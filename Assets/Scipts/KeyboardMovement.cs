@@ -1,0 +1,44 @@
+using System;
+using UnityEngine;
+
+namespace Scipts
+{
+    public class KeyboardMovement : MonoBehaviour
+    {
+        private const string VerticalAxis = "Vertical";
+        private const string HorizontalAxis = "Horizontal";
+
+        // units moved per second holding down move input
+        public float moveSpeed = 2;
+
+        // Update is called once per frame
+        private void Update()
+        {
+            Move(
+                Input.GetAxis(VerticalAxis),
+                Input.GetAxis(HorizontalAxis)
+            );
+        }
+
+        private void Move(float vertical, float horizontal)
+        {
+            if (vertical > 0)
+            {
+                transform.Translate(Vector3.back * Math.Abs(vertical) * moveSpeed);
+            }
+            else
+            {
+                transform.Translate(Vector3.forward * Math.Abs(vertical) * moveSpeed);
+            }
+
+            if (horizontal > 0)
+            {
+                transform.Translate(Vector3.right * Math.Abs(horizontal) * moveSpeed);
+            }
+            else
+            {
+                transform.Translate(Vector3.left * Math.Abs(horizontal) * moveSpeed);
+            }
+        }
+    }
+}
