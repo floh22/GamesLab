@@ -319,7 +319,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.00019836426, y: 0.00031280518}
-  m_SizeDelta: {x: 150, y: 150}
+  m_SizeDelta: {x: 180, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &14984457
 MonoBehaviour:
@@ -4504,7 +4504,7 @@ Transform:
   - {fileID: 1587382513}
   - {fileID: 800243047}
   m_Father: {fileID: 337752555}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &158748806
 GameObject:
@@ -22410,10 +22410,10 @@ Transform:
   - {fileID: 1247379217}
   - {fileID: 784490714}
   - {fileID: 1385020842}
+  - {fileID: 1384693235}
   - {fileID: 154085385}
   - {fileID: 1058786534}
   - {fileID: 352364352}
-  - {fileID: 1384693235}
   m_Father: {fileID: 642347415}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -22755,11 +22755,11 @@ RectTransform:
   - {fileID: 1516544837}
   - {fileID: 2103935577}
   m_Father: {fileID: 337752555}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 90.90981, y: -320.1646}
+  m_AnchoredPosition: {x: 90.90981, y: -260.69705}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &352364353
@@ -22813,7 +22813,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -32428,7 +32428,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &642347415
 RectTransform:
   m_ObjectHideFlags: 0
@@ -33561,6 +33561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17a2d5d5b8baf9843b02d908690f133a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerNames: []
   GameIsPaused: 0
   IsMinionSwitchMenuOpen: 0
   CurrentLevel: 0
@@ -36452,7 +36453,7 @@ GameObject:
   - component: {fileID: 800243049}
   - component: {fileID: 800243048}
   m_Layer: 5
-  m_Name: Player Color Sprite
+  m_Name: Player1_SwitchImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44159,11 +44160,11 @@ RectTransform:
   - {fileID: 1075456290}
   - {fileID: 28188175}
   m_Father: {fileID: 337752555}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 90.90981, y: -166.16461}
+  m_AnchoredPosition: {x: 90.90981, y: -106.69705}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1058786535
@@ -44217,7 +44218,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -44812,7 +44813,7 @@ GameObject:
   - component: {fileID: 1075456292}
   - component: {fileID: 1075456291}
   m_Layer: 5
-  m_Name: Player Color Sprite
+  m_Name: Player2_SwitchImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48728,8 +48729,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -213.09015, y: 108.33534}
-  m_SizeDelta: {x: 150, y: 150}
+  m_AnchoredPosition: {x: -222.63295, y: 108.33534}
+  m_SizeDelta: {x: 180, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1247379218
 MonoBehaviour:
@@ -65752,7 +65753,7 @@ GameObject:
   - component: {fileID: 1384693237}
   - component: {fileID: 1384693236}
   m_Layer: 5
-  m_Name: Minion Switch text - from (1)
+  m_Name: Minion Switch text - to
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65771,11 +65772,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 337752555}
-  m_RootOrder: 6
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 110.554436, y: 38.677475}
+  m_AnchoredPosition: {x: 534.64233, y: 38.677475}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1384693236
@@ -65798,7 +65799,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: from
+  m_text: to...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -83212,7 +83213,7 @@ GameObject:
   - component: {fileID: 1516544839}
   - component: {fileID: 1516544838}
   m_Layer: 5
-  m_Name: Player Color Sprite
+  m_Name: Player3_SwitchImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -84835,7 +84836,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 139.58102, y: -4.573791}
+  m_AnchoredPosition: {x: 215.58102, y: -4.573791}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1587382514
@@ -84892,7 +84893,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 5
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -84921,7 +84922,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 64.27932, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
