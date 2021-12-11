@@ -68,7 +68,7 @@ public class LauncherController : MonoBehaviourPunCallbacks
     public void Connect()
     {
         // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
-        if (PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected && PhotonNetwork.NickName != "")
         {
             if (RoomList.Count == 0)
             {
@@ -78,26 +78,26 @@ public class LauncherController : MonoBehaviourPunCallbacks
 
             try
             {
+                Debug.Log("Attempting to join room");
                 PhotonNetwork.JoinRoom(
-                    (RoomList.FirstOrDefault(r =>
-                         (bool)(r.CustomProperties["GameRunning"] ?? throw new ArgumentNullException()) == false) ??
-                     throw new NoAvailableRoomFoundException()).Name);
+                    (RoomList.FirstOrDefault(r => r.IsVisible && r.IsOpen )?? throw new NoAvailableRoomFoundException()).Name);
+
             }
             catch (NoAvailableRoomFoundException noRoomFound)
             {
+                Debug.Log("No open room found");
                 CreateRoom();
             }
             catch (ArgumentNullException e)
             {
-                
+                Debug.LogError("Game Running not set on lobby");
             }
           
         }
         else
         {
             // #Critical, we must first and foremost connect to Photon Online Server.
-            PhotonNetwork.ConnectUsingSettings();
-            PhotonNetwork.GameVersion = GameVersion.ToString();
+            Debug.Log($"Is Connected: {PhotonNetwork.IsConnected}, Nickname: {PhotonNetwork.NickName}");
         }
     }
     
@@ -106,7 +106,8 @@ public class LauncherController : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
+        Debug.Log("Connected to Server");
+        PhotonNetwork.JoinLobby();
     }
     
     public override void OnDisconnected(DisconnectCause cause)
@@ -126,17 +127,17 @@ public class LauncherController : MonoBehaviourPunCallbacks
     {
         Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
         ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
-        PhotonNetwork.LoadLevel(0);
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
     {
         ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
 
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1 && PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom && PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.CurrentRoom.SetCustomProperty("GameRunning", true);
-            PhotonNetwork.LoadLevel(0);
+            PhotonNetwork.CurrentRoom.IsVisible = false;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+            PhotonNetwork.LoadLevel(1);
         }
     }
 
@@ -144,12 +145,12 @@ public class LauncherController : MonoBehaviourPunCallbacks
     {
         base.OnRoomListUpdate(roomList);
         RoomList = roomList;
+        Debug.Log($"{RoomList.Count} rooms available");
     }
 
     public override void OnCreatedRoom()
     {
         base.OnCreatedRoom();
-        PhotonNetwork.CurrentRoom.SetCustomProperty("GameRunning", false);
     }
 
     #endregion
@@ -157,7 +158,7 @@ public class LauncherController : MonoBehaviourPunCallbacks
 
     private void CreateRoom()
     {
-        PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom }, TypedLobby.Default);
+        PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom, IsOpen = true, IsVisible = true}, TypedLobby.Default);
         
         ShowConnectionInfo("Joining Game");
     }

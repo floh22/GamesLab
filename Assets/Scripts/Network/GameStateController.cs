@@ -21,7 +21,7 @@ namespace Network
         /// </summary>
         public override void OnLeftRoom()
         {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(0);
         }
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
