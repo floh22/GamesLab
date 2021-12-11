@@ -1,3 +1,4 @@
+using Network;
 using Photon.Pun;
 using Photon.Pun.Demo.PunBasics;
 using UnityEngine;
@@ -111,7 +112,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
                 if (this.Health <= 0f)
                 {
-                    GameManager.Instance.LeaveRoom();
+                    GameStateController.Instance.LeaveRoom();
                 }
             }
 
