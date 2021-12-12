@@ -1,20 +1,3 @@
-%YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c509dbaa7b6f416409e3195321a2187e, type: 3}
-  m_Name: TerrainPalette
-  m_EditorClassIdentifier: 
-  PaletteLayers:
-  - {fileID: 8574412962073106934, guid: ecd84c59acd06a644a05674eeba041ef, type: 2}
-  - {fileID: 8574412962073106934, guid: cb17ca102f7fbb94fa66fd83f52e19c0, type: 2}
-  - {fileID: 8574412962073106934, guid: 2453db03bcfe44f41844d30ab9939cf7, type: 2}
-  - {fileID: 8574412962073106934, guid: 8333bb7d63c723d45b4910e637c05db0, type: 2}
-  - {fileID: 8574412962073106934, guid: 9b0d1baea481e1e49b4885d75709900f, type: 2}
+version https://git-lfs.github.com/spec/v1
+oid sha256:626f0f31d9a72588072aafcb8c99a73e3524d687ba596afa335da89c9bb551ce
+size 503
