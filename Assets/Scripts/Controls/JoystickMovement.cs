@@ -26,20 +26,20 @@ namespace Scipts
         {
             if (vertical < 0)
             {
-                transform.Translate(Vector3.back * Math.Abs(vertical) * moveSpeed * Time.fixedDeltaTime);
+                transform.Translate(Vector3.back * Math.Abs(vertical) * moveSpeed * Time.deltaTime);
             }
             else
             {
-                transform.Translate(Vector3.forward * Math.Abs(vertical) * moveSpeed * Time.fixedDeltaTime);
+                transform.Translate(Vector3.forward * Math.Abs(vertical) * moveSpeed * Time.deltaTime);
             }
 
             if (horizontal > 0)
             {
-                transform.Translate(Vector3.right * Math.Abs(horizontal) * moveSpeed * Time.fixedDeltaTime);
+                transform.Translate(Vector3.right * Math.Abs(horizontal) * moveSpeed * Time.deltaTime);
             }
             else
             {
-                transform.Translate(Vector3.left * Math.Abs(horizontal) * moveSpeed* Time.fixedDeltaTime);
+                transform.Translate(Vector3.left * Math.Abs(horizontal) * moveSpeed* Time.deltaTime);
             }
         }
     }
