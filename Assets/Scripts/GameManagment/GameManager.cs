@@ -148,8 +148,8 @@ public class GameManager : MonoBehaviour
     }
 
     string WrapText(string text) {
-        if(text.Length > 7) {
-            return text.Substring(0, 7) + "...";
+        if(text.Length > 10) {
+            return text.Substring(0, 10) + "...";
         } else {
             return text;
         }
