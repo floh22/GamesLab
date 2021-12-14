@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Scipts
+namespace Controls
 {
     public class FollowingCamera : MonoBehaviour
     {
@@ -8,7 +8,7 @@ namespace Scipts
         public Vector3 offset;
         public float smoothFactor;
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
             Follow();
         }

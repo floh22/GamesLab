@@ -1,3 +1,4 @@
+using System;
 using Photon.Pun;
 using UnityEngine;
 
@@ -6,6 +7,9 @@ namespace NetworkedPlayer
 	public class PlayerAnimatorController : MonoBehaviourPun
 	{
 		#region Private Fields
+		
+		[SerializeField]
+		private Joystick joystick;
     
 		[SerializeField]
 		private float directionDampTime = 0.25f;
@@ -24,6 +28,7 @@ namespace NetworkedPlayer
 		private void Start () 
 		{
 			animator = GetComponent<Animator>();
+			joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
 		}
     	        
 		/// <summary>
@@ -55,18 +60,22 @@ namespace NetworkedPlayer
 			}
                
 			// deal with movement
-			float h = Input.GetAxis("Horizontal");
-			float v = Input.GetAxis("Vertical");
-    
+			float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
+			float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1);
+
 			// prevent negative Speed.
+			
+			/*
 			if( v < 0 )
 			{
 				v = 0;
 			}
+			*/
     
 			// set the Animator Parameters
 			animator.SetFloat( Speed, h*h+v*v );
 			animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime );
+			
 		}
     
 		#endregion

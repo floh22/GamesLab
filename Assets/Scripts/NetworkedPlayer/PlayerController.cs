@@ -1,48 +1,57 @@
+using GameManagement;
 using Network;
 using Photon.Pun;
 using Photon.Pun.Demo.PunBasics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
+namespace NetworkedPlayer
 {
-    public static GameObject LocalPlayerInstance;
+    public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
+    {
+        public static GameObject LocalPlayerInstance;
     
-    public float Health = 1f;
-    
-    
-    #region Private Fields
-    
-    [SerializeField]
-    private GameObject playerUiPrefab;
-    
-    [SerializeField]
-    private GameObject beams;
+        public float Health = 1f;
 
-    private bool isFiring;
-
-    #endregion
+        
+        public GameData.Team Team { get; set; }
+        
+        #region Private Fields
     
-    #region MonoBehaviour CallBacks
+        [SerializeField]
+        private GameObject playerUiPrefab;
+    
+        [FormerlySerializedAs("beams")] [SerializeField]
+        private GameObject channelPrefab;
+
+        private bool isChanneling;
+
+        #endregion
+    
+        #region MonoBehaviour CallBacks
 
         /// <summary>
         /// MonoBehaviour method called on GameObject by Unity during early initialization phase.
         /// </summary>
         public void Awake()
         {
-            if (this.beams == null)
+            if (this.channelPrefab == null)
             {
                 Debug.LogError("<Color=Red><b>Missing</b></Color> Beams Reference.", this);
             }
             else
             {
-                this.beams.SetActive(false);
+                this.channelPrefab.SetActive(false);
             }
+            
             
             // in GameStateController we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.IsMine)
             {
                 LocalPlayerInstance = gameObject;
+                Team = PersistentData.Team;
+                this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
             }
             
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
@@ -56,6 +65,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         {
             CameraWork cameraWork = gameObject.GetComponent<CameraWork>();
 
+            Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
+            
             if (cameraWork != null)
             {
                 if (photonView.IsMine)
@@ -79,22 +90,22 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 Debug.LogWarning("<Color=Red><b>Missing</b></Color> PlayerUiPrefab reference on player Prefab.", this);
             }
 
-            #if UNITY_5_4_OR_NEWER
+#if UNITY_5_4_OR_NEWER
             // Unity 5.4 has a new scene management. register a method to call CalledOnLevelWasLoaded.
-			UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
-            #endif
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+#endif
         }
 
 
-		public override void OnDisable()
-		{
-			// Always call the base to remove callbacks
-			base.OnDisable ();
+        public override void OnDisable()
+        {
+            // Always call the base to remove callbacks
+            base.OnDisable ();
 
-			#if UNITY_5_4_OR_NEWER
-			UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
-			#endif
-		}
+#if UNITY_5_4_OR_NEWER
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+#endif
+        }
 
 
         /// <summary>
@@ -116,9 +127,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 }
             }
 
-            if (this.beams != null && this.isFiring != this.beams.activeInHierarchy)
+            if (this.channelPrefab != null && this.isChanneling != this.channelPrefab.activeInHierarchy)
             {
-                this.beams.SetActive(this.isFiring);
+                this.channelPrefab.SetActive(this.isChanneling);
             }
         }
         
@@ -189,32 +200,35 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                     return;
                 }
 
-                if (!this.isFiring)
+                if (!this.isChanneling)
                 {
-                    this.isFiring = true;
+                    this.isChanneling = true;
                 }
             }
 
             if (!Input.GetButtonUp("Fire1")) return;
-            if (this.isFiring)
+            if (this.isChanneling)
             {
-                this.isFiring = false;
+                this.isChanneling = false;
             }
         }
 
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
-            // Local player, send data
-            stream.SendNext(this.isFiring);
-            stream.SendNext(this.Health);
-        }
-        else
-        {
-            // Network player, receive data
-            this.isFiring = (bool)stream.ReceiveNext();
-            this.Health = (float)stream.ReceiveNext();
+            if (stream.IsWriting)
+            {
+                // Local player, send data
+                stream.SendNext(this.isChanneling);
+                stream.SendNext(this.Health);
+                stream.SendNext(this.Team);
+            }
+            else
+            {
+                // Network player, receive data
+                this.isChanneling = (bool)stream.ReceiveNext();
+                this.Health = (float)stream.ReceiveNext();
+                this.Team = (GameData.Team)stream.ReceiveNext();
+            }
         }
     }
 }
