@@ -1,3 +1,4 @@
+using Character;
 using UnityEngine;
 
 namespace Scipts

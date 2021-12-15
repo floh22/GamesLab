@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Scipts
+namespace Character
 {
     public class Targetable : MonoBehaviour
     {

@@ -1,7 +1,7 @@
-using System;
+using Scipts;
 using UnityEngine;
 
-namespace Scipts
+namespace Character
 {
     public class Targeter : MonoBehaviour
     {
