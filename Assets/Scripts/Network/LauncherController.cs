@@ -34,6 +34,10 @@ namespace Network
         [SerializeField] private TMP_InputField playerNameField;
 
         [SerializeField] private TMP_Text connectionInfo;
+        
+        [SerializeField] private TMP_Text connectionStatus;
+
+        [SerializeField] private Button forceStart;
 
         [SerializeField] private PersistentData persistentData;
 
@@ -43,6 +47,9 @@ namespace Network
         #region Private Fields
 
         private List<RoomInfo> RoomList = new();
+
+
+        private bool InLobby = false;
         #endregion
 
 
@@ -112,6 +119,7 @@ namespace Network
         {
             Debug.Log("Connected to Server");
             PhotonNetwork.JoinLobby();
+            connectionStatus.text = "Connected to Server";
         }
     
         public override void OnDisconnected(DisconnectCause cause)
@@ -132,7 +140,8 @@ namespace Network
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
-            
+
+            InLobby = true;
             CheckGameStart();
         }
 
@@ -145,12 +154,19 @@ namespace Network
 
         private void CheckGameStart()
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom && PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom)
             {
-                PhotonNetwork.CurrentRoom.IsVisible = false;
-                PhotonNetwork.CurrentRoom.IsOpen = false;
-                PhotonNetwork.LoadLevel(1);
+                StartLobby();
             }
+        }
+        
+        public void StartLobby()
+        {
+            if (!PhotonNetwork.IsMasterClient || !InLobby)
+                return;
+            PhotonNetwork.CurrentRoom.IsVisible = false;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+            PhotonNetwork.LoadLevel(1);
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -179,6 +195,7 @@ namespace Network
         private void ShowConnectionInfo(string info)
         {
             joinButton.gameObject.SetActive(false);
+            forceStart.gameObject.SetActive(true);
             playerNameField.gameObject.SetActive(false);
             connectionInfo.gameObject.SetActive(true);
             connectionInfo.SetText(info);
@@ -187,6 +204,7 @@ namespace Network
         private void HideConnectionInfo()
         {
             joinButton.gameObject.SetActive(true);
+            forceStart.gameObject.SetActive(false);
             playerNameField.gameObject.SetActive(true);
             connectionInfo.gameObject.SetActive(false);
         }

@@ -53,7 +53,7 @@ namespace Network
             // in case we started this demo with the wrong scene being active, simply load the menu scene
             if (!PhotonNetwork.IsConnected)
             {
-                //SceneManager.LoadScene(0);
+                SceneManager.LoadScene(0);
 
                 return;
             }
