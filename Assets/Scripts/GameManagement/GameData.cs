@@ -32,6 +32,8 @@ namespace GameManagement
         public Team currentTeam;
         public Team SelectedMinionTarget;
 
+        public bool AutoAttack;
+
         [Range(0, 10)] public int NumberOfPages;
 
         // R  G
@@ -42,22 +44,21 @@ namespace GameManagement
             if(Instance == null) {
                 Instance = this;
 
-                this.CurrentLevel  = (Levels)1;
-                this.GameIsPaused = false;
-                this.IsMinionSwitchMenuOpen = true;
-                NumberOfPages = 4;
+                CurrentLevel  = (Levels)1;
+                GameIsPaused = false;
+                IsMinionSwitchMenuOpen = true;
+                NumberOfPages = 10;
 
-                PlayerColors[0] = new float[] {0.7169812F, 0.131221F, 0.131221F, 1};
-                PlayerColors[1] = new float[] {0.05490196F, 0.4823529F, 0.06666667F, 1};
-                PlayerColors[2] = new float[] {0.972549F, 0.9215686F, 0.05882353F, 1};
-                PlayerColors[3] = new float[] {0.1294118F, 0.1921569F, 0.7176471F, 1};
+                PlayerColors[0] = new float[] {0.7169812F, 0.131221F, 0.131221F, 1}; //Red
+                PlayerColors[1] = new float[] {0.05490196F, 0.4823529F, 0.06666667F, 1}; //Green
+                PlayerColors[2] = new float[] {0.972549F, 0.9215686F, 0.05882353F, 1}; //Yellow
+                PlayerColors[3] = new float[] {0.1294118F, 0.1921569F, 0.7176471F, 1}; //Blue
 
                 PlayerNames = new string[4];
-
                 SetCurrentPlayer(3);
                 SetPlayers("Redboy", "Greendude", "Yellowman", "Blueguy");
             
-
+                AutoAttack = true;
 
                 DontDestroyOnLoad(gameObject);
             } else {

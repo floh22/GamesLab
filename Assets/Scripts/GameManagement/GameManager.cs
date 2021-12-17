@@ -11,45 +11,28 @@ namespace GameManagement
         public GameObject IngameUI;
         public Image MinionSwitchButtonImage;
 
-        private TMP_Text TargetPlayerMinionSwitchText;
-        private Image TargetPlayerMinionSwitchImage;
-
-        private TMP_Text[] PlayerMinionSwitchTexts;
-        private Image[] PlayerMinionSwitchImages;
-
         private GameObject PagesContainer;
         private Image[] PagesImages;
 
+        private GameObject AutoAttackOnImage;
+        private GameObject AutoAttackOffImage;
+
         void Start() {
-            MinionSwitchMenuUI.SetActive(true);
-            TargetPlayerMinionSwitchText = GameObject.Find("Player1_Text").GetComponent<TMP_Text>();
-            TargetPlayerMinionSwitchImage = GameObject.Find("Player1_SwitchImage").GetComponent<Image>();
-
-            PlayerMinionSwitchTexts = new TMP_Text[2];
-            PlayerMinionSwitchImages = new Image[2];
-            PlayerMinionSwitchTexts[0] = GameObject.Find("Player2_Text").GetComponent<TMP_Text>();
-            PlayerMinionSwitchImages[0] = GameObject.Find("Player2_SwitchImage").GetComponent<Image>();
-            PlayerMinionSwitchTexts[1] = GameObject.Find("Player3_Text").GetComponent<TMP_Text>();
-            PlayerMinionSwitchImages[1] = GameObject.Find("Player3_SwitchImage").GetComponent<Image>();
-            MinionSwitchMenuUI.SetActive(false);
-
-            SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam), true);
-
+            SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam, true));
 
             PagesContainer = GameObject.Find("Pages Container");
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
+
+            AutoAttackOnImage = GameObject.Find("ON_Sprite");
+            AutoAttackOffImage = GameObject.Find("OFF_Sprite");
+            SetAutoAttack(GameData.Instance.AutoAttack);
+
             SetInitPages();
         }
 
         // Update is called once per frame
         void Update()
         {
-            // Debug.Log(GameData.Instance.CurrentLevel);
-            if(GameData.Instance.CurrentLevel == GameData.Levels.MAP) {
-                // if(Input.GetKeyDown(KeyCode.Escape)) {
-                //     TogglePauseMenu();
-                // }
-            }
         }
 
         public void TogglePauseMenu() {
@@ -64,57 +47,28 @@ namespace GameManagement
             }
         }
 
-        public void ToggleMinionSwitchMenu() {
-            if(GameData.Instance.IsMinionSwitchMenuOpen) {
-                MinionSwitchMenuUI.SetActive(false);
-                IngameUI.SetActive(true);
-                GameData.Instance.IsMinionSwitchMenuOpen = false;
-            } else {
-                MinionSwitchMenuUI.SetActive(true);
-                IngameUI.SetActive(false);
-                GameData.Instance.IsMinionSwitchMenuOpen = true;
-            }
-        }
-
-        public void SetMinionTarget(GameData.Team target, bool toggleMenu = true) {
+        public void SetMinionTarget(GameData.Team target) {
             GameData.Instance.SelectedMinionTarget = target;
             MinionSwitchButtonImage.color = GetColor(target);
+        }
 
-            UpdateLabels();
+        public void SetMinionsToNextTarget() {
+            SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.SelectedMinionTarget, true));
+        }
 
-            if(toggleMenu) {
-                ToggleMinionSwitchMenu();
+        public void SetAutoAttack(bool state) {
+            GameData.Instance.AutoAttack = state;
+            if(state) {
+                AutoAttackOnImage.SetActive(true);
+                AutoAttackOffImage.SetActive(false);
+            } else {
+                AutoAttackOnImage.SetActive(false);
+                AutoAttackOffImage.SetActive(true);
             }
         }
 
-        public void UpdateMinionTarget(int target) {
-            int counter = 0;
-            for(int i = 0; i < 4; i++) {
-                if((GameData.Team)i != GameData.Instance.currentTeam && (GameData.Team)i != GameData.Instance.SelectedMinionTarget) {
-                    if(target == counter) {
-                        SetMinionTarget((GameData.Team)i);
-                        return;
-                    } else {
-                        counter++;
-                    }
-                }
-
-            }
-        }
-
-        public void UpdateLabels() {
-            TargetPlayerMinionSwitchText.text = WrapText(GameData.Instance.PlayerNames[(int)GameData.Instance.SelectedMinionTarget]);
-            TargetPlayerMinionSwitchImage.color = GetColor(GameData.Instance.SelectedMinionTarget);
-
-            int counter = 0;
-            for(int i = 0; i < 4; i++) {
-                if((GameData.Team)i != GameData.Instance.currentTeam && (GameData.Team)i != GameData.Instance.SelectedMinionTarget) {
-                    PlayerMinionSwitchTexts[counter].text = WrapText(GameData.Instance.PlayerNames[i]);
-                    PlayerMinionSwitchImages[counter].color = GetColor((GameData.Team)i);
-                    counter++;
-                }
-
-            }
+        public void SwitchAutoAttack() {
+            SetAutoAttack(!GameData.Instance.AutoAttack);
         }
 
         public void increasePages() {
@@ -137,21 +91,21 @@ namespace GameManagement
             }
         }
 
-        GameData.Team GetNextPlayerClockwise(GameData.Team team) {
-            return (GameData.Team) ((int)team - 1 % 4);
+        GameData.Team GetNextPlayerClockwise(GameData.Team team, bool CountOwnPlayer) {
+            int temp = (((int)team - 1) + 4) % 4;
+            if(!CountOwnPlayer) {
+                return (GameData.Team)temp;
+            } else {
+                if((GameData.Team)temp == GameData.Instance.currentTeam) {
+                    temp = (((int)temp - 1) + 4) % 4;
+                }
+            }
+            return (GameData.Team)temp;
         }
 
         Color GetColor(GameData.Team team) {
             float[] color = GameData.PlayerColors[(int)team];
             return new Color(color[0], color[1], color[2], color[3]);
-        }
-
-        string WrapText(string text) {
-            if(text.Length > 10) {
-                return text.Substring(0, 10) + "...";
-            } else {
-                return text;
-            }
         }
     }
 }
