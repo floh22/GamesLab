@@ -12,11 +12,16 @@ namespace Character
         }
 
         public EnemyType type;
-        public IStats stats;
+        private ITargetable _targetable;
 
         void Start()
         {
-            stats = GetComponent<IStats>();
+            _targetable = GetComponent<ITargetable>();
+        }
+
+        public void OnAttacked()
+        {
+            _targetable.OnAttacked();
         }
 
     }

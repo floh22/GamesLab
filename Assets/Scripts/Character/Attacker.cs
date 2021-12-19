@@ -1,6 +1,4 @@
 using System.Collections;
-using Character.Stats;
-using Scipts;
 using UnityEngine;
 
 namespace Character
@@ -8,58 +6,62 @@ namespace Character
     public class Attacker : MonoBehaviour
     {
         private Targeter _targeter;
-        private HeroStats _stats;
+        private Hero _hero;
         private bool _isAttacking;
 
         void Start()
         {
-            _targeter = GetComponent<Targeter>();
-            _stats = GetComponent<HeroStats>();
+            _hero = GetComponentInParent<Hero>();
         }
 
         void Update()
         {
-            if (!_isAttacking && _targeter != null && _targeter.HasTarget())
+            if (!_hero.IsReady())
             {
-                var target = _targeter.GetTarget();
-                var distance = Vector3.Distance(target.transform.position, this.transform.position);
-                if (distance <= _stats.attackRange)
-                {
-                    _isAttacking = true;
-                    // TODO start coroutine to attack,
-                    // TODO set false by the end of coroutine duration depends on attack speed 
-                    switch (target.type)
-                    {
-                        case Targetable.EnemyType.Hero:
-                            StartCoroutine(AttackHero(target));
-                            break;
-                        case Targetable.EnemyType.Minion:
-                            StartCoroutine(AttackMinion(target));
-                            break;
-                    }
-                }
+                return;
+            }
+
+            if (!_targeter.HasTarget() || _isAttacking)
+            {
+                return;
+            }
+
+            if (_targeter.DistanceToTarget(transform.position) > _hero.AttackRange())
+            {
+                return;
+            }
+
+            var target = _targeter.GetTarget();
+            switch (target.type)
+            {
+                case Targetable.EnemyType.Hero:
+                    StartCoroutine(Attack(target));
+                    break;
+                case Targetable.EnemyType.Minion:
+                    StartCoroutine(Attack(target));
+                    break;
             }
         }
 
-        private IEnumerator AttackHero(Targetable target)
+        public void SetTargeter(Targeter targeter)
         {
-            // TODO 1. animate an attack
-            // 2. take hp from target
-            // 3. wait amount of attack speed * amount of seconds
-            // 4. be ready for another attack
-            _isAttacking = true;
-            yield return new WaitForSeconds(1);
-            _isAttacking = false;
+            _targeter = targeter;
         }
 
-        private IEnumerator AttackMinion(Targetable target)
+        private IEnumerator Attack(Targetable targetable)
         {
+            _isAttacking = true;
             // TODO 1. animate an attack
+            _hero.OnAttack();
             // 2. take hp from target
             // 3. wait amount of attack speed * amount of seconds
             // 4. be ready for another attack
             _isAttacking = true;
-            yield return new WaitForSeconds(1);
+            targetable.OnAttacked();
+            yield return new WaitForSeconds(0.5f);
+            _hero.OnRest();
+            // pause
+            yield return new WaitForSeconds(0.5f); // TODO define with attack speed
             _isAttacking = false;
         }
     }
