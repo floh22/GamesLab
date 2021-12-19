@@ -1,8 +1,6 @@
-using UnityEngine;
-
-namespace Scipts
+namespace Character.Stats
 {
-    public class HeroStats : MonoBehaviour
+    public class MinionStats : IStats
     {
 
         public float health;
@@ -10,10 +8,11 @@ namespace Scipts
         public float attackSpeed;
         public float rotationSpeed;
         public float attackRange;
-        
+
         // Start is called before the first frame update
         void Start()
         {
+        
         }
 
         // Update is called once per frame

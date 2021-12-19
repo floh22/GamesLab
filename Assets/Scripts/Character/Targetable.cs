@@ -1,3 +1,4 @@
+using Character.Stats;
 using UnityEngine;
 
 namespace Character
@@ -11,6 +12,12 @@ namespace Character
         }
 
         public EnemyType type;
+        public IStats stats;
+
+        void Start()
+        {
+            stats = GetComponent<IStats>();
+        }
 
     }
 }

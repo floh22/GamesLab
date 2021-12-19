@@ -6,6 +6,7 @@ namespace Character
     public class Targeter : MonoBehaviour
     {
 
+        // TODO You should be able change the target by clicking on another hero
         public Targetable target;
         public float targetRange;
         private BoxCollider _boxCollider;
