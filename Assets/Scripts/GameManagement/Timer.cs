@@ -14,9 +14,7 @@ namespace GameManagement
 
         void Start()
         {
-
         }
-
         void Update()
         {        
             if (timeRemainingInSeconds > 0)
@@ -31,7 +29,7 @@ namespace GameManagement
             }
             else
             {
-                Debug.Log("Time has run out!");
+                // Debug.Log("Time has run out!");
             }
         }
     }
