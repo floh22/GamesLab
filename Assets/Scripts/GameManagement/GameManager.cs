@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +19,8 @@ namespace GameManagement
         private GameObject AutoAttackOnImage;
         private GameObject AutoAttackOffImage;
 
+        [CanBeNull] private MasterController controller;
+
         void Start() {
             SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam, true));
 
@@ -28,6 +32,11 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                controller = gameObject.AddComponent<MasterController>();
+            }
         }
 
         // Update is called once per frame
