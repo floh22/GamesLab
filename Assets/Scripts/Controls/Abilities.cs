@@ -13,6 +13,7 @@ public class Abilities : MonoBehaviour
     public float maxAbilityDistance = 5;
     public GameObject Character;
     public GameObject arrowIndicatorPivot;
+    public GameObject ability1ProjectilePrefab;
 
     public enum Ability
     {
@@ -42,7 +43,6 @@ public class Abilities : MonoBehaviour
                 Vector3 direction = new Vector3(joystick.Vertical, 0, joystick.Horizontal);
                 // direction = transform.InverseTransformDirection(direction);
                 Quaternion transRot = Quaternion.LookRotation(direction);
-                Debug.Log(direction);
                 transRot.eulerAngles = new Vector3(0, 0, transRot.eulerAngles.y);
                 arrowIndicatorPivot.transform.localRotation =
                     Quaternion.Lerp(transRot, arrowIndicatorPivot.transform.localRotation, 0f);
@@ -84,8 +84,10 @@ public class Abilities : MonoBehaviour
         switch (ability)
         {
             case Ability.RANGE:
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = targetCircle.transform.position;
+                Vector3 startingPosition = transform.position + new Vector3(0, 2f, 0);
+                GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
+                    Quaternion.identity) as GameObject;
+                ability1ActiveObject.GetComponent<AbilityProjectile>().Activate(targetCircle.transform.position);
                 break;
             case Ability.LINE:
                 break;
