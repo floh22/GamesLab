@@ -1,7 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Minion;
+using GameUnit;
 using Photon.Pun;
 using UnityEngine;
 
@@ -9,16 +10,14 @@ namespace GameManagement
 {
     public class MasterController : MonoBehaviourPunCallbacks
     {
-
-        private System.Timers.Timer waveTimer;
-        private HashSet<System.Timers.Timer> minionDelayTimers;
-
         private Dictionary<GameData.Team, HashSet<MinionBehavior>> minions;
         private Dictionary<GameData.Team, GameData.Team> targets;
 
         private MinionValues minionValues;
         private GameObject minionPrefab;
         private GameObject spawnPointHolder;
+
+        public bool IsPaused = false;
         
         public MasterController()
         {
@@ -32,6 +31,8 @@ namespace GameManagement
                 //Set default target to opposing team
                 targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
             }
+
+            Debug.Log($"Init {minions.Count} teams");
         }
 
         public void Init(MinionValues minionValues, GameObject minionPrefab, GameObject spawnPointHolder, GameObject minionPaths)
@@ -42,23 +43,24 @@ namespace GameManagement
 
             MinionBehavior.Values = minionValues;
             MinionBehavior.Splines = minionPaths;
+            
+            Debug.Log("Starting Master Client Controller");
         }
 
-        public async Task StartMinionSpawning(int startDelayInMs = 0)
+        public void StartMinionSpawning(int startDelayInMs = 0)
         {
-            if (startDelayInMs != 0)
+            Debug.Log($"Spawning Minions in {startDelayInMs}ms");
+            StartCoroutine(SpawnMinions());
+        }
+
+        private IEnumerator SpawnMinions()
+        {
+            while (!IsPaused)
             {
-                await Task.Delay(startDelayInMs);
+                StartCoroutine(OnWaveSpawn());
+                
+                yield return new WaitForSeconds(minionValues.WaveDelayInMs / 1000);
             }
-            OnWaveSpawn();
-            waveTimer = new System.Timers.Timer() {Interval = minionValues.WaveDelayInMs};
-            waveTimer.Elapsed += (s, e) => OnWaveSpawn();
-            waveTimer.Start();
-        }
-
-        public void StopMinionSpawning()
-        {
-            waveTimer.Dispose();
         }
 
         // Update is called once per frame
@@ -67,18 +69,16 @@ namespace GameManagement
             
         }
 
-
-        void OnWaveSpawn()
+        private IEnumerator OnWaveSpawn()
         {
-            for (int waves = 1; waves < minionValues.WaveSize; waves++)
+            Debug.Log("Spawning Minion Wave");
+
+            int wavesSpawned = 0;
+            while (wavesSpawned++ < minionValues.WaveSize)
             {
-                System.Timers.Timer t = new System.Timers.Timer()
-                    { Interval = waves * minionValues.MinionOffsetInMs, Enabled = true, AutoReset = false, };
-                t.Elapsed += SpawnMinions;
-                t.Start();
-                minionDelayTimers.Add(t);
+                SpawnMinions(this, EventArgs.Empty);
+                yield return new WaitForSeconds(minionValues.MinionOffsetInMs / 1000);
             }
-            SpawnMinions(this, EventArgs.Empty);
         }
 
         void SpawnMinions(object o , EventArgs e)
@@ -86,17 +86,14 @@ namespace GameManagement
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
                 Vector3 spawnPoint = spawnPointHolder.transform.Find(team.ToString()).transform.position;
-
+                
+                Debug.Log($"Spawning Minion at {spawnPoint}");
                 GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
                 MinionBehavior behavior = go.GetComponent<MinionBehavior>();
                 behavior.Init(go.GetInstanceID(), team, targets[team]);
                 minions[team].Add(behavior);
             }
-            
-            System.Timers.Timer t = o as System.Timers.Timer;
-            minionDelayTimers.Remove(t);
-            t?.Dispose();
         }
 
 

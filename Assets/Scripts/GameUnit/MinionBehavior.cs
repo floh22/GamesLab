@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using BezierSolution;
 using Character;
 using GameManagement;
+using Photon.Pun;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-namespace Minion
+namespace GameUnit
 {
     public class MinionBehavior : MonoBehaviour, IGameUnit
     {
@@ -19,7 +20,7 @@ namespace Minion
         public static MinionValues Values;
 
         //Determines how fine the navagent follows the spline. Higher values require less updates to destination but follow the exact spline less accurately 
-        private const float NavAgentSplineDistanceModifier = 5;
+        private const float NavAgentSplineDistanceModifier = 10;
         
         #endregion
 
@@ -63,18 +64,17 @@ namespace Minion
 
 
         private bool isAttacking = false;
-        private static readonly int AutoAttack = Animator.StringToHash("Auto Attack");
+        private static readonly int AnimAutoAttack = Animator.StringToHash("AutoAttack");
+        private static readonly int AnimMoveSpeed = Animator.StringToHash("MovementSpeed");
+
 
         #endregion
 
-        void Start()
+        public void Init(int networkID, GameData.Team team, GameData.Team targetTeam)
         {
             agent = GetComponent<NavMeshAgent>();
             anim = GetComponent<Animator>();
-        }
-
-        public void Init(int networkID, GameData.Team team, GameData.Team targetTeam)
-        {
+            
             this.NetworkID = networkID;
             this.target = targetTeam;
             this.Team = team;
@@ -87,6 +87,8 @@ namespace Minion
 
             pathHolder = Splines.transform.Find(team.ToString());
             Spline = pathHolder.Find(targetTeam.ToString()).GetComponent<BezierSpline>();
+
+            agent.speed = MoveSpeed;
         }
 
         // Update is called once per frame
@@ -94,8 +96,14 @@ namespace Minion
         {
             //GameObject not init yet somehow
             if (NetworkID is 0) return;
+
+            if (Health <= 0)
+            {
+                PhotonNetwork.Destroy(gameObject);
+            }
             
             Move(Time.deltaTime);
+            anim.SetFloat(AnimMoveSpeed, agent.velocity.magnitude);
             
         }
 
@@ -108,54 +116,71 @@ namespace Minion
         {
             Vector3 currentPos = transform.position;
             Vector3 targetPos = currentPos;
+
+            if (isAttacking)
+                return;
             
             #region TargetedMovement
             if (CurrentTarget is not null)
             {
-                if (Vector3.Distance(currentPos, CurrentTarget.transform.position) <= Values.MinionAttackRange)
+                if (CurrentTarget.IsDestroyed())
                 {
-                    FaceTarget(CurrentTarget);
-                    agent.isStopped = true;
-                    if (!isAttacking)
-                    {
-                        StartCoroutine(AttackTarget());
-                    }
+                    CurrentTarget = null;
                 }
                 else
                 {
-                    agent.destination = CurrentTarget.transform.position;
+                    if (Vector3.Distance(currentPos, CurrentTarget.transform.position) <= Values.MinionAttackRange)
+                    {
+                        if (Team == GameData.Team.BLUE)
+                        {
+                            Debug.Log("1");
+                        }
+                        FaceTarget(CurrentTarget);
+                        if (!isAttacking)
+                        {
+                            agent.isStopped = true;
+                            StartCoroutine(AttackTarget());
+                        }
+                    }
+                    else
+                    {
+                        if (Team == GameData.Team.BLUE)
+                        {
+                            Debug.Log("2");
+                        }
+                        agent.isStopped = false;
+                        agent.destination = CurrentTarget.transform.position;
                     
-                    //Deprecated. Let navagent figure out how to get closest
-                    //targetPos = Vector3.Lerp( currentPos, CurrentTarget.position, MoveSpeed * deltaTime );
+                    }
+                
+                    float distanceFromPath = Vector3.Distance(CurrentTarget.transform.position, Spline.FindNearestPointTo(currentPos));
+                
+                    //Return if we can keep following the target away from the path
+                    if (distanceFromPath < Values.MinionLeashRadius) return;
+                
+                    //Reset target
+                    CurrentTarget = null;
+
+                    return;
                 }
                 
-                float distanceFromPath = Vector3.Distance(targetPos, Spline.FindNearestPointTo(currentPos));
-                
-                //Return if we can keep following the target away from the path
-                if (distanceFromPath < Values.MinionLeashRadius) return;
-                
-                //Reset target
-                CurrentTarget = null;
-                agent.isStopped = true;
-
-                return;
             }
             
             #endregion
             
             //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
             var results = new Collider[20];
-            int size = Physics.OverlapSphereNonAlloc(currentPos, Values.MinionAgroRadius, results, 7);
+            int size = Physics.OverlapSphereNonAlloc(currentPos, Values.MinionAgroRadius, results, LayerMask.GetMask("GameObject"));
 
             IGameUnit closest = null;
             Transform closestT = null;
             float closestDistance = Mathf.Infinity;
 
             //Find viable targets
-            foreach (Collider res in results)
+            foreach (Collider res in results.NotNull())
             {
-                IGameUnit unit = res.GetComponent<IGameUnit>();
-                
+                IGameUnit unit = res.GetComponent<IGameUnit>()??throw new NullReferenceException($"Found gameObject without component: {res.transform.gameObject.name}");
+
                 //Ignore own units... obviously
                 if(unit.Team == this.Team)
                     continue;
@@ -176,9 +201,8 @@ namespace Minion
             if (closest is not null)
             {
                 CurrentTarget = closestT;
-                agent.destination = CurrentTarget.position;
                 agent.isStopped = false;
-
+                agent.destination = CurrentTarget.position;
                 return;
             }
             
@@ -187,7 +211,7 @@ namespace Minion
             
             //Check if interim destination reached. If not, dont recalculate the next position
             float dist = agent.remainingDistance;
-            if (float.IsPositiveInfinity(dist) || agent.pathStatus != NavMeshPathStatus.PathComplete || agent.remainingDistance != 0) return;
+            if (float.IsPositiveInfinity(dist) || agent.pathStatus != NavMeshPathStatus.PathComplete || dist > agent.stoppingDistance) return;
             
             //Final destination reached
             if( mNormalizedT >= 1f )
@@ -208,22 +232,22 @@ namespace Minion
                 
             //Get next position. Make sure the navagent is active
             targetPos = Spline.MoveAlongSpline( ref mNormalizedT, MoveSpeed * NavAgentSplineDistanceModifier * deltaTime );
-            agent.destination = targetPos;
             agent.isStopped = false;
-            
+            agent.destination = targetPos;
+
             #endregion
         }
 
         private IEnumerator AttackTarget()
         {
             isAttacking = true;
-            anim.SetBool(AutoAttack, true);
+            anim.SetBool(AnimAutoAttack, true);
 
             yield return new WaitForSeconds(Values.MinionAttackSpeed);
 
             if (CurrentTarget is null)
             {
-                anim.SetBool(AutoAttack, false);
+                anim.SetBool(AnimAutoAttack, false);
                 isAttacking = false;
             }
         }
@@ -238,12 +262,21 @@ namespace Minion
 
         private void OnAttack()
         {
+            if (CurrentTarget.IsDestroyed())
+            {
+                CurrentTarget = null;
+                return;
+            }
             if (CurrentTarget is null) return;
             
             IGameUnit unit = CurrentTarget.GetComponent<IGameUnit>();
             if (unit.Team != this.Team)
             {
                 unit.Health = Mathf.Max(0, unit.Health - this.AttackDamage);
+                if (unit.Health < 0)
+                {
+                    CurrentTarget = null;
+                }
             }
 
             isAttacking = false;
@@ -261,5 +294,27 @@ namespace Minion
                 CurrentTarget = unitT;
             }
         }
+        
+        /*
+        protected IEnumerator StopAgent()
+        {
+            if (agent.isStopped)
+                yield break;
+            agent.isStopped = true;
+            agent.enabled = false;
+            yield return null;
+            obstacle.enabled = true;
+        }
+
+        protected IEnumerator StartAgent()
+        {
+            if (!agent.isStopped)
+                yield break;
+            obstacle.enabled = false;
+            yield return null;
+            agent.enabled = true;
+            agent.isStopped = false;
+        }
+        */
     }
 }

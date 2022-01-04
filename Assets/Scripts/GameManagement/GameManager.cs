@@ -45,7 +45,7 @@ namespace GameManagement
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
                 controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
                 
-                controller.StartMinionSpawning(5000);
+                controller.StartMinionSpawning(2000);
             }
             catch
             {

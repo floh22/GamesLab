@@ -16,7 +16,6 @@ namespace GameManagement
 
         [Serializable]
         public enum Team {
-            NONE = -1,
             RED = 0,
             GREEN = 1,
             YELLOW = 2,
@@ -59,10 +58,7 @@ namespace GameManagement
                 SetPlayers("Redboy", "Greendude", "Yellowman", "Blueguy");
             
                 AutoAttack = true;
-
-                DontDestroyOnLoad(gameObject);
-            } else {
-                Destroy(gameObject);
+                
             }
         }
 

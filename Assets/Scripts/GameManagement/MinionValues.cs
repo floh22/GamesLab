@@ -7,8 +7,8 @@ namespace GameManagement
     public class MinionValues : ScriptableObject
     {
         public int WaveSize;
-        public float WaveDelayInMs;
-        public float MinionOffsetInMs;
+        public int WaveDelayInMs;
+        public int MinionOffsetInMs;
         
         
         public float MinionHealth;
