@@ -12,3 +12,4 @@
 *.mat text eol=lf
 *.mask text eol=lf
 *.spriteatlas text eol=lf
+*.fbx filter=lfs diff=lfs merge=lfs -text

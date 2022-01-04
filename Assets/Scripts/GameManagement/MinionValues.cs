@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GameManagement
 {
@@ -11,10 +12,11 @@ namespace GameManagement
         
         
         public float MinionHealth;
-        public float MinionAttacKSpeed;
+        [FormerlySerializedAs("MinionAttacKSpeed")] public float MinionAttackSpeed;
         public float MinionAttackDamage;
         public float MinionMoveSpeed;
         public float MinionAgroRadius;
         public float MinionLeashRadius;
+        public float MinionAttackRange;
     }
 }

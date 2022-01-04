@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Minion;
 using Photon.Pun;
 using UnityEngine;
@@ -15,13 +16,12 @@ namespace GameManagement
         private Dictionary<GameData.Team, HashSet<MinionBehavior>> minions;
         private Dictionary<GameData.Team, GameData.Team> targets;
 
-        [SerializeField] private MinionValues minionValues;
-        [SerializeField] private GameObject minionPrefab;
-        [SerializeField] private GameObject spawnPointHolder;
+        private MinionValues minionValues;
+        private GameObject minionPrefab;
+        private GameObject spawnPointHolder;
         
         public MasterController()
         {
-            MinionBehavior.TargetPositions = spawnPointHolder;
             minions = new Dictionary<GameData.Team,  HashSet<MinionBehavior>>();
             targets = new Dictionary<GameData.Team, GameData.Team>();
 
@@ -32,6 +32,33 @@ namespace GameManagement
                 //Set default target to opposing team
                 targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
             }
+        }
+
+        public void Init(MinionValues minionValues, GameObject minionPrefab, GameObject spawnPointHolder, GameObject minionPaths)
+        {
+            this.minionValues = minionValues;
+            this.minionPrefab = minionPrefab;
+            this.spawnPointHolder = spawnPointHolder;
+
+            MinionBehavior.Values = minionValues;
+            MinionBehavior.Splines = minionPaths;
+        }
+
+        public async Task StartMinionSpawning(int startDelayInMs = 0)
+        {
+            if (startDelayInMs != 0)
+            {
+                await Task.Delay(startDelayInMs);
+            }
+            OnWaveSpawn();
+            waveTimer = new System.Timers.Timer() {Interval = minionValues.WaveDelayInMs};
+            waveTimer.Elapsed += (s, e) => OnWaveSpawn();
+            waveTimer.Start();
+        }
+
+        public void StopMinionSpawning()
+        {
+            waveTimer.Dispose();
         }
 
         // Update is called once per frame
@@ -63,7 +90,7 @@ namespace GameManagement
                 GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
                 MinionBehavior behavior = go.GetComponent<MinionBehavior>();
-                behavior.Init(go.GetInstanceID(), targets[team]);
+                behavior.Init(go.GetInstanceID(), team, targets[team]);
                 minions[team].Add(behavior);
             }
             
