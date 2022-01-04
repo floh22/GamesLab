@@ -13,6 +13,8 @@ public class Abilities : MonoBehaviour
     public float maxAbilityDistance = 5;
     public GameObject Character;
     public GameObject arrowIndicatorPivot;
+    public GameObject ability1ProjectilePrefab;
+    public GameObject ability2ProjectilePrefab;
 
     public enum Ability
     {
@@ -40,9 +42,7 @@ public class Abilities : MonoBehaviour
                 break;
             case Ability.LINE:
                 Vector3 direction = new Vector3(joystick.Vertical, 0, joystick.Horizontal);
-                // direction = transform.InverseTransformDirection(direction);
                 Quaternion transRot = Quaternion.LookRotation(direction);
-                Debug.Log(direction);
                 transRot.eulerAngles = new Vector3(0, 0, transRot.eulerAngles.y);
                 arrowIndicatorPivot.transform.localRotation =
                     Quaternion.Lerp(transRot, arrowIndicatorPivot.transform.localRotation, 0f);
@@ -78,16 +78,35 @@ public class Abilities : MonoBehaviour
         }
     }
 
-    public void CastAbility(Ability ability)
+    public void CastAbility(Ability ability, Vector3 lastPosition)
     {
-        Debug.Log("Cast!!!!!");
+        Vector3 startingPosition = transform.position + new Vector3(0, 2f, 0);
+
         switch (ability)
         {
             case Ability.RANGE:
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = targetCircle.transform.position;
+                GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
+                    Quaternion.identity) as GameObject;
+                ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position);
                 break;
+
             case Ability.LINE:
+                Vector3 direction = new Vector3(lastPosition.x, 0, lastPosition.y);
+                Debug.Log("----------------");
+                Debug.Log(direction);
+                Quaternion transRot = Quaternion.LookRotation(direction);
+                // Debug.Log(transRot);
+                transRot.eulerAngles = new Vector3(0, 0, transRot.eulerAngles.y);
+                // Debug.Log(transRot);
+                // Debug.Log(Vector3.forward);
+                // Debug.Log(transRot * Vector3.forward);
+                // Debug.Log(".......");
+                // Debug.Log(transRot.eulerAngles);
+
+                GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
+                    transRot) as GameObject;
+                ability2ActiveObject.GetComponent<AbilityProjectile2>().Activate(transRot * Vector3.forward);
+
                 break;
         }
 
