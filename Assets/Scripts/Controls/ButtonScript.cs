@@ -50,7 +50,7 @@ public class ButtonScript : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         }
         else
         {
-            Character.GetComponent<Abilities>().CastAbility(this.CurrentAbility);
+            Character.GetComponent<Abilities>().CastAbility(this.CurrentAbility, lastPosition);
         }
 
         IsInDeadZone = true;

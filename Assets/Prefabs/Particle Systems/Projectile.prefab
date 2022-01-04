@@ -10439,7 +10439,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.48029304
+      value: 0.5051744
       mode: 0
       spread: 0
       speed:
@@ -14628,7 +14628,7 @@ GameObject:
   - component: {fileID: 7467911905582437129}
   - component: {fileID: 7467911905582437128}
   - component: {fileID: 7467911905582437127}
-  - component: {fileID: 7467911905582437126}
+  - component: {fileID: 5261001191710052760}
   m_Layer: 0
   m_Name: Projectile
   m_TagString: Untagged
@@ -14716,7 +14716,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7467911905582437126
+--- !u!114 &5261001191710052760
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

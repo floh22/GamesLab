@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TreeEditor;
 using UnityEngine;
 
-public class AbilityProjectile : MonoBehaviour
+public class AbilityProjectile1 : MonoBehaviour
 {
     private Vector3 _targetPosition;
     private float _animationProgress;
