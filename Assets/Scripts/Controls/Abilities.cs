@@ -80,11 +80,13 @@ public class Abilities : MonoBehaviour
 
     public void CastAbility(Ability ability, Vector3 lastPosition)
     {
-        Vector3 startingPosition = transform.position + new Vector3(0, 2f, 0);
-
+        Vector3 startingPosition;
+        
         switch (ability)
         {
             case Ability.RANGE:
+                startingPosition = transform.position + new Vector3(0, 2, 0);
+                
                 GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
                     Quaternion.identity) as GameObject;
                 ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position);
@@ -92,20 +94,22 @@ public class Abilities : MonoBehaviour
 
             case Ability.LINE:
                 Vector3 direction = new Vector3(lastPosition.x, 0, lastPosition.y);
-                Debug.Log("----------------");
-                Debug.Log(direction);
-                Quaternion transRot = Quaternion.LookRotation(direction);
-                // Debug.Log(transRot);
-                transRot.eulerAngles = new Vector3(0, 0, transRot.eulerAngles.y);
-                // Debug.Log(transRot);
-                // Debug.Log(Vector3.forward);
-                // Debug.Log(transRot * Vector3.forward);
-                // Debug.Log(".......");
-                // Debug.Log(transRot.eulerAngles);
+                direction *= maxAbilityDistance;
+                
+                float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
+                if (direction.z <= 0)
+                {
+                    angle *= -1;
+                }
+                
+                direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance);
+                startingPosition = transform.position + new Vector3(direction.x*0.05f, 2, direction.z*0.05f);
+                direction = transform.TransformPoint(direction);
+
 
                 GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
-                    transRot) as GameObject;
-                ability2ActiveObject.GetComponent<AbilityProjectile2>().Activate(transRot * Vector3.forward);
+                    Quaternion.identity) as GameObject;
+                ability2ActiveObject.GetComponent<AbilityProjectile2>().Activate(direction);
 
                 break;
         }
