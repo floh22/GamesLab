@@ -21,7 +21,6 @@ public class AbilityProjectile1 : MonoBehaviour
         if (_alive)
         {
             _animationProgress += Time.deltaTime;
-            Debug.Log(_animationProgress);
             transform.position =
                 MathParabola.Parabola(transform.position, _targetPosition, 0.5f, _animationProgress);
             if (Vector3.Distance(transform.position, _targetPosition) < 0.5f)

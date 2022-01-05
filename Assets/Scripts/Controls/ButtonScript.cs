@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class ButtonScript : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
-    public GameObject Character;
     public float deadZone = 0.2f;
+    public GameObject Character;
     private bool IsInDeadZone = true;
     public Abilities.Ability CurrentAbility;
 
