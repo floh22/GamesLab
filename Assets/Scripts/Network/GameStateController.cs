@@ -15,6 +15,9 @@ namespace Network
         private GameObject playerPrefab;
 
         [SerializeField] private GameObject spawnPointHolder;
+
+
+        private bool hasLeft = false;
         
         #region Photon Callbacks
 
@@ -40,6 +43,9 @@ namespace Network
 
         public void LeaveRoom()
         {
+            if (hasLeft)
+                return;
+            hasLeft = true;
             PhotonNetwork.LeaveRoom();
         }
 

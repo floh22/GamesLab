@@ -10,7 +10,7 @@ namespace GameManagement
 {
     public class MasterController : MonoBehaviourPunCallbacks
     {
-        private Dictionary<GameData.Team, HashSet<MinionBehavior>> minions;
+        private Dictionary<GameData.Team, HashSet<Minion>> minions;
         private Dictionary<GameData.Team, GameData.Team> targets;
 
         private MinionValues minionValues;
@@ -19,14 +19,20 @@ namespace GameManagement
 
         public bool IsPaused = false;
         
+        [field: SerializeField] public float TimeScale
+        {
+            get => Time.timeScale;
+            set => Time.timeScale = value;
+        }
+        
         public MasterController()
         {
-            minions = new Dictionary<GameData.Team,  HashSet<MinionBehavior>>();
+            minions = new Dictionary<GameData.Team,  HashSet<Minion>>();
             targets = new Dictionary<GameData.Team, GameData.Team>();
 
             foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
             {
-                minions.Add(team, new HashSet<MinionBehavior>());
+                minions.Add(team, new HashSet<Minion>());
                 
                 //Set default target to opposing team
                 targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
@@ -41,8 +47,8 @@ namespace GameManagement
             this.minionPrefab = minionPrefab;
             this.spawnPointHolder = spawnPointHolder;
 
-            MinionBehavior.Values = minionValues;
-            MinionBehavior.Splines = minionPaths;
+            Minion.Values = minionValues;
+            Minion.Splines = minionPaths;
             
             Debug.Log("Starting Master Client Controller");
         }
@@ -90,9 +96,19 @@ namespace GameManagement
                 Debug.Log($"Spawning Minion at {spawnPoint}");
                 GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
-                MinionBehavior behavior = go.GetComponent<MinionBehavior>();
+                Minion behavior = go.GetComponent<Minion>();
                 behavior.Init(go.GetInstanceID(), team, targets[team]);
                 minions[team].Add(behavior);
+
+                //Debug
+                /*
+                if (team == GameData.Team.BLUE)
+                {
+                    behavior.showDestination = true;
+                }
+                */
+                
+                behavior.ShowTarget = true;
             }
         }
 
@@ -103,9 +119,9 @@ namespace GameManagement
 
             targets[team] = target;
             //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
-            foreach (MinionBehavior minionBehavior in minions[team])
+            foreach (Minion minionBehavior in minions[team])
             {
-                minionBehavior.SetTarget(target);
+                minionBehavior.SetTargetTeam(target);
             }
         }
     }
