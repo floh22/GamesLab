@@ -26,6 +26,7 @@ public class AbilityProjectile1 : MonoBehaviour
                 MathParabola.Parabola(transform.position, _targetPosition, 0.5f, _animationProgress);
             if (Vector3.Distance(transform.position, _targetPosition) < 0.5f)
             {
+                ability1Prefab.SetActive(true);
                 Instantiate(ability1Prefab, _targetPosition, Quaternion.identity);
                 Destroy((gameObject));
             }
