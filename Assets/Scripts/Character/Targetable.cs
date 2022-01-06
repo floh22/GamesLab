@@ -19,9 +19,9 @@ namespace Character
             _targetable = GetComponent<ITargetable>();
         }
 
-        public void OnAttacked()
+        public void OnAttacked(float dmg)
         {
-            _targetable.OnAttacked();
+            _targetable.OnAttacked(dmg);
         }
 
     }

@@ -7,8 +7,6 @@ namespace Character
 {
     public class Minion : ITargetable
     {
-        private Targetable _targetable;
-        private Attacker _attacker;
         private MinionStats _stats;
         private MeshRenderer _renderer;
         private bool _ready;
@@ -16,13 +14,14 @@ namespace Character
 
         public float AttackRange() => _stats.attackRange;
 
+        public float Damage() => _stats.damage;
+
         public bool IsReady() => _ready;
 
         void Start()
         {
             _renderer = GetComponent<MeshRenderer>();
             _stats = GetComponentInChildren<MinionStats>();
-            _targetable = GetComponentInChildren<Targetable>();
             _ready = true;
         }
 
@@ -31,8 +30,9 @@ namespace Character
             _renderer.material.color = Color.blue;
         }
         
-        public override void OnAttacked()
+        public override void OnAttacked(float dmg)
         {
+            _stats.OnAttacked(dmg);
             if (_isAttacked)
             {
                 return;

@@ -10,13 +10,15 @@ namespace Character
         public Targetable target;
         public float targetRange;
         private BoxCollider _boxCollider;
+        private Targetable _self;
 
         public void SetTargetRange(float targetRange)
         {
+            _self = GetComponentInParent<Targetable>();
             this.targetRange = targetRange;
             _boxCollider.size = new Vector3(targetRange, 1, targetRange);
         }
-
+        
         public bool HasTarget()
         {
             return target != null;
@@ -46,6 +48,11 @@ namespace Character
                 return;
             }
 
+            if (targetable == _self)
+            {
+                return;
+            }
+
             if (target != null)
             {
                 return;
@@ -59,6 +66,11 @@ namespace Character
         {
             var targetable = other.GetComponent<Targetable>();
             if (targetable == null)
+            {
+                return;
+            }
+            
+            if (targetable == _self)
             {
                 return;
             }

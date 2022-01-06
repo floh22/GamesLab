@@ -3,20 +3,23 @@ using UnityEngine;
 
 namespace Character
 {
-    public class Attacker : MonoBehaviour
+    public class MinionAttacker : MonoBehaviour
     {
         private Targeter _targeter;
-        private Hero _hero;
+        private Minion _minion;
         private bool _isAttacking;
+        private Targetable _self;
 
         void Start()
         {
-            _hero = GetComponentInParent<Hero>();
+            _minion = GetComponentInParent<Minion>();
+            _self = GetComponentInParent<Targetable>();
+            _targeter = GetComponentInChildren<Targeter>();
         }
 
         void Update()
         {
-            if (!_hero.IsReady())
+            if (!_minion.IsReady())
             {
                 return;
             }
@@ -26,7 +29,7 @@ namespace Character
                 return;
             }
 
-            if (_targeter.DistanceToTarget(transform.position) > _hero.AttackRange())
+            if (_targeter.DistanceToTarget(transform.position) > _minion.AttackRange())
             {
                 return;
             }
@@ -43,25 +46,16 @@ namespace Character
             }
         }
 
-        public void SetTargeter(Targeter targeter)
-        {
-            _targeter = targeter;
-        }
-
         private IEnumerator Attack(Targetable targetable)
         {
             _isAttacking = true;
-            // TODO 1. animate an attack
-            _hero.OnAttack();
-            // 2. take hp from target
+            _minion.OnAttack();
+            targetable.OnAttacked(_minion.Damage());
             // 3. wait amount of attack speed * amount of seconds
-            // 4. be ready for another attack
-            _isAttacking = true;
-            targetable.OnAttacked();
             yield return new WaitForSeconds(0.5f);
-            _hero.OnRest();
-            // pause
+            _minion.OnRest();
             yield return new WaitForSeconds(0.5f); // TODO define with attack speed
+            // 4. be ready for another attack
             _isAttacking = false;
         }
     }
