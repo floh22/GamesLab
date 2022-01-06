@@ -3,7 +3,7 @@ using Object = System.Object;
 
 namespace Utils
 {
-    public class ValidationUtils
+    public static class ValidationUtils
     {
         public static void RequireNonNull(Object obj)
         {
