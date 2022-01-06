@@ -1,25 +1,25 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Character
+namespace Character.Hero
 {
-    public class MinionAttacker : MonoBehaviour
+    public abstract class IHeroAttacker : MonoBehaviour
     {
         private Targeter _targeter;
-        private Minion _minion;
+        private IHero _hero;
         private bool _isAttacking;
         private Targetable _self;
 
         void Start()
         {
-            _minion = GetComponentInParent<Minion>();
+            _hero = GetComponentInParent<IHero>();
             _self = GetComponentInParent<Targetable>();
             _targeter = GetComponentInChildren<Targeter>();
         }
 
         void Update()
         {
-            if (!_minion.IsReady())
+            if (!_hero.IsReady())
             {
                 return;
             }
@@ -29,7 +29,7 @@ namespace Character
                 return;
             }
 
-            if (_targeter.DistanceToTarget(transform.position) > _minion.AttackRange())
+            if (_targeter.DistanceToTarget(transform.position) > _hero.AttackRange())
             {
                 return;
             }
@@ -49,11 +49,11 @@ namespace Character
         private IEnumerator Attack(Targetable targetable)
         {
             _isAttacking = true;
-            _minion.OnAttack();
-            targetable.OnAttacked(_minion.Damage());
+            _hero.OnAttack();
+            targetable.OnAttacked(_hero.Damage());
             // 3. wait amount of attack speed * amount of seconds
             yield return new WaitForSeconds(0.5f);
-            _minion.OnRest();
+            _hero.OnRest();
             yield return new WaitForSeconds(0.5f); // TODO define with attack speed
             // 4. be ready for another attack
             _isAttacking = false;

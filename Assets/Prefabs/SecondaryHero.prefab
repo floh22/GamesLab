@@ -51,6 +51,7 @@ MonoBehaviour:
   attackSpeed: 1
   rotationSpeed: 1
   attackRange: 1
+  movementSpeed: 0
 --- !u!1 &5166956072714154715
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,6 +283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 544468b070dea491db54cfb052b73524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  firstPriorityTarget: {fileID: 0}
   target: {fileID: 0}
   targetRange: 1.5
 --- !u!65 &5166956073456245599
@@ -325,9 +327,9 @@ GameObject:
   - component: {fileID: 5166956073999625236}
   - component: {fileID: 5166956073999625235}
   - component: {fileID: 5166956073999625234}
-  - component: {fileID: 5166956073999625238}
   - component: {fileID: 5166956073999625239}
   - component: {fileID: 5166956073999625240}
+  - component: {fileID: 4407991358595191975}
   m_Layer: 0
   m_Name: SecondaryHero
   m_TagString: Untagged
@@ -416,18 +418,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5166956073999625238
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5166956073999625711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de9c27f2acb544065a493e1fa90cf3ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5166956073999625239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,6 +440,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 5166956073999625711}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74fc122774ed146abb3c8a0f28e3f4f5, type: 3}
+  m_Script: {fileID: 11500000, guid: 6c5d7de75ada49a3906455197214bd64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4407991358595191975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5166956073999625711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a91d337b505048fcaf8154ec9acc556c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

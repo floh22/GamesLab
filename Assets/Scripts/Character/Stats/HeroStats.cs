@@ -11,6 +11,7 @@ namespace Character.Stats
         public float attackSpeed;
         public float rotationSpeed;
         public float attackRange;
+        public float movementSpeed;
         private HeroHealthBar _healthBar;
 
         void Start()

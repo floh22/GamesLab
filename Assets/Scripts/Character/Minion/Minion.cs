@@ -3,12 +3,11 @@ using Character.Stats;
 using UnityEngine;
 using Utils;
 
-namespace Character
+namespace Character.Minion
 {
-    public class Hero : ITargetable
+    public class Minion : ITargetable
     {
-
-        private HeroStats _stats;
+        private MinionStats _stats;
         private MeshRenderer _renderer;
         private bool _ready;
         private bool _isAttacked;
@@ -22,9 +21,8 @@ namespace Character
         void Start()
         {
             _renderer = GetComponent<MeshRenderer>();
-            _stats = GetComponentInChildren<HeroStats>();
+            _stats = GetComponentInChildren<MinionStats>();
             _ready = true;
-            CheckObjects();
         }
 
         public override void OnAttack()
@@ -47,12 +45,6 @@ namespace Character
             _renderer.material.color = Color.grey;
         }
 
-        private void CheckObjects()
-        {
-            ValidationUtils.RequireNonNull(_renderer);
-            ValidationUtils.RequireNonNull(_stats);
-        }
-        
         private IEnumerator AttackedCoroutine()
         {
             _isAttacked = true;
@@ -62,6 +54,5 @@ namespace Character
             material.color = Color.grey;
             _isAttacked = false;
         }
-
     }
 }

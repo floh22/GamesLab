@@ -238,7 +238,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &5345165146728159906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -275,6 +275,8 @@ MonoBehaviour:
   maxAbilityDistance: 5
   Character: {fileID: 0}
   arrowIndicatorPivot: {fileID: 5345165146867905386}
+  ability1ProjectilePrefab: {fileID: 0}
+  ability2ProjectilePrefab: {fileID: 0}
 --- !u!1 &5345165146867905386
 GameObject:
   m_ObjectHideFlags: 0
