@@ -1,3 +1,4 @@
+using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -12,6 +13,11 @@ namespace Network
         
         [SerializeField]
         private GameObject playerPrefab;
+
+        [SerializeField] private GameObject spawnPointHolder;
+
+
+        private bool hasLeft = false;
         
         #region Photon Callbacks
 
@@ -37,6 +43,9 @@ namespace Network
 
         public void LeaveRoom()
         {
+            if (hasLeft)
+                return;
+            hasLeft = true;
             PhotonNetwork.LeaveRoom();
         }
 
@@ -50,7 +59,7 @@ namespace Network
             // in case we started this demo with the wrong scene being active, simply load the menu scene
             if (!PhotonNetwork.IsConnected)
             {
-                SceneManager.LoadScene("PunBasics-Launcher");
+                SceneManager.LoadScene(0);
 
                 return;
             }
@@ -64,9 +73,10 @@ namespace Network
                 if (PlayerController.LocalPlayerInstance==null)
                 {
                     Debug.LogFormat("We are Instantiating LocalPlayer from {0}", SceneManagerHelper.ActiveSceneName);
+                    Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
 
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f,5f,0f), Quaternion.identity, 0);
+                    PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
                 }else{
 
                     Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
