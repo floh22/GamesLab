@@ -25,7 +25,7 @@ public class Abilities : MonoBehaviour
     void Start()
     {
         targetCircle.GetComponent<Image>().enabled = false;
-        arrowIndicatorPivot.GetComponent<Image>().enabled = false;
+        arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
         rangeIndicatorCircle1.GetComponent<Image>().enabled = false;
         rangeIndicatorCircle2.GetComponent<Image>().enabled = false;
     }
@@ -60,7 +60,7 @@ public class Abilities : MonoBehaviour
                 break;
             case Ability.LINE:
                 rangeIndicatorCircle2.GetComponent<Image>().enabled = true;
-                arrowIndicatorPivot.GetComponent<Image>().enabled = true;
+                arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = true;
                 break;
         }
     }
@@ -75,7 +75,7 @@ public class Abilities : MonoBehaviour
                 break;
             case Ability.LINE:
                 rangeIndicatorCircle2.GetComponent<Image>().enabled = false;
-                arrowIndicatorPivot.GetComponent<Image>().enabled = false;
+                arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
                 break;
         }
     }
