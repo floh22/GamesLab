@@ -1,18 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
+using GameManagement;
+using TreeEditor;
 using UnityEngine;
 
-public class AbilityProjectile1 : MonoBehaviour
+public class AbilityProjectile1 : AbilityProjectile
 {
-    private Vector3 _targetPosition;
-    private float _animationProgress;
-    private bool _alive = false;
-    public GameObject ability1Prefab;
-
-    public void Activate(Vector3 targetPosition)
-    {
-        _alive = true;
-        _targetPosition = targetPosition;
-    }
-
     void FixedUpdate()
     {
         if (_alive)
@@ -22,10 +15,15 @@ public class AbilityProjectile1 : MonoBehaviour
                 MathParabola.Parabola(transform.position, _targetPosition, 0.5f, _animationProgress);
             if (Vector3.Distance(transform.position, _targetPosition) < 0.5f)
             {
-                ability1Prefab.SetActive(true);
-                Instantiate(ability1Prefab, _targetPosition, Quaternion.identity);
-                Destroy((gameObject));
+                TerminateParticle();
             }
         }
+    }
+
+    public void TerminateParticle()
+    {
+        abilityPrefab.SetActive(true);
+        Instantiate(abilityPrefab, _targetPosition, Quaternion.identity);
+        Destroy(gameObject);
     }
 }

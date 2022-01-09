@@ -9769,8 +9769,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3700037301662248089}
   - component: {fileID: 2238459341205904070}
+  - component: {fileID: 4216628754255576026}
+  - component: {fileID: 3467394249261423767}
   m_Layer: 0
-  m_Name: Ability1
+  m_Name: Explosion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9785,8 +9787,8 @@ Transform:
   m_GameObject: {fileID: 3700037301662248088}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 9, y: 9, z: 9}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3549061287014118408}
   - {fileID: 2344892612107190551}
@@ -9805,6 +9807,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dd887c040a22cf4092e1657bdd3794c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!135 &4216628754255576026
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700037301662248088}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3467394249261423767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700037301662248088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6521e7f4c54116f48a30005ac55f9658, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 10
+  damageMultiplier: 1
 --- !u!1 &3779751252929884834
 GameObject:
   m_ObjectHideFlags: 0
@@ -14677,4 +14706,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1c573aa720c0f4e9e2e9cf8de1c4d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ability1Prefab: {fileID: 3700037301662248088}
+  abilityPrefab: {fileID: 3700037301662248088}
+  damage: 10
+  damageMultiplier: 1
