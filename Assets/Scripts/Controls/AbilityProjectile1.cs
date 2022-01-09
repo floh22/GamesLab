@@ -1,29 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
-using GameManagement;
-using TreeEditor;
 using UnityEngine;
 
-public class AbilityProjectile1 : AbilityProjectile
+namespace Controls
 {
-    void FixedUpdate()
+    public class AbilityProjectile1 : AbilityProjectile
     {
-        if (_alive)
+        void FixedUpdate()
         {
-            _animationProgress += Time.deltaTime;
-            transform.position =
-                MathParabola.Parabola(transform.position, _targetPosition, 0.5f, _animationProgress);
-            if (Vector3.Distance(transform.position, _targetPosition) < 0.5f)
+            if (_alive)
             {
-                TerminateParticle();
+                _animationProgress += Time.deltaTime;
+                transform.position =
+                    MathParabola.Parabola(transform.position, _targetPosition, 0.5f, _animationProgress);
+                if (Vector3.Distance(transform.position, _targetPosition) < 0.5f)
+                {
+                    TerminateParticle();
+                }
             }
         }
-    }
 
-    public void TerminateParticle()
-    {
-        abilityPrefab.SetActive(true);
-        Instantiate(abilityPrefab, _targetPosition, Quaternion.identity);
-        Destroy(gameObject);
+        public void TerminateParticle()
+        {
+            abilityPrefab.SetActive(true);
+            Instantiate(abilityPrefab, _targetPosition, Quaternion.identity);
+            Destroy(gameObject);
+        }
     }
 }

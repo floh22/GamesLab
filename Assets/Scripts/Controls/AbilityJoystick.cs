@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Controls;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
