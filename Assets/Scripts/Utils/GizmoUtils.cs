@@ -5,14 +5,17 @@ namespace Utils
 {
     public static class GizmoUtils
     {
+        
         public static void DrawPoint(Vector3 pos, float radius, Color color)
         {
+#if UNITY_EDITOR
             Color c = Handles.color;
             Handles.color = color;
             Handles.DrawWireDisc(pos // position
                 , Vector3.up        // normal
                 , radius);                // radius
             Handles.color = c;            // color
+#endif
         }
         
         public static void DrawLine(Vector3 p1, Vector3 p2, float width, Color color)

@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using TreeEditor;
 using UnityEngine;
 
 public class AbilityProjectile1 : MonoBehaviour
