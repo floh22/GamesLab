@@ -29,7 +29,6 @@ public class ParticleSystemManager : MonoBehaviour
 
         if (counter == transform.childCount - 1)
         {
-            Debug.Log("Getting Destroyed now" + counter);
             Destroy(gameObject);
             
         }

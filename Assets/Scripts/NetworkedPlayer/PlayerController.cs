@@ -1,22 +1,51 @@
+using System;
+using System.Collections.Generic;
+using Character;
 using GameManagement;
 using Network;
 using Photon.Pun;
 using Photon.Pun.Demo.PunBasics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
 namespace NetworkedPlayer
 {
-    public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
+    public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable, IGameUnit
     {
         public static GameObject LocalPlayerInstance;
-    
-        public float Health = 1f;
 
-        
+        public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }
-        
+
+        public GameUnitType Type => GameUnitType.Player;
+        public float MaxHealth { get; set; }
+        public float Health { get; set; }
+        public float MoveSpeed { get; set; }
+        public float RotationSpeed { get; set; }
+        public float AttackDamage { get; set; }
+        public float AttackSpeed { get; set; }
+        public float AttackRange { get; set; }
+        public IGameUnit CurrentAttackTarget { get; set; }
+        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
+        public void Damage(IGameUnit unit, float damage)
+        {
+            CurrentlyAttackedBy.Add(unit);
+            Health -= damage;
+        }
+
+        public bool IsDestroyed()
+        {
+            return !gameObject;
+        }
+
+        public Vector3 Position
+        {
+            get => transform.position;
+            set => transform.position = value;
+        }
+
         #region Private Fields
     
         [SerializeField]
@@ -50,7 +79,7 @@ namespace NetworkedPlayer
             if (photonView.IsMine)
             {
                 LocalPlayerInstance = gameObject;
-                Team = PersistentData.Team;
+                Team = PersistentData.Team??throw new NullReferenceException();
                 this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
             }
             
@@ -64,6 +93,15 @@ namespace NetworkedPlayer
         public void Start()
         {
             CameraWork cameraWork = gameObject.GetComponent<CameraWork>();
+
+            NetworkID = gameObject.GetInstanceID();
+            
+            
+            //TODO temp
+            Health = 100;
+            MaxHealth = 100;
+
+            CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
             

@@ -22,32 +22,39 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }
+
     public void OnDrag(PointerEventData eventData)
     {
-        GetComponentInParent<FixedJoystick>().SendMessage("OnDrag", eventData);
-        _character.GetComponent<Abilities>().move(this.currentAbility);
-        _lastPosition = new Vector3(
-            _abilityJoystick.Vertical,
-            _abilityJoystick.Horizontal, 0);
-        if (InDeadZone() && !_isInDeadZone)
+        if (!_character.GetComponent<Abilities>().isCooldown(currentAbility))
         {
-            _isInDeadZone = true;
-            this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
-        }
-        else if (!InDeadZone() && _isInDeadZone)
-        {
-            _isInDeadZone = false;
-            this.gameObject.GetComponent<Image>().color = new Color(0, 0.1104961f, 0.9716981f, 0.6f);
+            GetComponentInParent<FixedJoystick>().SendMessage("OnDrag", eventData);
+            _character.GetComponent<Abilities>().move(this.currentAbility);
+            _lastPosition = new Vector3(
+                _abilityJoystick.Vertical,
+                _abilityJoystick.Horizontal, 0);
+            if (InDeadZone() && !_isInDeadZone)
+            {
+                _isInDeadZone = true;
+                this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
+            }
+            else if (!InDeadZone() && _isInDeadZone)
+            {
+                _isInDeadZone = false;
+                this.gameObject.GetComponent<Image>().color = new Color(0, 0.1104961f, 0.9716981f, 0.6f);
+            }
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);
-        _character.GetComponent<Abilities>().ShowAbilityInterface(this.currentAbility);
-        _abilityJoystickImage.enabled = true;
-        _character.GetComponent<Abilities>().move(this.currentAbility);
-        this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
+        if (!_character.GetComponent<Abilities>().isCooldown(currentAbility))
+        {
+            GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);
+            _character.GetComponent<Abilities>().ShowAbilityInterface(this.currentAbility);
+            _abilityJoystickImage.enabled = true;
+            _character.GetComponent<Abilities>().move(this.currentAbility);
+            this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)

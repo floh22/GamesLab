@@ -1,3 +1,6 @@
+using System;
+using JetBrains.Annotations;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +20,13 @@ namespace GameManagement
         private GameObject AutoAttackOnImage;
         private GameObject AutoAttackOffImage;
 
+        [CanBeNull] private MasterController controller;
+        
+        [SerializeField] private MinionValues minionValues;
+        [SerializeField] private GameObject minionPrefab;
+        [SerializeField] private GameObject spawnPointHolder;
+        [SerializeField] private GameObject minionPaths;
+
         void Start() {
             SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam, true));
 
@@ -28,6 +38,20 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
+
+            if (!PhotonNetwork.IsMasterClient) return;
+            try
+            {
+                controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
+                controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
+                
+                controller.StartMinionSpawning(2000);
+            }
+            catch
+            {
+                Debug.LogError("Could not create master controller. Server functionality will not work");
+            }
+
         }
 
         // Update is called once per frame
