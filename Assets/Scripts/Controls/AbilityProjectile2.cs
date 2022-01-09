@@ -5,15 +5,16 @@ using UnityEngine;
 
 public class AbilityProjectile2 : MonoBehaviour
 {
-    private Vector3 _targetPosition;
+    public Vector3 _targetPosition;
     private float _animationProgress;
-    private bool _alive = false;
+    public bool _alive = false;
     public GameObject ability1Prefab;
 
     public void Activate(Vector3 targetPosition)
     {
         _alive = true;
         _targetPosition = targetPosition;
+        transform.LookAt(targetPosition);
     }
 
     void FixedUpdate()
