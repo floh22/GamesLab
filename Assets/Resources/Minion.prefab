@@ -221,7 +221,7 @@ MonoBehaviour:
     SynchronizeType: 2
     Name: Health
   - Type: 1
-    SynchronizeType: 0
+    SynchronizeType: 2
     Name: AttackSpeedMult
   m_SynchronizeLayers:
   - SynchronizeType: 0
