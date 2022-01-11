@@ -62,7 +62,6 @@ namespace GameUnit
         #region MinionAI
         
         public MinionState currentMinionState = MinionState.Idle;
-        private MinionState pastMinionState = MinionState.Idle;
 
         [Header("Pathfinding")] 
         private NavMeshAgent agent;
@@ -134,11 +133,6 @@ namespace GameUnit
         // Update is called once per frame
         void Update()
         {
-            if (pastMinionState != currentMinionState && this.Team == GameData.Team.RED)
-            {
-                Debug.Log($"Minion state change from {pastMinionState} to {currentMinionState}");
-                pastMinionState = currentMinionState;
-            }
             attackingID = CurrentAttackTarget?.NetworkID??-1;
             updateTimer += Time.deltaTime;
             if (!(updateTimer >= Values.UpdateRateInS)) return;
