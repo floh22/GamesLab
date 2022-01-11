@@ -14,6 +14,7 @@ namespace GameManagement
 
         void Start()
         {
+            timeRemainingComponent = GameObject.Find("Timer").GetComponent<TextMeshProUGUI>();
         }
         void Update()
         {        
