@@ -5,7 +5,6 @@ namespace Utils
 {
     public static class GizmoUtils
     {
-        
         public static void DrawPoint(Vector3 pos, float radius, Color color)
         {
 #if UNITY_EDITOR
@@ -15,9 +14,9 @@ namespace Utils
                 , Vector3.up        // normal
                 , radius);                // radius
             Handles.color = c;            // color
-#endif
+#endif  
         }
-        
+
         public static void DrawLine(Vector3 p1, Vector3 p2, float width, Color color)
         {
             int count = 1 + Mathf.CeilToInt(width); // how many lines are needed.

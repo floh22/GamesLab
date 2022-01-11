@@ -76,8 +76,11 @@ namespace Network
                     Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
 
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
-                }else{
+                    GameObject pl = PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
+                    
+                    pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
+                }
+                else{
 
                     Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
                 }

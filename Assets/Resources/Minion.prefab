@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1107547528308056354}
   - component: {fileID: 532332816134254042}
+  - component: {fileID: 7276751680035771570}
   - component: {fileID: 5635135267443527102}
   - component: {fileID: 8866977164425867142}
   - component: {fileID: 1976488508111456701}
@@ -51,6 +52,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7368097050080284918}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &7276751680035771570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7368097050080284918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a21e098cf60d8c145833cfbb55f5790b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myRenderer: {fileID: 6714847818302888332}
+  threshold: 0.1
 --- !u!23 &5635135267443527102
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -349,11 +364,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8452844654027553262, guid: 71bcb4c39aae7ae4294facb39d4c52b1,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 71bcb4c39aae7ae4294facb39d4c52b1, type: 3}
 --- !u!4 &6685603904622673520 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8406371925711953426, guid: 71bcb4c39aae7ae4294facb39d4c52b1,
+    type: 3}
+  m_PrefabInstance: {fileID: 2909721106461958242}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &6714847818302888332 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8452844654027553262, guid: 71bcb4c39aae7ae4294facb39d4c52b1,
     type: 3}
   m_PrefabInstance: {fileID: 2909721106461958242}
   m_PrefabAsset: {fileID: 0}
@@ -368,6 +394,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FogOfWarVisibleRangeMesh
+      objectReference: {fileID: 0}
+    - target: {fileID: 6615859761042996246, guid: 4b69f9d91258bbc4dae2d6458a771098,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6615859761042996247, guid: 4b69f9d91258bbc4dae2d6458a771098,
         type: 3}
