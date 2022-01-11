@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BezierSolution;
 using Character;
 using GameManagement;
+using JetBrains.Annotations;
 using Photon.Pun;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -60,6 +62,7 @@ namespace GameUnit
         #region MinionAI
         
         public MinionState currentMinionState = MinionState.Idle;
+        private MinionState pastMinionState = MinionState.Idle;
 
         [Header("Pathfinding")] 
         private NavMeshAgent agent;
@@ -95,7 +98,7 @@ namespace GameUnit
         {
         }
 
-        public void Init(int networkID, GameData.Team team, GameData.Team targetTeam)
+        public void Init(int networkID, GameData.Team team, GameData.Team target)
         {
             //Components
             agent = GetComponent<NavMeshAgent>();
@@ -104,7 +107,7 @@ namespace GameUnit
             
             //Values
             this.NetworkID = networkID;
-            this.targetTeam = targetTeam;
+            this.targetTeam = target;
             this.Team = team;
             Health = Values.MinionHealth;
             MaxHealth = Values.MinionHealth;
@@ -115,10 +118,11 @@ namespace GameUnit
 
             //Pathfinding
             pathHolder = Splines.transform.Find(team.ToString());
-            currentPath = pathHolder.Find(targetTeam.ToString()).GetComponent<BezierSpline>();
+            currentPath = pathHolder.Find(target.ToString()).GetComponent<BezierSpline>();
 
             agent.speed = MoveSpeed;
             agent.stoppingDistance = Values.MinionAttackRange - 1f;
+            
             nextWayPoint = Position;
             
             //Attacking
@@ -130,6 +134,11 @@ namespace GameUnit
         // Update is called once per frame
         void Update()
         {
+            if (pastMinionState != currentMinionState && this.Team == GameData.Team.RED)
+            {
+                Debug.Log($"Minion state change from {pastMinionState} to {currentMinionState}");
+                pastMinionState = currentMinionState;
+            }
             attackingID = CurrentAttackTarget?.NetworkID??-1;
             updateTimer += Time.deltaTime;
             if (!(updateTimer >= Values.UpdateRateInS)) return;
@@ -144,21 +153,28 @@ namespace GameUnit
         
         private void OnDrawGizmos()
         {
-            if (this.IsDestroyed())
+            if (this.IsDestroyed() || this == null || this.Equals(null))
                 return;
             if (!ShowTarget) return;
 
             Vector3 target = agent.destination;
             
-            if (CurrentChaseTarget != null && !CurrentChaseTarget.IsDestroyed())
+            if (CurrentChaseTarget != null && !CurrentChaseTarget.Equals(null) && !CurrentChaseTarget.IsDestroyed())
             {
                 target = CurrentChaseTarget.Position;
             }
             
-            if (CurrentAttackTarget != null && !CurrentAttackTarget.IsDestroyed())
+            if (CurrentAttackTarget != null && !CurrentAttackTarget.Equals(null) && !CurrentAttackTarget.IsDestroyed())
             {
                 target = CurrentAttackTarget.Position;
             }
+
+            if (double.IsPositiveInfinity(Math.Abs(target.magnitude)))
+            {
+                target = Position;
+            }
+
+            target = target.XZPlane();
             GizmoUtils.DrawLine(Position, target, 1 , ColorUtils.GetColor(this.Team.ToString()));
             GizmoUtils.DrawPoint(target, 0.5f, ColorUtils.GetColor(this.Team.ToString()));
         }
@@ -168,8 +184,6 @@ namespace GameUnit
             switch (currentMinionState)
             {
                 case MinionState.Idle:
-                    agent.isStopped = true;
-                    obstacle.enabled = true;
                     break;
                 case MinionState.Walking:
                     CheckPath();
@@ -178,11 +192,11 @@ namespace GameUnit
                     DetermineDestination();
                     break;
                 case MinionState.Attacking:
-                    if (CurrentAttackTarget is not null)
+                    if (CurrentAttackTarget != null && !CurrentAttackTarget.Equals(null))
                     {
                         FaceTarget(CurrentAttackTarget.Position);
 
-                        if (attackCycle is null)
+                        if (attackCycle == null || attackCycle.Equals(null))
                         {
                             attackCycle = AttackLogic();
                             StartCoroutine(attackCycle);
@@ -213,61 +227,38 @@ namespace GameUnit
 
         void DetermineDestination()
         {
-            if (Vector3.Distance(Position, nextWayPoint) <= agent.stoppingDistance )
+            if (NormalizedT > 1)
             {
-                if (NormalizedT > 1)
-                {
-                    NormalizedT = 1;
-                    onPathCompleted.Invoke();
-                    currentMinionState = MinionState.Idle;
-                }
-                nextWayPoint = currentPath.MoveAlongSpline( ref mNormalizedT, MoveSpeed  );
-                agent.SetDestination(nextWayPoint);
+                NormalizedT = 1;
+                onPathCompleted.Invoke();
+                currentMinionState = MinionState.Idle;
+            }
+            
+            nextWayPoint = currentPath.MoveAlongSpline(ref mNormalizedT, MoveSpeed);
+
+            if (!agent.enabled)
+            {
+                StartCoroutine(EnableAgent(
+                    () =>
+                    {
+                        currentMinionState = MinionState.Walking;
+                        agent.SetDestination(nextWayPoint);
+                    })
+                );
             }
             else
             {
-                obstacle.enabled = false;
-                agent.destination = nextWayPoint;
-                agent.isStopped = false;
                 currentMinionState = MinionState.Walking;
+                agent.SetDestination(nextWayPoint);
             }
         }
 
         void CheckPath()
         {
-            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            var results = new Collider[20];
-            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("GameObject"));
+            var closeUnits = FindUnits();
+            (IGameUnit closest, float closestDistance) = (from unit in closeUnits orderby unit.Value select unit).Where(kvp => kvp.Key.Team != this.Team).FirstOrDefault();
 
-            IGameUnit closest = null;
-            float closestDistance = Mathf.Infinity;
-            
-            //Find viable targets
-            foreach (Collider res in results.NotNull())
-            {
-                IGameUnit unit = res.GetComponent<IGameUnit>();
-
-                //Ignore units without GameUnit component
-                if (unit is null)
-                {
-                    continue;
-                }
-
-                //Ignore own units... obviously
-                if(unit.Team == this.Team)
-                    continue;
-
-                //Get distance between the units.
-                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
-                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
-
-                if (closest is not null && !(distance < closestDistance)) continue;
-                closest = unit;
-                closestDistance = distance;
-            }
-
-
-            if (closest is not null)
+            if ( closest != null && !closest.Equals(null))
             {
                 //Target found
 
@@ -280,9 +271,14 @@ namespace GameUnit
                 //Move towards target if not in range
                 else
                 {
-                    agent.destination = closest.Position;
-                    CurrentChaseTarget = closest;
-                    currentMinionState = MinionState.ChasingTarget;
+                    StartCoroutine(EnableAgent( 
+                        () =>
+                        {
+                            currentMinionState = MinionState.Walking;
+                            agent.destination = closest.Position;
+                            CurrentChaseTarget = closest;
+                        })
+                    );
                 }
 
                 return;
@@ -290,37 +286,144 @@ namespace GameUnit
             
             //Check if interim destination reached. If not, dont recalculate the next position
             float dist = Vector3.Distance(Position, agent.destination);
-            if (float.IsPositiveInfinity(dist) || agent.pathStatus != NavMeshPathStatus.PathComplete || dist > agent.stoppingDistance) return;
+            if (dist > agent.stoppingDistance + 0.5 ) return;
             
-            currentMinionState = MinionState.LookingForPath;
-            obstacle.enabled = true;
-            agent.isStopped = true;
+            
+            if(dist < 0.05)
+                StartCoroutine(DisableAgent(() => currentMinionState = MinionState.LookingForPath));
+            else
+                currentMinionState = MinionState.LookingForPath;
+        }
+
+
+        Dictionary<IGameUnit, float> FindUnits()
+        {
+            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
+            var results = new Collider[20];
+            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("GameObject"));
+
+            var foundUnits = new Dictionary<IGameUnit, float>();
+            
+            
+            //Find viable targets
+            foreach (Collider res in results.NotNull())
+            {
+                IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                //Ignore units without GameUnit component
+                if (unit == null || unit.Equals(null) )
+                {
+                    continue;
+                }
+
+                //Get distance between the units.
+                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
+                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
+                
+                
+                foundUnits.Add(unit, distance);
+                
+            }
+            
+            return foundUnits;
         }
 
         void CheckReturnPath()
         {
-            if (Vector3.Distance(Position, nextWayPoint) <= agent.stoppingDistance)
+            StartCoroutine(EnableAgent(() =>
             {
-                currentMinionState = MinionState.LookingForPath;
-            }
+                float dist = Vector3.Distance(Position, nextWayPoint);
+                if ( dist <= agent.stoppingDistance)
+                {
+                    currentMinionState = MinionState.LookingForPath;
+                    return;
+                }
+
+                if (dist <= Values.MinionAttackRange)
+                {
+                    var results = new Collider[20];
+                    Physics.OverlapSphereNonAlloc(Position, Values.MinionAttackRange, results, LayerMask.GetMask("GameObject"));
+
+                    bool foundAlly = false;
+                    bool foundEnemy = false;
+
+                    foreach (Collider res in results.NotNull())
+                    {
+                        IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                        //Ignore units without GameUnit component
+                        if (unit == null || unit.Equals(null) )
+                        {
+                            continue;
+                        }
+
+                        if (unit.Team == Team)
+                        {
+                            foundAlly = true;
+                        }
+                        else
+                        {
+                            foundEnemy = true;
+                        }
+                    }
+
+                    //If an enemy is on the path we wish to return to, attack it
+                    if (foundEnemy)
+                    {
+                        currentMinionState = MinionState.Walking;
+                        return;
+                    }
+
+                    //If an ally is blocking out path we wish to return to, ignore them and find the next point to travel to
+                    if (foundAlly)
+                    {
+                        currentMinionState = MinionState.LookingForPath;
+                        return;
+                    }
+
+                    currentMinionState = MinionState.LookingForPath;
+                }
+            }));
+            
         }
 
         void ChaseTarget()
         {
-            if (CurrentChaseTarget == null || CurrentChaseTarget.IsDestroyed())
+            Vector3 nearestPointOnPath = currentPath.FindNearestPointTo(Position);
+            //If our target does not exist anymore, break off and return to path
+            if (CurrentChaseTarget == null|| CurrentChaseTarget.Equals(null) || CurrentChaseTarget.IsDestroyed() )
             {
-                currentMinionState = MinionState.ReturningToPath;
+                currentMinionState = MinionState.Walking;
+                agent.destination = nearestPointOnPath;
+                nextWayPoint = nearestPointOnPath;
                 return;
             }
-            float distanceToTarget = Vector3.Distance(Position, CurrentChaseTarget.Position);
-            Vector3 nearestPointOnPath = currentPath.FindNearestPointTo(Position);
+            
+            float distanceToTarget = Vector3.Distance(Position, CurrentChaseTarget.Position.XZPlane());
             float distanceToPath = Vector3.Distance(Position, nearestPointOnPath);
 
+            //Check if target is outside of leash range
             if (distanceToPath > Values.MinionLeashRadius)
             {
                 currentMinionState = MinionState.ReturningToPath;
                 agent.destination = nearestPointOnPath;
                 nextWayPoint = nearestPointOnPath;
+                return;
+            }
+            
+            //If we are targeting a minion, see if there is a closer minion we can attack
+            if (CurrentChaseTarget.Type == GameUnitType.Minion)
+            {
+                (IGameUnit closest, float closestDistance)  = (from unit in FindUnits() orderby unit.Value select unit).Where(unit => unit.Key.Type == GameUnitType.Minion && unit.Key.Team != this.Team).FirstOrDefault();
+                
+                //If there are not minions found nearby, we have no target. This will make minions de agro other minions as soon as they are out of agro range... might break stuff?
+                if (!(closest == null || closest.Equals(null) || closest.IsDestroyed()) && closest != CurrentChaseTarget)
+                {
+                    agent.destination = closest.Position;
+                    CurrentChaseTarget = closest;
+                    distanceToTarget = closestDistance;
+                    
+                }
             }
             
             if (distanceToTarget < Values.MinionAttackRange)
@@ -334,9 +437,14 @@ namespace GameUnit
 
         IEnumerator AttackLogic()
         {
-            if (Vector3.Distance(Position, CurrentAttackTarget.Position) > Values.MinionAttackRange)
+            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
             {
-                Debug.Log("Minion out of range");
+                currentMinionState = MinionState.LookingForPath;
+                yield break;
+            }
+            
+            if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) > Values.MinionAttackRange)
+            {
                 CurrentAttackTarget.RemoveAttacker(this);
                 CurrentChaseTarget = CurrentAttackTarget;
                 currentMinionState = MinionState.ChasingTarget;
@@ -345,21 +453,19 @@ namespace GameUnit
                 yield break;
             }
             
-            agent.isStopped = true;
-            obstacle.enabled = true;
+            yield return DisableAgent();
             
             anim.SetBool(AnimAutoAttack, true);
             CurrentAttackTarget.AddAttacker(this);
             yield return new WaitForSeconds(1 / Values.MinionAttackSpeed);
-            //AttackTarget();
             attackCycle = null;
         }
 
         void AttackTarget()
         {
-            if (CurrentAttackTarget is null)
+            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
             {
-                currentMinionState = MinionState.LookingForPath;
+                currentMinionState = MinionState.ReturningToPath;
                 anim.SetBool(AnimAutoAttack, false);
                 return;
             }
@@ -393,6 +499,49 @@ namespace GameUnit
             }
             
             PhotonNetwork.Destroy(gameObject);
+        }
+
+
+        IEnumerator EnableAgent([CanBeNull] Action nextFunc = null)
+        {
+            if (agent.enabled)
+            {
+                nextFunc?.Invoke();
+                yield break;
+            }
+                
+
+            MinionState prevState = currentMinionState;
+            currentMinionState = MinionState.Idle;
+            
+            obstacle.enabled = false;
+            yield return null;
+            agent.enabled = true;
+            agent.isStopped = false;
+            
+            currentMinionState = prevState;
+            nextFunc?.Invoke();
+        }
+
+        IEnumerator DisableAgent([CanBeNull] Action nextFunc = null)
+        {
+            if (!agent.enabled)
+            {
+                nextFunc?.Invoke();
+                yield break;
+            }
+
+            MinionState prevState = currentMinionState;
+            currentMinionState = MinionState.Idle;
+            
+            agent.isStopped = true;
+            agent.enabled = false;
+            yield return null;
+            obstacle.enabled = true;
+            
+            currentMinionState = prevState;
+            nextFunc?.Invoke();
+            
         }
 
         public void Damage(IGameUnit unit, float damageTaken)
