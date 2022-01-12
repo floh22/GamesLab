@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using GameUnit;
 using Photon.Pun;
 using UnityEngine;
-using Network;
 
 namespace GameManagement
 {
@@ -98,17 +97,6 @@ namespace GameManagement
 
                 GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
-
-
-                // If the minion's team is the same as the local player's team
-                // enable the visibility mesh for the minion
-
-                Debug.Log($"PersistentData.Team.ToString() = {PersistentData.Team.ToString()}");
-
-                if (team.ToString().Equals(PersistentData.Team.ToString()))
-                {
-                    go.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
-                }
 
                 Minion behavior = go.GetComponent<Minion>();
                 behavior.Init(go.GetInstanceID(), team, targets[team]);
