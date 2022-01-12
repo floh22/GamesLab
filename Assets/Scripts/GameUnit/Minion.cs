@@ -36,7 +36,7 @@ namespace GameUnit
         
         #region GameUnit
         public int NetworkID { get; set; }
-        public GameData.Team Team { get; set; }
+        [field: SerializeField] public GameData.Team Team { get; set; }
         public GameUnitType Type => GameUnitType.Minion;
         public Vector3 Position
         {

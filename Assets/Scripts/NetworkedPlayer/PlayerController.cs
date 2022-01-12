@@ -15,6 +15,7 @@ namespace NetworkedPlayer
     public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable, IGameUnit
     {
         public static GameObject LocalPlayerInstance;
+        [field: SerializeField] public GameObject DamageText;
 
         public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }
@@ -33,6 +34,9 @@ namespace NetworkedPlayer
         {
             CurrentlyAttackedBy.Add(unit);
             Health -= damage;
+            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+                .GetComponent<DamageIndicator>();
+            indicator.SetDamageText(damage);
         }
 
         public bool IsDestroyed()

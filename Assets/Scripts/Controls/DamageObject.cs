@@ -34,6 +34,7 @@ public class DamageObject : MonoBehaviour
             return;
         }
 
+        Debug.Log(Time.time + "|" + timestamp);
         if (Time.time > timestamp + delayBetweenAoEDamage)
         {
             timestamp = Time.time;
@@ -54,22 +55,22 @@ public class DamageObject : MonoBehaviour
 
     private void DealDamage(Collider collider)
     {
-        if (collider == null)
+        if (collider == null || _castFrom == null)
         {
             return;
         }
 
         if (collider.gameObject.tag == "Minion")
         {
-            collider.gameObject.GetComponent<Minion>().Damage(_castFrom, damage * damageMultiplier);
+            if (_castFrom.Team != collider.gameObject.GetComponent<Minion>().Team)
+            {
+                collider.gameObject.GetComponent<Minion>().Damage(_castFrom, damage * damageMultiplier);
+            }
         }
         
         if (collider.gameObject.tag == "Player")
         {
-            if (_castFrom == null)
-            {
-                return;
-            }
+
             if (_castFrom.Team != collider.gameObject.GetComponent<PlayerController>().Team)
             {
                 collider.gameObject.GetComponent<PlayerController>().Damage(_castFrom, damage * damageMultiplier);

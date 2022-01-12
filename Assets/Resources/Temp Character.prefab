@@ -512,6 +512,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82419a8898e38d444b6237db7738eacb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DamageText: {fileID: 0}
+  <Team>k__BackingField: 0
+  <Health>k__BackingField: 0
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   channelPrefab: {fileID: 170262}
 --- !u!114 &11400008
