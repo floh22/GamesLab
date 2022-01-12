@@ -9771,6 +9771,7 @@ GameObject:
   - component: {fileID: 2238459341205904070}
   - component: {fileID: 4216628754255576026}
   - component: {fileID: 3467394249261423767}
+  - component: {fileID: 108190730467770504}
   m_Layer: 0
   m_Name: Explosion
   m_TagString: Untagged
@@ -9818,7 +9819,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.07
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3467394249261423767
 MonoBehaviour:
@@ -9834,6 +9835,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   damageMultiplier: 1
+  delayBetweenAoEDamage: 1.9
+--- !u!54 &108190730467770504
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700037301662248088}
+  serializedVersion: 2
+  m_Mass: 0.0000001
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &3779751252929884834
 GameObject:
   m_ObjectHideFlags: 0
@@ -14692,7 +14710,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.07
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5261001191710052760
 MonoBehaviour:
@@ -14707,5 +14725,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   abilityPrefab: {fileID: 3700037301662248088}
-  damage: 10
-  damageMultiplier: 1
