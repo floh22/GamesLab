@@ -64,8 +64,8 @@ public class UnitVisibilityScript : MonoBehaviour
             return;
         }
 
-        bool visible = GetColorAtPosition().grayscale >= threshold;
+        bool isVisible = GetColorAtPosition().grayscale >= threshold;
 
-        myRenderer.enabled = visible;
+        myRenderer.enabled = isVisible;
     }
 }

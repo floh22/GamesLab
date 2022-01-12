@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using Utils;
+using Network;
 
 namespace GameUnit
 {
@@ -91,14 +92,25 @@ namespace GameUnit
         private float updateTimer;
 
         public bool ShowTarget = false;
-        
+
         // Start is called before the first frame update
         void Start()
         {
+            // If the minion's team is the same as the local player's team
+            // enable the visibility mesh for the minion
+
+            Debug.Log($"PersistentData.Team.ToString() = {PersistentData.Team.ToString()}");
+            Debug.Log($"this.Team.ToString() = {this.Team.ToString()}");
+
+            if (this.Team.ToString().Equals(PersistentData.Team.ToString()))
+            {
+                this.gameObject.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
+            }
         }
 
         public void Init(int networkID, GameData.Team team, GameData.Team target)
         {
+            Debug.Log($"In Init");
             //Components
             agent = GetComponent<NavMeshAgent>();
             anim = GetComponent<Animator>();
