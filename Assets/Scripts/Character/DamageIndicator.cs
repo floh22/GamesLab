@@ -41,6 +41,7 @@ public class DamageIndicator : MonoBehaviour
 
         transform.position = Vector3.Lerp(initPos, targetPos, Mathf.Sin(timer / lifetime));
         transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, Mathf.Sin(timer / lifetime));
+        transform.LookAt(transform.position - Camera.main.transform.position);
     }
 
     public void SetDamageText(float damage)

@@ -54,6 +54,18 @@ public class DamageObject : MonoBehaviour
         {
             return;
         }
+        
+        IGameUnit unit = collider.GetComponent<IGameUnit>();
+
+        //Ignore units without GameUnit component
+        if (unit == null || unit.Equals(null) )
+        {
+            return;
+        }
+        
+        unit.Damage(_castFrom, damage * damageMultiplier);
+        
+        /*
 
         if (collider.gameObject.tag == "Minion")
         {
@@ -71,5 +83,7 @@ public class DamageObject : MonoBehaviour
                 collider.gameObject.GetComponent<PlayerController>().Damage(_castFrom, damage * damageMultiplier);
             }
         }
+        
+        */
     }
 }

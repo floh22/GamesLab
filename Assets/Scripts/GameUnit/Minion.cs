@@ -90,7 +90,9 @@ namespace GameUnit
         #endregion
 
         [SerializeField] private GameObject fogOfWarMesh;
-
+        [SerializeField] private GameObject damageText;
+        
+        
         private float updateTimer;
 
         public bool ShowTarget = false;
@@ -105,6 +107,7 @@ namespace GameUnit
             {
                 fogOfWarMesh.gameObject.SetActive(true);
             }
+            
         }
 
         public void Init(int networkID, GameData.Team team, GameData.Team target)
@@ -571,8 +574,13 @@ namespace GameUnit
         public void Damage(IGameUnit unit, float damageTaken)
         {
             //Because this is a hashset, duplicates will not be added
-            // CurrentlyAttackedBy.Add(unit);
+            CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
+            
+            DamageIndicator indicator = Instantiate(damageText, transform.position, Quaternion.identity)
+                .GetComponent<DamageIndicator>();
+            
+            indicator.SetDamageText(damageTaken);
         }
 
         public void SetTargetTeam(GameData.Team team)

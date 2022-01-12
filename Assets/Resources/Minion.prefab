@@ -147,6 +147,8 @@ MonoBehaviour:
   targetTeam: 0
   attackingID: 0
   fogOfWarMesh: {fileID: 647599451974009578}
+  damageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
+    type: 3}
   ShowTarget: 0
 --- !u!195 &1269564560119471383
 NavMeshAgent:
