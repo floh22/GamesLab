@@ -8,8 +8,8 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 {
     public Abilities.Ability currentAbility;
     public float deadZone = 0.2f;
+    public GameObject _character;
 
-    private GameObject _character;
     private Image _abilityJoystickImage;
     private Joystick _abilityJoystick;
     private bool _isInDeadZone = true;
@@ -73,6 +73,13 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         _isInDeadZone = true;
         this.gameObject.GetComponent<Image>().color = new Color(1, 1, 1, 0.6f);
         _abilityJoystickImage.enabled = false;
+    }
+
+    public void RefreshReferences()
+    {
+        _character = GameObject.FindWithTag("Player");
+        _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
+        _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }
 
     private bool InDeadZone()

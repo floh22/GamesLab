@@ -1,3 +1,4 @@
+using Character;
 using UnityEngine;
 
 public class AbilityProjectile2 : AbilityProjectile
@@ -8,7 +9,7 @@ public class AbilityProjectile2 : AbilityProjectile
         {
             transform.position = Vector3.MoveTowards(transform.position, _targetPosition, Time.deltaTime * 6);
             if (Vector3.Distance(transform.position, _targetPosition) < 1f)
-            {
+            { 
                 TerminateParticle();
             }
         }

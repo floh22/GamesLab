@@ -132,8 +132,8 @@ namespace GameUnit
         {
             attackingID = CurrentAttackTarget?.NetworkID??-1;
             updateTimer += Time.deltaTime;
-            if (!(updateTimer >= Values.UpdateRateInS)) return;
-            AILogic();
+            // if (!(updateTimer >= Values.UpdateRateInS)) return;
+            // AILogic();
             updateTimer = 0;
         }
         
@@ -398,7 +398,7 @@ namespace GameUnit
         public void Damage(IGameUnit unit, float damageTaken)
         {
             //Because this is a hashset, duplicates will not be added
-            CurrentlyAttackedBy.Add(unit);
+            // CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
         }
 

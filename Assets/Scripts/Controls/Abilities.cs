@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using GameManagement;
 using Network;
+using NetworkedPlayer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,8 +13,8 @@ public class Abilities : MonoBehaviour
     public float maxAbilityDistance2 = 7;
     public float cooldownAbility1 = 5;
     public float cooldownAbility2 = 7;
-    public bool isCooldown1 = false ;
-    public bool isCooldown2= false;
+    public bool isCooldown1 = false;
+    public bool isCooldown2 = false;
 
     public Image ability1Image;
     public Image ability2Image;
@@ -42,6 +44,9 @@ public class Abilities : MonoBehaviour
         ability2Image = GameObject.FindWithTag("Ability2Handle").GetComponent<Image>();
         ability1Image.fillAmount = 1;
         ability2Image.fillAmount = 1;
+
+        GameObject.FindWithTag("Ability1Handle").GetComponent<AbilityJoystick>().RefreshReferences();
+        GameObject.FindWithTag("Ability2Handle").GetComponent<AbilityJoystick>().RefreshReferences();
     }
 
     void Update()
@@ -55,7 +60,7 @@ public class Abilities : MonoBehaviour
                 isCooldown1 = false;
             }
         }
-        
+
         if (isCooldown2)
         {
             ability2Image.fillAmount += 1 / cooldownAbility2 * Time.deltaTime;
@@ -120,7 +125,7 @@ public class Abilities : MonoBehaviour
     public void CastAbility(Ability ability, Vector3 lastPosition)
     {
         Vector3 startingPosition;
-        
+
         switch (ability)
         {
             case Ability.RANGE:
@@ -128,13 +133,13 @@ public class Abilities : MonoBehaviour
                 {
                     return;
                 }
-                
+
                 startingPosition = transform.position + new Vector3(0, 2, 0);
 
                 GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
                     Quaternion.identity) as GameObject;
-                ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position, PersistentData.Team );
-
+                ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position,
+                    gameObject.GetComponent<PlayerController>());
                 isCooldown1 = true;
                 ability1Image.fillAmount = 0;
                 break;
@@ -144,6 +149,7 @@ public class Abilities : MonoBehaviour
                 {
                     return;
                 }
+
                 Vector3 direction = new Vector3(lastPosition.x, 0, lastPosition.y);
                 direction *= maxAbilityDistance2;
 
@@ -156,14 +162,16 @@ public class Abilities : MonoBehaviour
                 direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
                 startingPosition = transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f);
                 direction = transform.TransformPoint(direction);
-                
 
 
                 GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
                     Quaternion.Euler(0, angle, 0));
                 ability2ActiveObject.transform.LookAt(direction);
-                ability2ActiveObject.GetComponent<AbilityProjectile2>().Activate(direction, PersistentData.Team);
-                
+                ability2ActiveObject.GetComponent<AbilityProjectile2>()
+                    .Activate(direction, gameObject.GetComponent<PlayerController>());
+                ability2ActiveObject.GetComponent<DamageObject>()
+                    .Activate(gameObject.GetComponent<PlayerController>(), false);
+
                 isCooldown2 = true;
                 ability2Image.fillAmount = 0;
                 break;
