@@ -16,7 +16,7 @@ using Network;
 
 namespace GameUnit
 {
-    public class Minion : MonoBehaviour, IGameUnit, IDamagable
+    public class Minion : MonoBehaviour, IGameUnit
     {
         #region Enums
         public enum MinionState {Idle, Walking, LookingForPath, Attacking, ChasingTarget, ReturningToPath }
@@ -89,6 +89,8 @@ namespace GameUnit
         public IEnumerator attackCycle;
         #endregion
 
+        [SerializeField] private GameObject fogOfWarMesh;
+
         private float updateTimer;
 
         public bool ShowTarget = false;
@@ -98,19 +100,15 @@ namespace GameUnit
         {
             // If the minion's team is the same as the local player's team
             // enable the visibility mesh for the minion
-
-            Debug.Log($"PersistentData.Team.ToString() = {PersistentData.Team.ToString()}");
-            Debug.Log($"this.Team.ToString() = {this.Team.ToString()}");
-
-            if (this.Team.ToString().Equals(PersistentData.Team.ToString()))
+            
+            if (this.Team.Equals(PersistentData.Team))
             {
-                this.gameObject.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
+                fogOfWarMesh.gameObject.SetActive(true);
             }
         }
 
         public void Init(int networkID, GameData.Team team, GameData.Team target)
         {
-            Debug.Log($"In Init");
             //Components
             agent = GetComponent<NavMeshAgent>();
             anim = GetComponent<Animator>();
@@ -147,8 +145,8 @@ namespace GameUnit
         {
             attackingID = CurrentAttackTarget?.NetworkID??-1;
             updateTimer += Time.deltaTime;
-            // if (!(updateTimer >= Values.UpdateRateInS)) return;
-            // AILogic();
+            if (!(updateTimer >= Values.UpdateRateInS)) return;
+            AILogic();
             updateTimer = 0;
         }
         
@@ -461,6 +459,26 @@ namespace GameUnit
             
             yield return DisableAgent();
             
+            //quick n dirty
+            
+            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
+            {
+                currentMinionState = MinionState.LookingForPath;
+                yield break;
+            }
+            
+            if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) > Values.MinionAttackRange)
+            {
+                CurrentAttackTarget.RemoveAttacker(this);
+                CurrentChaseTarget = CurrentAttackTarget;
+                currentMinionState = MinionState.ChasingTarget;
+                CurrentAttackTarget = null;
+                attackCycle = null;
+                yield break;
+            }
+            
+            //pls ignore this :)
+            
             anim.SetBool(AnimAutoAttack, true);
             CurrentAttackTarget.AddAttacker(this);
             yield return new WaitForSeconds(1 / Values.MinionAttackSpeed);
@@ -567,6 +585,33 @@ namespace GameUnit
 
             agent.SetDestination(dest);
             currentMinionState = MinionState.Walking;
+        }
+
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                // Local player, send data
+                stream.SendNext(this.NetworkID);
+                stream.SendNext(this.Team);
+                stream.SendNext(this.Health);
+                stream.SendNext(this.MaxHealth);
+                stream.SendNext(this.MoveSpeed);
+                stream.SendNext(this.AttackDamage);
+                stream.SendNext(this.AttackSpeed);
+            }
+            else
+            {
+                // Network player, receive data
+                this.NetworkID = (int)stream.ReceiveNext();
+                this.Team = (GameData.Team)stream.ReceiveNext();
+                this.Health = (float)stream.ReceiveNext();
+                this.MaxHealth = (float)stream.ReceiveNext();
+                this.MoveSpeed = (float)stream.ReceiveNext();
+                this.AttackDamage = (float)stream.ReceiveNext();
+                this.AttackSpeed = (float)stream.ReceiveNext();
+            }
         }
     }
 }

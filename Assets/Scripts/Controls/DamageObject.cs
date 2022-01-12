@@ -1,11 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Character;
-using GameManagement;
-using GameUnit;
 using NetworkedPlayer;
 using UnityEngine;
+using Minion = GameUnit.Minion;
 
 public class DamageObject : MonoBehaviour
 {
@@ -34,7 +30,6 @@ public class DamageObject : MonoBehaviour
             return;
         }
 
-        Debug.Log(Time.time + "|" + timestamp);
         if (Time.time > timestamp + delayBetweenAoEDamage)
         {
             timestamp = Time.time;

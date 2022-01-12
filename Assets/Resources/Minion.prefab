@@ -134,6 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61b7c252d85a2964fa398d7d90957ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Team>k__BackingField: 0
   <Health>k__BackingField: 0
   anim: {fileID: 0}
   currentMinionState: 0
@@ -145,6 +146,7 @@ MonoBehaviour:
       m_Calls: []
   targetTeam: 0
   attackingID: 0
+  fogOfWarMesh: {fileID: 647599451974009578}
   ShowTarget: 0
 --- !u!195 &1269564560119471383
 NavMeshAgent:
@@ -203,6 +205,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
+  - {fileID: 1976488508111456701}
   - {fileID: 7995566974728686793}
   - {fileID: 7313647196687746357}
   sceneViewId: 0
@@ -472,6 +475,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4b69f9d91258bbc4dae2d6458a771098, type: 3}
+--- !u!1 &647599451974009578 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6615859761042996246, guid: 4b69f9d91258bbc4dae2d6458a771098,
+    type: 3}
+  m_PrefabInstance: {fileID: 5993443532086623996}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &647599451974009579 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6615859761042996247, guid: 4b69f9d91258bbc4dae2d6458a771098,

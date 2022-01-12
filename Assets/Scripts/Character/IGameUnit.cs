@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GameManagement;
+using Photon.Pun;
 using UnityEngine;
 
 namespace Character
@@ -13,7 +14,7 @@ namespace Character
         Minion,
         Monster
     }
-    public interface IGameUnit
+    public interface IGameUnit : IPunObservable
     {
         public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }

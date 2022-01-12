@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Character;
 using GameManagement;
+using Photon.Pun;
 using UnityEngine;
 
 namespace GameUnit
@@ -65,5 +66,26 @@ namespace GameUnit
             this.Health -= damage;
         }
 
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                // Local player, send data
+                stream.SendNext(this.NetworkID);
+                stream.SendNext(this.Team);
+                stream.SendNext(this.Health);
+                stream.SendNext(this.MaxHealth);
+                stream.SendNext(this.Pages);
+            }
+            else
+            {
+                // Network player, receive data
+                this.NetworkID = (int)stream.ReceiveNext();
+                this.Team = (GameData.Team)stream.ReceiveNext();
+                this.Health = (float)stream.ReceiveNext();
+                this.MaxHealth = (float)stream.ReceiveNext();
+                this.Pages = (int)stream.ReceiveNext();
+            }
+        }
     }
 }
