@@ -33,6 +33,9 @@ namespace NetworkedPlayer
         {
             CurrentlyAttackedBy.Add(unit);
             Health -= damage;
+            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+                .GetComponent<DamageIndicator>();
+            indicator.SetDamageText(damage);
         }
 
         public bool IsDestroyed()
