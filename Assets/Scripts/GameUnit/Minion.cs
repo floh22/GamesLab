@@ -23,6 +23,8 @@ namespace GameUnit
         #region StaticValues
         
         public static GameObject Splines;
+        [field: SerializeField] public GameObject DamageText;
+
         
         public static MinionValues Values;
 
@@ -400,6 +402,9 @@ namespace GameUnit
             //Because this is a hashset, duplicates will not be added
             // CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
+            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+                .GetComponent<DamageIndicator>();
+            indicator.SetDamageText(damageTaken);
         }
 
         public void SetTargetTeam(GameData.Team team)

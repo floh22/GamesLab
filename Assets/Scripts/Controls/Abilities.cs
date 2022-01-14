@@ -139,7 +139,8 @@ public class Abilities : MonoBehaviour
                 GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
                     Quaternion.identity) as GameObject;
                 ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position,
-                    gameObject.GetComponent<PlayerController>());
+                    gameObject.GetComponent<PlayerController>(),
+                    gameObject.GetComponent<PlayerController>().DamageMultiplierAbilities);
                 isCooldown1 = true;
                 ability1Image.fillAmount = 0;
                 break;
@@ -168,9 +169,11 @@ public class Abilities : MonoBehaviour
                     Quaternion.Euler(0, angle, 0));
                 ability2ActiveObject.transform.LookAt(direction);
                 ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                    .Activate(direction, gameObject.GetComponent<PlayerController>());
+                    .Activate(direction, gameObject.GetComponent<PlayerController>(),
+                        gameObject.GetComponent<PlayerController>().DamageMultiplierAbilities);
                 ability2ActiveObject.GetComponent<DamageObject>()
-                    .Activate(gameObject.GetComponent<PlayerController>(), false);
+                    .Activate(gameObject.GetComponent<PlayerController>(), false,
+                        gameObject.GetComponent<PlayerController>().DamageMultiplierAbilities);
 
                 isCooldown2 = true;
                 ability2Image.fillAmount = 0;

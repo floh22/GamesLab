@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using JetBrains.Annotations;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace GameManagement
@@ -19,6 +21,9 @@ namespace GameManagement
         private GameObject AutoAttackOnImage;
         private GameObject AutoAttackOffImage;
 
+        private TextMeshProUGUI LevelUpLabel;
+        private GameObject[] levelUpButtons;
+
         [CanBeNull] private MasterController controller;
 
         [SerializeField] private MinionValues minionValues;
@@ -34,6 +39,10 @@ namespace GameManagement
             MinionSwitchButtonImage = GameObject.Find("Player_Color_Sprite").GetComponent<Image>();
             AutoAttackOnImage = GameObject.Find("ON_Sprite");
             AutoAttackOffImage = GameObject.Find("OFF_Sprite");
+            LevelUpLabel = GameObject.Find("LevelUp_Label").GetComponent<TextMeshProUGUI>();
+            levelUpButtons = GameObject.FindGameObjectsWithTag("LevelUpButton");
+            SetVisibilityOfLevelUpButtons(false);
+
 
             SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam, true));
 
@@ -158,6 +167,22 @@ namespace GameManagement
         {
             float[] color = GameData.PlayerColors[(int) team];
             return new Color(color[0], color[1], color[2], color[3]);
+        }
+
+        public IEnumerator ShowLevelUpLabel()
+        {
+            LevelUpLabel.enabled = true;
+            SetVisibilityOfLevelUpButtons(true);
+            yield return new WaitForSeconds(4);
+            LevelUpLabel.enabled = false;
+        }
+
+        private void SetVisibilityOfLevelUpButtons(bool visibility)
+        {
+            foreach (GameObject button in levelUpButtons)
+            {
+                button.SetActive(visibility);
+            }
         }
     }
 }
