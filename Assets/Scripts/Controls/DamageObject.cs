@@ -6,7 +6,6 @@ using Minion = GameUnit.Minion;
 public class DamageObject : MonoBehaviour
 {
     [Range(1, 100)] public float damage = 10;
-    public float damageMultiplier = 1;
     public float delayBetweenAoEDamage = 1f;
 
     delegate void EffectOnDagmage(float damage);
@@ -14,13 +13,15 @@ public class DamageObject : MonoBehaviour
     private EffectOnDagmage damageEffect;
     private IGameUnit _castFrom;
     private bool _isAoE = true;
+    private float _damageMultiplier = 1;
     private float timestamp = 0f;
 
 
-    public void Activate(IGameUnit castFrom, bool isAoE)
+    public void Activate(IGameUnit castFrom, bool isAoE, float damageMultiplier)
     {
         _castFrom = castFrom;
         _isAoE = isAoE;
+        _damageMultiplier = damageMultiplier;
     }
 
     private void OnTriggerStay(Collider collider)
@@ -71,7 +72,7 @@ public class DamageObject : MonoBehaviour
         {
             if (_castFrom.Team != collider.gameObject.GetComponent<Minion>().Team)
             {
-                collider.gameObject.GetComponent<Minion>().Damage(_castFrom, damage * damageMultiplier);
+                collider.gameObject.GetComponent<Minion>().Damage(_castFrom, damage * _damageMultiplier);
             }
         }
         
@@ -80,7 +81,7 @@ public class DamageObject : MonoBehaviour
 
             if (_castFrom.Team != collider.gameObject.GetComponent<PlayerController>().Team)
             {
-                collider.gameObject.GetComponent<PlayerController>().Damage(_castFrom, damage * damageMultiplier);
+                collider.gameObject.GetComponent<PlayerController>().Damage(_castFrom, damage * _damageMultiplier);
             }
         }
         

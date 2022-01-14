@@ -18,21 +18,32 @@ namespace NetworkedPlayer
         [field: SerializeField] public GameObject DamageText;
 
         public int NetworkID { get; set; }
-        public GameData.Team Team { get; set; }
+        [field: SerializeField] public GameData.Team Team { get; set; }
 
         public GameUnitType Type => GameUnitType.Player;
         public float MaxHealth { get; set; }
-        public float Health { get; set; }
+        [field: SerializeField] public float Health { get; set; }
         public float MoveSpeed { get; set; }
         public float RotationSpeed { get; set; }
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
+        
+        public int Level { get; set; }
+        public int Experience { get; set; }
+        public int ExperienceToReachNextLevel { get; set; }
+        public int ExperienceBetweenLevels { get; set; }
+        public int GainedExperienceByMinion { get; set; }
+        public int GainedExperienceByPlayer { get; set; }
+        public float DamageMultiplierMinion { get; set; }
+        public float DamageMultiplierAbilities { get; set; }
+        
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
+
         public void Damage(IGameUnit unit, float damage)
         {
-            CurrentlyAttackedBy.Add(unit);
+            // CurrentlyAttackedBy.Add(unit);
             Health -= damage;
             DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
@@ -51,17 +62,16 @@ namespace NetworkedPlayer
         }
 
         #region Private Fields
-    
-        [SerializeField]
-        private GameObject playerUiPrefab;
-    
+
+        [SerializeField] private GameObject playerUiPrefab;
+
         [FormerlySerializedAs("beams")] [SerializeField]
         private GameObject channelPrefab;
 
         private bool isChanneling;
 
         #endregion
-    
+
         #region MonoBehaviour CallBacks
 
         /// <summary>
@@ -77,16 +87,16 @@ namespace NetworkedPlayer
             {
                 this.channelPrefab.SetActive(false);
             }
-            
-            
+
+
             // in GameStateController we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.IsMine)
             {
                 LocalPlayerInstance = gameObject;
-                Team = PersistentData.Team??throw new NullReferenceException();
+                Team = PersistentData.Team ?? throw new NullReferenceException();
                 this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
             }
-            
+
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
             DontDestroyOnLoad(gameObject);
         }
@@ -99,16 +109,24 @@ namespace NetworkedPlayer
             CameraWork cameraWork = gameObject.GetComponent<CameraWork>();
 
             NetworkID = gameObject.GetInstanceID();
-            
-            
+
+
             //TODO temp
             Health = 100;
             MaxHealth = 100;
+            Level = 0;
+            Experience = 0;
+            ExperienceToReachNextLevel = 200;
+            ExperienceBetweenLevels = 200;
+            GainedExperienceByMinion = 50;
+            GainedExperienceByPlayer = 100;
+            DamageMultiplierMinion = 1f;
+            DamageMultiplierAbilities = 1f;
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
-            Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
-            
+            // Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
+
             if (cameraWork != null)
             {
                 if (photonView.IsMine)
@@ -142,7 +160,7 @@ namespace NetworkedPlayer
         public override void OnDisable()
         {
             // Always call the base to remove callbacks
-            base.OnDisable ();
+            base.OnDisable();
 
 #if UNITY_5_4_OR_NEWER
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -174,12 +192,13 @@ namespace NetworkedPlayer
                 this.channelPrefab.SetActive(this.isChanneling);
             }
         }
-        
-        void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadingMode)
+
+        void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,
+            UnityEngine.SceneManagement.LoadSceneMode loadingMode)
         {
             this.CalledOnLevelWasLoaded(scene.buildIndex);
         }
-        
+
         public void OnTriggerEnter(Collider other)
         {
             // we dont do anything if we are not the local player.
@@ -199,7 +218,7 @@ namespace NetworkedPlayer
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
             this.Health -= 0.1f;
         }
-        
+
         public void OnTriggerStay(Collider other)
         {
             // we dont do anything if we are not the local player.
@@ -216,7 +235,7 @@ namespace NetworkedPlayer
             }
 
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
-            this.Health -= 0.1f*Time.deltaTime;
+            this.Health -= 0.1f * Time.deltaTime;
         }
 
         private void CalledOnLevelWasLoaded(int level)
@@ -267,9 +286,33 @@ namespace NetworkedPlayer
             else
             {
                 // Network player, receive data
-                this.isChanneling = (bool)stream.ReceiveNext();
-                this.Health = (float)stream.ReceiveNext();
-                this.Team = (GameData.Team)stream.ReceiveNext();
+                this.isChanneling = (bool) stream.ReceiveNext();
+                this.Health = (float) stream.ReceiveNext();
+                this.Team = (GameData.Team) stream.ReceiveNext();
+            }
+        }
+
+        public void AddExperience(int amount)
+        {
+            Experience += amount;
+            if (Experience >= ExperienceToReachNextLevel)
+            {
+                Level++;
+                ExperienceToReachNextLevel += ExperienceBetweenLevels;
+            }
+        }
+
+        public void UpdateMultipliers(bool updateMinion)
+        {
+            if (updateMinion)
+            {
+                DamageMultiplierMinion += 0.1f;
+
+            }
+            else
+            {
+                DamageMultiplierAbilities += 0.2f;
+
             }
         }
     }

@@ -26,7 +26,8 @@ namespace GameUnit
         #region StaticValues
         
         public static GameObject Splines;
-        
+
+
         public static MinionValues Values;
 
         //Determines how fine the navagent follows the spline. Higher values require less updates to destination but follow the exact spline less accurately 
@@ -579,7 +580,7 @@ namespace GameUnit
             
             DamageIndicator indicator = Instantiate(damageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
-            
+                
             indicator.SetDamageText(damageTaken);
         }
 
