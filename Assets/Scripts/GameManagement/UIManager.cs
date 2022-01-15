@@ -20,8 +20,8 @@ namespace GameManagement
         private GameObject PagesContainer;
         private Image[] PagesImages;
 
-        private GameObject AutoAttackOnImage;
-        private GameObject AutoAttackOffImage;
+        [SerializeField] private GameObject AutoAttackOnImage;
+        [SerializeField] private GameObject AutoAttackOffImage;
 
         private TextMeshProUGUI LevelUpLabel;
         private GameObject[] levelUpButtons;
@@ -33,14 +33,16 @@ namespace GameManagement
         [SerializeField] private GameObject spawnPointHolder;
         [SerializeField] private GameObject minionPaths;
 
+
         void Start()
         {
-            PauseMenuUI = GameObject.Find("PauseMenu_UI");
-            PauseMenuUI.SetActive(false);
+            //PauseMenuUI = GameObject.Find("PauseMenu_UI");
+            if(PauseMenuUI != null && !PauseMenuUI.Equals(null))
+                PauseMenuUI.SetActive(false);
             IngameUI = GameObject.Find("Ingame_UI");
             MinionSwitchButtonImage = GameObject.Find("Player_Color_Sprite").GetComponent<Image>();
-            AutoAttackOnImage = GameObject.Find("ON_Sprite");
-            AutoAttackOffImage = GameObject.Find("OFF_Sprite");
+            //AutoAttackOnImage = GameObject.Find("ON_Sprite");
+            //AutoAttackOffImage = GameObject.Find("OFF_Sprite");
             LevelUpLabel = GameObject.Find("LevelUp_Label").GetComponent<TextMeshProUGUI>();
             LevelUpLabel.enabled = false;
             levelUpButtons = GameObject.FindGameObjectsWithTag("LevelUpButton");
@@ -56,8 +58,6 @@ namespace GameManagement
 
             SetInitPages();
             
-            _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
-
 
             if (!PhotonNetwork.IsMasterClient) return;
             try
@@ -193,12 +193,22 @@ namespace GameManagement
 
         public void UpdateButtonClicked(int which)
         {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+            }
+            
             _playerController.UpdateMultiplier(which);
             SetVisibilityOfLevelUpButtons(false);
         }
 
         public void UIHELPERMETHODAddExperience(int experience)
         {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+            }
+            
             _playerController.AddExperience(experience);
         }
     }

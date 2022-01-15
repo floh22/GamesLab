@@ -17,6 +17,8 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     void Start()
     {
+        if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
+            return;
         _abilities = PlayerController.LocalPlayerInstance.GetComponent<Abilities>();
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
@@ -24,6 +26,11 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
+        {
+            RefreshReferences();
+        }
+            
         if (!_abilities.isCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnDrag", eventData);
@@ -46,6 +53,11 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
+        {
+            RefreshReferences();
+        }
+        
         if (!_abilities.isCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);

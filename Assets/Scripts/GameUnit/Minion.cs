@@ -250,6 +250,7 @@ namespace GameUnit
                     () =>
                     {
                         currentMinionState = MinionState.Walking;
+                        agent.speed = Values.MinionMoveSpeed;
                         agent.SetDestination(nextWayPoint);
                     })
                 );
@@ -257,6 +258,7 @@ namespace GameUnit
             else
             {
                 currentMinionState = MinionState.Walking;
+                agent.speed = Values.MinionMoveSpeed;
                 agent.SetDestination(nextWayPoint);
             }
         }
@@ -338,61 +340,72 @@ namespace GameUnit
 
         void CheckReturnPath()
         {
-            StartCoroutine(EnableAgent(() =>
+            if (!agent.enabled)
             {
-                float dist = Vector3.Distance(Position, nextWayPoint);
-                if ( dist <= agent.stoppingDistance)
+                StartCoroutine(EnableAgent(CheckReturnPathActiveAgent));
+                return;
+            }
+            CheckReturnPathActiveAgent();
+            
+        }
+
+        void CheckReturnPathActiveAgent()
+        {
+            float dist = Vector3.Distance(Position.XZPlane(), nextWayPoint.XZPlane());
+            if (dist <= agent.stoppingDistance)
+            {
+                currentMinionState = MinionState.LookingForPath;
+                return;
+            }
+
+            if (dist <= Values.MinionAttackRange)
+            {
+                var results = new Collider[20];
+                Physics.OverlapSphereNonAlloc(Position, Values.MinionAttackRange, results,
+                    LayerMask.GetMask("GameObject"));
+
+                bool foundAlly = false;
+                bool foundEnemy = false;
+
+                foreach (Collider res in results.NotNull())
+                {
+                    IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                    //Ignore units without GameUnit component
+                    if (unit == null || unit.Equals(null))
+                    {
+                        continue;
+                    }
+
+                    if (unit.Team == Team)
+                    {
+                        foundAlly = true;
+                    }
+                    else
+                    {
+                        foundEnemy = true;
+                    }
+                }
+
+                //If an enemy is on the path we wish to return to, attack it
+                if (foundEnemy)
+                {
+                    currentMinionState = MinionState.Walking;
+                    return;
+                }
+
+                //If an ally is blocking out path we wish to return to, ignore them and find the next point to travel to
+                if (foundAlly)
                 {
                     currentMinionState = MinionState.LookingForPath;
                     return;
                 }
 
-                if (dist <= Values.MinionAttackRange)
-                {
-                    var results = new Collider[20];
-                    Physics.OverlapSphereNonAlloc(Position, Values.MinionAttackRange, results, LayerMask.GetMask("GameObject"));
+                currentMinionState = MinionState.LookingForPath;
+            }
 
-                    bool foundAlly = false;
-                    bool foundEnemy = false;
-
-                    foreach (Collider res in results.NotNull())
-                    {
-                        IGameUnit unit = res.GetComponent<IGameUnit>();
-
-                        //Ignore units without GameUnit component
-                        if (unit == null || unit.Equals(null) )
-                        {
-                            continue;
-                        }
-
-                        if (unit.Team == Team)
-                        {
-                            foundAlly = true;
-                        }
-                        else
-                        {
-                            foundEnemy = true;
-                        }
-                    }
-
-                    //If an enemy is on the path we wish to return to, attack it
-                    if (foundEnemy)
-                    {
-                        currentMinionState = MinionState.Walking;
-                        return;
-                    }
-
-                    //If an ally is blocking out path we wish to return to, ignore them and find the next point to travel to
-                    if (foundAlly)
-                    {
-                        currentMinionState = MinionState.LookingForPath;
-                        return;
-                    }
-
-                    currentMinionState = MinionState.LookingForPath;
-                }
-            }));
-            
+            if(agent.destination != nextWayPoint)
+                agent.destination = nextWayPoint;
         }
 
         void ChaseTarget()
