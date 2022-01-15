@@ -578,8 +578,10 @@ namespace GameUnit
             CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
             
-            DamageIndicator indicator = Instantiate(damageText, transform.position, Quaternion.identity)
-                .GetComponent<DamageIndicator>();
+            Vector3 spawnPosition = transform.position;
+            spawnPosition.y = 1;
+            
+            DamageIndicator indicator = Instantiate(damageText, spawnPosition, Quaternion.identity).GetComponent<DamageIndicator>();
                 
             indicator.SetDamageText(damageTaken);
         }

@@ -44,21 +44,25 @@ namespace NetworkedPlayer
         #endregion
         
         #region Level
-        public int Level { get; set; }
-        public int Experience { get; set; }
-        public int ExperienceToReachNextLevel { get; set; }
+        [field: SerializeField] public int Level { get; set; }
+        [field: SerializeField] public int Experience { get; set; }
+        [field: SerializeField] public int ExperienceToReachNextLevel { get; set; }
         public int ExperienceBetweenLevels { get; set; }
         public int GainedExperienceByMinion { get; set; }
         public int GainedExperienceByPlayer { get; set; }
-        public float DamageMultiplierMinion { get; set; }
-        public float DamageMultiplierAbilities { get; set; }
+        [field: SerializeField] public float DamageMultiplierMinion { get; set; }
+        [field: SerializeField] public float DamageMultiplierAbility1 { get; set; }
+        [field: SerializeField] public float DamageMultiplierAbility2 { get; set; }
         
         #endregion
         
         public void Damage(IGameUnit unit, float damage)
         {
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
+            
             Health -= damage;
+            
             DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
@@ -131,11 +135,12 @@ namespace NetworkedPlayer
             Level = 0;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
-            ExperienceBetweenLevels = 200;
+            ExperienceBetweenLevels = 100;
             GainedExperienceByMinion = 50;
             GainedExperienceByPlayer = 100;
             DamageMultiplierMinion = 1f;
-            DamageMultiplierAbilities = 1f;
+            DamageMultiplierAbility1 = 1f;
+            DamageMultiplierAbility2 = 1f;
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
@@ -327,21 +332,25 @@ namespace NetworkedPlayer
             if (Experience >= ExperienceToReachNextLevel)
             {
                 Level++;
+                Experience -= ExperienceToReachNextLevel;
                 ExperienceToReachNextLevel += ExperienceBetweenLevels;
+                StartCoroutine(GameObject.Find("UIManager").GetComponent<UIManager>().ShowLevelUpLabel());
             }
         }
 
-        public void UpdateMultipliers(bool updateMinion)
+        public void UpdateMultiplier(int whatToUpdate)
         {
-            if (updateMinion)
+            switch (whatToUpdate)
             {
-                DamageMultiplierMinion += 0.1f;
-
-            }
-            else
-            {
-                DamageMultiplierAbilities += 0.2f;
-
+                case 1:
+                    DamageMultiplierMinion += 0.1f;
+                    break;
+                case 2:
+                    DamageMultiplierAbility1 += 0.2f;
+                    break;
+                case 3:
+                    DamageMultiplierAbility2 += 0.2f;
+                    break;
             }
         }
     }

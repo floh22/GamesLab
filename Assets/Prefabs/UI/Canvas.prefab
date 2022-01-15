@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8663093118887360740}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: UpdateButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 3
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &997222189833452110
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +329,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2644760840322210144}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: UpdateButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1366090872219811572
 GameObject:
   m_ObjectHideFlags: 0
@@ -637,9 +661,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: 
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: TogglePauseMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1312,8 +1336,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManagement.GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
         m_MethodName: SwitchAutoAttack
         m_Mode: 1
         m_Arguments:
@@ -1584,7 +1608,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAbility: 3
   deadZone: 0.2
-  _character: {fileID: 0}
 --- !u!1 &2000761999462499093
 GameObject:
   m_ObjectHideFlags: 0
@@ -2004,14 +2027,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: increasePages
-        m_Mode: 1
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: UIHELPERMETHODAddExperience
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 100
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -2082,7 +2105,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Pages++
+  m_text: ' Function 1
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2365,7 +2390,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAbility: 2
   deadZone: 0.2
-  _character: {fileID: 0}
 --- !u!1 &2000761999673860643
 GameObject:
   m_ObjectHideFlags: 0
@@ -3458,7 +3482,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2000761999991498223}
   m_Layer: 0
-  m_Name: Pages Switch Helper UI
+  m_Name: Helper UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4539,7 +4563,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Pages--
+  m_text: 'Function 2
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4730,14 +4756,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: decreasePages
-        m_Mode: 1
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: UIHELPERMETHODAddExperience
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 50
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -5016,8 +5042,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
         m_MethodName: TogglePauseMenu
         m_Mode: 1
         m_Arguments:
@@ -5635,8 +5661,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: GameManagement.GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
         m_MethodName: SetMinionsToNextTarget
         m_Mode: 1
         m_Arguments:
@@ -5917,6 +5943,7 @@ RectTransform:
   - {fileID: 2000761999516742404}
   - {fileID: 2000762000824768826}
   - {fileID: 2000762000934124194}
+  - {fileID: 1232644694308852935}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6215,7 +6242,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3769693519627037440}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -6417,7 +6444,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7873022504286350687}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: UpdateButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &2000762000388218803
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6577,4 +6616,91 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2929252283123773938, guid: aaa2c939c0359ac4dbce3f49e8b90252,
     type: 3}
   m_PrefabInstance: {fileID: 2000762000388218803}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4325592496965841968
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2000762001012472350}
+    m_Modifications:
+    - target: {fileID: 3250662854955819249, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_Name
+      value: UIManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 555
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 269
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3e5e84d16225f0c488ea7e2dab0444a3, type: 3}
+--- !u!114 &1232644694308852934 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 4325592496965841968}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f3011664d8f73045a9f58aec9c50b1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1232644694308852935 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 4325592496965841968}
   m_PrefabAsset: {fileID: 0}
