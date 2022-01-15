@@ -64,27 +64,6 @@ public class DamageObject : MonoBehaviour
             return;
         }
         
-        unit.Damage(_castFrom, damage * damageMultiplier);
-        
-        /*
-
-        if (collider.gameObject.tag == "Minion")
-        {
-            if (_castFrom.Team != collider.gameObject.GetComponent<Minion>().Team)
-            {
-                collider.gameObject.GetComponent<Minion>().Damage(_castFrom, damage * _damageMultiplier);
-            }
-        }
-        
-        if (collider.gameObject.tag == "Player")
-        {
-
-            if (_castFrom.Team != collider.gameObject.GetComponent<PlayerController>().Team)
-            {
-                collider.gameObject.GetComponent<PlayerController>().Damage(_castFrom, damage * _damageMultiplier);
-            }
-        }
-        
-        */
+        unit.Damage(_castFrom, damage * _damageMultiplier);
     }
 }

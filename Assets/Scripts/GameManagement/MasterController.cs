@@ -89,6 +89,11 @@ namespace GameManagement
 
         void SpawnMinions(object o , EventArgs e)
         {
+            //Don't actually spawn the minions unless we are the master client
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                return;
+            }
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
                 Vector3 spawnPoint = spawnPointHolder.transform.Find(team.ToString()).transform.position;

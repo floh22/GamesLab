@@ -46,7 +46,25 @@ namespace Network
             if (hasLeft)
                 return;
             hasLeft = true;
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                Player nextMasterClient = PhotonNetwork.MasterClient.GetNext();
+                PhotonNetwork.SetMasterClient(nextMasterClient);
+                PhotonView photonView = PhotonView.Get(this);
+                photonView.RPC("NewMasterClient", RpcTarget.Others, nextMasterClient.ActorNumber);
+            }
+            
             PhotonNetwork.LeaveRoom();
+        }
+
+        [PunRPC]
+        public void NewMasterClient(int newMasterActorNumber)
+        {
+            if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterActorNumber)
+            {
+                Debug.Log("Now functioning as master client");
+            }
         }
 
 

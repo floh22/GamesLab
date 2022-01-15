@@ -52,8 +52,7 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
-
-            if (!PhotonNetwork.IsMasterClient) return;
+            
             try
             {
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();

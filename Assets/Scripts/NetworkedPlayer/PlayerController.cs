@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Character;
 using GameManagement;
@@ -12,11 +13,19 @@ using UnityEngine.Serialization;
 
 namespace NetworkedPlayer
 {
-    public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable, IGameUnit
+    public class PlayerController : MonoBehaviourPunCallbacks, IGameUnit
     {
+        #region StaticFields
+        
         public static GameObject LocalPlayerInstance;
+        
+        #endregion
+        
         [field: SerializeField] public GameObject DamageText;
 
+        private CameraController cameraController;
+
+        #region IGameUnit
         public int NetworkID { get; set; }
         [field: SerializeField] public GameData.Team Team { get; set; }
 
@@ -29,6 +38,12 @@ namespace NetworkedPlayer
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
         
+        public IGameUnit CurrentAttackTarget { get; set; }
+        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
+        
+        #endregion
+        
+        #region Level
         public int Level { get; set; }
         public int Experience { get; set; }
         public int ExperienceToReachNextLevel { get; set; }
@@ -38,9 +53,8 @@ namespace NetworkedPlayer
         public float DamageMultiplierMinion { get; set; }
         public float DamageMultiplierAbilities { get; set; }
         
-        public IGameUnit CurrentAttackTarget { get; set; }
-        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
-
+        #endregion
+        
         public void Damage(IGameUnit unit, float damage)
         {
             // CurrentlyAttackedBy.Add(unit);
@@ -106,7 +120,7 @@ namespace NetworkedPlayer
         /// </summary>
         public void Start()
         {
-            CameraWork cameraWork = gameObject.GetComponent<CameraWork>();
+            cameraController = gameObject.GetComponent<CameraController>();
 
             NetworkID = gameObject.GetInstanceID();
 
@@ -127,11 +141,11 @@ namespace NetworkedPlayer
 
             // Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
 
-            if (cameraWork != null)
+            if (cameraController != null)
             {
                 if (photonView.IsMine)
                 {
-                    cameraWork.OnStartFollowing();
+                    cameraController.OnStartFollowing();
                 }
             }
             else
@@ -183,7 +197,7 @@ namespace NetworkedPlayer
 
                 if (this.Health <= 0f)
                 {
-                    GameStateController.Instance.LeaveRoom();
+                    Die();
                 }
             }
 
@@ -191,6 +205,21 @@ namespace NetworkedPlayer
             {
                 this.channelPrefab.SetActive(this.isChanneling);
             }
+        }
+
+
+        public void Die()
+        {
+            cameraController.OnStopFollowing();
+            StartCoroutine(Respawn());
+        }
+
+
+        public IEnumerator Respawn()
+        {
+            
+            yield return new WaitForSeconds(10);
+            this.Health = this.MaxHealth;
         }
 
         void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,

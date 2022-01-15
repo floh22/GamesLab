@@ -58,5 +58,7 @@ namespace Character
         public void Damage(IGameUnit unit, float damage);
 
         public bool IsDestroyed();
+        
+        
     }
 }
