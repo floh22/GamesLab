@@ -400,9 +400,14 @@ namespace GameUnit
         public void Damage(IGameUnit unit, float damageTaken)
         {
             //Because this is a hashset, duplicates will not be added
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
-            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+            
+            Vector3 spawnPosition = transform.position;
+            spawnPosition.y = 1;
+            
+            DamageIndicator indicator = Instantiate(DamageText, spawnPosition, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damageTaken);
         }

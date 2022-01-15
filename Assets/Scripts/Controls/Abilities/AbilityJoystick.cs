@@ -1,15 +1,14 @@
 using UnityEngine;
-using System.Collections;
+using NetworkedPlayer;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     public Abilities.Ability currentAbility;
     public float deadZone = 0.2f;
-    public GameObject _character;
 
+    private Abilities _abilities;
     private Image _abilityJoystickImage;
     private Joystick _abilityJoystick;
     private bool _isInDeadZone = true;
@@ -18,17 +17,17 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     void Start()
     {
-        _character = GameObject.FindWithTag("Player");
+        _abilities = PlayerController.LocalPlayerInstance.GetComponent<Abilities>();
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (!_character.GetComponent<Abilities>().isCooldown(currentAbility))
+        if (!_abilities.isCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnDrag", eventData);
-            _character.GetComponent<Abilities>().move(this.currentAbility);
+            _abilities.move(this.currentAbility);
             _lastPosition = new Vector3(
                 _abilityJoystick.Vertical,
                 _abilityJoystick.Horizontal, 0);
@@ -47,12 +46,12 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!_character.GetComponent<Abilities>().isCooldown(currentAbility))
+        if (!_abilities.isCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);
-            _character.GetComponent<Abilities>().ShowAbilityInterface(this.currentAbility);
+            _abilities.ShowAbilityInterface(this.currentAbility);
             _abilityJoystickImage.enabled = true;
-            _character.GetComponent<Abilities>().move(this.currentAbility);
+            _abilities.move(this.currentAbility);
             this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
         }
     }
@@ -63,11 +62,11 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
         if (InDeadZone())
         {
-            _character.GetComponent<Abilities>().DontCastAbility(this.currentAbility);
+            _abilities.DontCastAbility(this.currentAbility);
         }
         else
         {
-            _character.GetComponent<Abilities>().CastAbility(this.currentAbility, _lastPosition);
+            _abilities.CastAbility(this.currentAbility, _lastPosition);
         }
 
         _isInDeadZone = true;
@@ -77,7 +76,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void RefreshReferences()
     {
-        _character = GameObject.FindWithTag("Player");
+        _abilities = PlayerController.LocalPlayerInstance.GetComponent<Abilities>();
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }

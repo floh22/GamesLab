@@ -1,20 +1,22 @@
 using System;
 using System.Collections;
 using JetBrains.Annotations;
+using Network;
+using NetworkedPlayer;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace GameManagement
 {
-    public class GameManager : MonoBehaviour
+    public class UIManager : MonoBehaviour
     {
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
         public Image MinionSwitchButtonImage;
 
+        private PlayerController _playerController;
         private GameObject PagesContainer;
         private Image[] PagesImages;
 
@@ -40,11 +42,12 @@ namespace GameManagement
             AutoAttackOnImage = GameObject.Find("ON_Sprite");
             AutoAttackOffImage = GameObject.Find("OFF_Sprite");
             LevelUpLabel = GameObject.Find("LevelUp_Label").GetComponent<TextMeshProUGUI>();
+            LevelUpLabel.enabled = false;
             levelUpButtons = GameObject.FindGameObjectsWithTag("LevelUpButton");
             SetVisibilityOfLevelUpButtons(false);
 
 
-            SetMinionTarget(GetNextPlayerClockwise(GameData.Instance.currentTeam, true));
+            SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
 
             PagesContainer = GameObject.Find("Pages Container");
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
@@ -52,6 +55,9 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
+            
+            _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+
 
             if (!PhotonNetwork.IsMasterClient) return;
             try
@@ -154,7 +160,7 @@ namespace GameManagement
             }
             else
             {
-                if ((GameData.Team) temp == GameData.Instance.currentTeam)
+                if ((GameData.Team) temp == (PersistentData.Team ?? GameData.Team.RED))
                 {
                     temp = (((int) temp - 1) + 4) % 4;
                 }
@@ -173,7 +179,7 @@ namespace GameManagement
         {
             LevelUpLabel.enabled = true;
             SetVisibilityOfLevelUpButtons(true);
-            yield return new WaitForSeconds(4);
+            yield return new WaitForSeconds(3);
             LevelUpLabel.enabled = false;
         }
 
@@ -183,6 +189,17 @@ namespace GameManagement
             {
                 button.SetActive(visibility);
             }
+        }
+
+        public void UpdateButtonClicked(int which)
+        {
+            _playerController.UpdateMultiplier(which);
+            SetVisibilityOfLevelUpButtons(false);
+        }
+
+        public void UIHELPERMETHODAddExperience(int experience)
+        {
+            _playerController.AddExperience(experience);
         }
     }
 }

@@ -35,7 +35,6 @@ public class DamageObject : MonoBehaviour
             return;
         }
 
-        Debug.Log(Time.time + "|" + timestamp);
         if (Time.time > timestamp + delayBetweenAoEDamage)
         {
             timestamp = Time.time;

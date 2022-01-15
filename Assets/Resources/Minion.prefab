@@ -118,6 +118,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61b7c252d85a2964fa398d7d90957ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
+    type: 3}
+  <Team>k__BackingField: 0
   <Health>k__BackingField: 0
   anim: {fileID: 0}
   currentMinionState: 0
