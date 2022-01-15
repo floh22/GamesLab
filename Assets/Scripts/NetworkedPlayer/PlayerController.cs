@@ -5,8 +5,6 @@ using Character;
 using GameManagement;
 using Network;
 using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -18,12 +16,31 @@ namespace NetworkedPlayer
         #region StaticFields
         
         public static GameObject LocalPlayerInstance;
+        public static PlayerController LocalPlayerController;
         
         #endregion
         
         [field: SerializeField] public GameObject DamageText;
 
         private CameraController cameraController;
+
+        [SerializeField] private bool hasPage;
+        
+        public bool HasPage
+        {
+            get => hasPage;
+            set
+            {
+                if (hasPage != value)
+                {
+                    if(value)
+                        PickUpPage();
+                    else
+                        DropPage();
+                }
+                hasPage = value;
+            }
+        }
 
         #region IGameUnit
         public int NetworkID { get; set; }
@@ -111,6 +128,7 @@ namespace NetworkedPlayer
             if (photonView.IsMine)
             {
                 LocalPlayerInstance = gameObject;
+                LocalPlayerController = this;
                 Team = PersistentData.Team ?? throw new NullReferenceException();
                 this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
             }
@@ -125,8 +143,8 @@ namespace NetworkedPlayer
         public void Start()
         {
             cameraController = gameObject.GetComponent<CameraController>();
-
             NetworkID = gameObject.GetInstanceID();
+            CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
 
             //TODO temp
@@ -141,10 +159,7 @@ namespace NetworkedPlayer
             DamageMultiplierMinion = 1f;
             DamageMultiplierAbility1 = 1f;
             DamageMultiplierAbility2 = 1f;
-
-            CurrentlyAttackedBy = new HashSet<IGameUnit>();
-
-            // Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
+            
 
             if (cameraController != null)
             {
@@ -155,7 +170,7 @@ namespace NetworkedPlayer
             }
             else
             {
-                Debug.LogError("<Color=Red><b>Missing</b></Color> CameraWork Component on player Prefab.", this);
+                Debug.LogError("<Color=Red><b>Missing</b></Color> CameraController Component on player Prefab.", this);
             }
 
             // Create the UI
@@ -168,22 +183,6 @@ namespace NetworkedPlayer
             {
                 Debug.LogWarning("<Color=Red><b>Missing</b></Color> PlayerUiPrefab reference on player Prefab.", this);
             }
-
-#if UNITY_5_4_OR_NEWER
-            // Unity 5.4 has a new scene management. register a method to call CalledOnLevelWasLoaded.
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
-#endif
-        }
-
-
-        public override void OnDisable()
-        {
-            // Always call the base to remove callbacks
-            base.OnDisable();
-
-#if UNITY_5_4_OR_NEWER
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
-#endif
         }
 
 
@@ -211,28 +210,7 @@ namespace NetworkedPlayer
                 this.channelPrefab.SetActive(this.isChanneling);
             }
         }
-
-
-        public void Die()
-        {
-            cameraController.OnStopFollowing();
-            StartCoroutine(Respawn());
-        }
-
-
-        public IEnumerator Respawn()
-        {
-            
-            yield return new WaitForSeconds(10);
-            this.Health = this.MaxHealth;
-        }
-
-        void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,
-            UnityEngine.SceneManagement.LoadSceneMode loadingMode)
-        {
-            this.CalledOnLevelWasLoaded(scene.buildIndex);
-        }
-
+        
         public void OnTriggerEnter(Collider other)
         {
             // we dont do anything if we are not the local player.
@@ -271,19 +249,33 @@ namespace NetworkedPlayer
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
             this.Health -= 0.1f * Time.deltaTime;
         }
-
-        private void CalledOnLevelWasLoaded(int level)
-        {
-            if (!Physics.Raycast(transform.position, -Vector3.up, 5f))
-            {
-                transform.position = new Vector3(0f, 5f, 0f);
-            }
-
-            GameObject uiGo = Instantiate(this.playerUiPrefab);
-            uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
-        }
+        
 
         #endregion
+
+        private void PickUpPage()
+        {
+            
+        }
+
+        private void DropPage()
+        {
+            
+        }
+        
+        public void Die()
+        {
+            cameraController.OnStopFollowing();
+            StartCoroutine(Respawn());
+        }
+
+
+        public IEnumerator Respawn()
+        {
+            
+            yield return new WaitForSeconds(10);
+            this.Health = this.MaxHealth;
+        }
 
         private void ProcessInputs()
         {
@@ -352,6 +344,11 @@ namespace NetworkedPlayer
                     DamageMultiplierAbility2 += 0.2f;
                     break;
             }
+        }
+
+        public void OnLoseGame()
+        {
+            
         }
     }
 }

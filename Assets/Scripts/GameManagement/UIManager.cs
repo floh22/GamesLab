@@ -12,6 +12,8 @@ namespace GameManagement
 {
     public class UIManager : MonoBehaviour
     {
+        public static UIManager Instance;
+        
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
         public Image MinionSwitchButtonImage;
@@ -26,16 +28,14 @@ namespace GameManagement
         private TextMeshProUGUI LevelUpLabel;
         private GameObject[] levelUpButtons;
 
-        [CanBeNull] private MasterController controller;
-
-        [SerializeField] private MinionValues minionValues;
-        [SerializeField] private GameObject minionPrefab;
-        [SerializeField] private GameObject spawnPointHolder;
-        [SerializeField] private GameObject minionPaths;
-
+        public Timer GameTimer;
 
         void Start()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
             //PauseMenuUI = GameObject.Find("PauseMenu_UI");
             if(PauseMenuUI != null && !PauseMenuUI.Equals(null))
                 PauseMenuUI.SetActive(false);
@@ -57,20 +57,6 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
-            
-
-            if (!PhotonNetwork.IsMasterClient) return;
-            try
-            {
-                controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
-                controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
-
-                controller.StartMinionSpawning(2000);
-            }
-            catch
-            {
-                Debug.LogError("Could not create master controller. Server functionality will not work");
-            }
         }
 
         // Update is called once per frame
@@ -124,8 +110,23 @@ namespace GameManagement
         {
             SetAutoAttack(!GameData.Instance.AutoAttack);
         }
+        
+        public void SetPages(int count)
+        {
+            while (count != GameData.Instance.NumberOfPages)
+            {
+                if (count > GameData.Instance.NumberOfPages)
+                {
+                    IncreasePages();
+                }
+                else
+                {
+                    DecreasePages();
+                }
+            }
+        }
 
-        public void increasePages()
+        public void IncreasePages()
         {
             if (GameData.Instance.NumberOfPages < 10)
             {
@@ -134,7 +135,7 @@ namespace GameManagement
             }
         }
 
-        public void decreasePages()
+        public void DecreasePages()
         {
             if (GameData.Instance.NumberOfPages - 1 >= 0)
             {

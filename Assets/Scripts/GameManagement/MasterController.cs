@@ -12,6 +12,7 @@ namespace GameManagement
     {
         private Dictionary<GameData.Team, HashSet<Minion>> minions;
         private Dictionary<GameData.Team, GameData.Team> targets;
+        private Dictionary<GameData.Team, BaseBehavior> bases;
 
         private MinionValues minionValues;
         private GameObject minionPrefab;
@@ -29,6 +30,12 @@ namespace GameManagement
         {
             minions = new Dictionary<GameData.Team,  HashSet<Minion>>();
             targets = new Dictionary<GameData.Team, GameData.Team>();
+            bases = new Dictionary<GameData.Team, BaseBehavior>();
+        }
+
+        private void Awake()
+        {
+            GameObject baseHolder = GameObject.Find("Bases");
 
             foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
             {
@@ -36,8 +43,11 @@ namespace GameManagement
                 
                 //Set default target to opposing team
                 targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
+                
+                if(baseHolder != null && !baseHolder.Equals(null))
+                    bases.Add(team, baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>());
             }
-
+            
             Debug.Log($"Init {minions.Count} teams");
         }
 
@@ -72,7 +82,15 @@ namespace GameManagement
         // Update is called once per frame
         void Update()
         {
-            
+            if (UIManager.Instance.GameTimer.timeRemainingInSeconds == 0)
+            {
+                foreach (var kvp in bases)
+                {
+                    kvp.Value.Pages--;
+                }
+
+                UIManager.Instance.GameTimer.timeRemainingInSeconds = GameData.SecondsPerRound;
+            }
         }
 
         private IEnumerator OnWaveSpawn()

@@ -6629,6 +6629,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: UIManager
       objectReference: {fileID: 0}
+    - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: GameTimer
+      value: 
+      objectReference: {fileID: 1232644694308852932}
     - target: {fileID: 3250662854955819255, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
         type: 3}
       propertyPath: m_RootOrder
@@ -6686,6 +6691,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e5e84d16225f0c488ea7e2dab0444a3, type: 3}
+--- !u!114 &1232644694308852932 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3250662854955819252, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+    type: 3}
+  m_PrefabInstance: {fileID: 4325592496965841968}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d80f2dc4fcbc5d428db4bbc0b8d40d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1232644694308852934 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,

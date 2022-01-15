@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using Character;
 using GameManagement;
+using Network;
+using NetworkedPlayer;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
@@ -27,8 +30,17 @@ namespace GameUnit
         public float AttackRange { get; set; } = 0;
         public IGameUnit CurrentAttackTarget { get; set; } = null;
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
-        
-        public int Pages { get; set; }
+
+        private int pages;
+        public int Pages
+        {
+            get => pages;
+            set
+            {
+                pages = value;
+                OnPageUpdate();
+            } 
+        }
         
         // Start is called before the first frame update
         void Start()
@@ -53,6 +65,21 @@ namespace GameUnit
         void Update()
         {
         
+        }
+
+
+        void OnPageUpdate()
+        {
+            if (Team != PersistentData.Team)
+                return;
+            
+            if (Pages <= 0 )
+            {
+                if(PlayerController.LocalPlayerInstance != null && !PlayerController.LocalPlayerInstance.Equals(null))
+                    PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnLoseGame();
+            }
+            
+            UIManager.Instance.SetPages(Pages);
         }
         
         public bool IsDestroyed()

@@ -1,3 +1,6 @@
+using System;
+using GameManagement;
+using JetBrains.Annotations;
 using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
@@ -11,10 +14,24 @@ namespace Network
         
         static public GameStateController Instance;
         
+        [CanBeNull] private MasterController controller;
+        
+        
+        [Header("Player Data")]
         [SerializeField]
         private GameObject playerPrefab;
 
+        [SerializeField] private GameObject abilityPrefab;
+
         [SerializeField] private GameObject spawnPointHolder;
+        
+        
+        [Header("Minion Data")]
+        
+        [SerializeField] private MinionValues minionValues;
+        [SerializeField] private GameObject minionPrefab;
+        [SerializeField] private GameObject minionSpawnPointHolder;
+        [SerializeField] private GameObject minionPaths;
 
 
         private bool hasLeft = false;
@@ -97,6 +114,8 @@ namespace Network
                     GameObject pl = PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
                     
                     pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
+
+                    GameObject.Instantiate(abilityPrefab);
                 }
                 else{
 
@@ -104,6 +123,19 @@ namespace Network
                 }
 
 
+            }
+            
+            if (!PhotonNetwork.IsMasterClient) return;
+            try
+            {
+                controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
+                controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
+
+                controller.StartMinionSpawning(10000);
+            }
+            catch
+            {
+                Debug.LogError("Could not create master controller. Server functionality will not work");
             }
 
         }

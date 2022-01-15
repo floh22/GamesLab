@@ -1,3 +1,4 @@
+using Controls.Abilities;
 using UnityEngine;
 using NetworkedPlayer;
 using UnityEngine.EventSystems;
@@ -19,7 +20,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
             return;
-        _abilities = PlayerController.LocalPlayerInstance.GetComponent<Abilities>();
+        _abilities = Abilities.Instance;
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }
@@ -88,7 +89,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void RefreshReferences()
     {
-        _abilities = PlayerController.LocalPlayerInstance.GetComponent<Abilities>();
+        _abilities = Abilities.Instance;
         _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
         _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
     }
