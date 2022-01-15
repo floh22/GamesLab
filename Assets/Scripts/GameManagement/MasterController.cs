@@ -89,13 +89,20 @@ namespace GameManagement
 
         void SpawnMinions(object o , EventArgs e)
         {
+            //Don't actually spawn the minions unless we are the master client
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                return;
+            }
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
                 Vector3 spawnPoint = spawnPointHolder.transform.Find(team.ToString()).transform.position;
                 
                 Debug.Log($"Spawning Minion at {spawnPoint}");
+
                 GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
+
                 Minion behavior = go.GetComponent<Minion>();
                 behavior.Init(go.GetInstanceID(), team, targets[team]);
                 minions[team].Add(behavior);

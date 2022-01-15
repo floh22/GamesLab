@@ -46,7 +46,25 @@ namespace Network
             if (hasLeft)
                 return;
             hasLeft = true;
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                Player nextMasterClient = PhotonNetwork.MasterClient.GetNext();
+                PhotonNetwork.SetMasterClient(nextMasterClient);
+                PhotonView photonView = PhotonView.Get(this);
+                photonView.RPC("NewMasterClient", RpcTarget.Others, nextMasterClient.ActorNumber);
+            }
+            
             PhotonNetwork.LeaveRoom();
+        }
+
+        [PunRPC]
+        public void NewMasterClient(int newMasterActorNumber)
+        {
+            if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterActorNumber)
+            {
+                Debug.Log("Now functioning as master client");
+            }
         }
 
 
@@ -76,8 +94,11 @@ namespace Network
                     Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
 
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
-                }else{
+                    GameObject pl = PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
+                    
+                    pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
+                }
+                else{
 
                     Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
                 }

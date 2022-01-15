@@ -268,12 +268,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b973821b1cf741bc3081ec43fe256, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  abilityCanvas: {fileID: 5345165146728159904}
-  arrowIndicator: {fileID: 5345165146631159590}
+  maxAbilityDistance1: 5
+  maxAbilityDistance2: 7
+  cooldownAbility1: 5
+  cooldownAbility2: 7
+  isCooldown1: 0
+  isCooldown2: 0
+  ability1Image: {fileID: 0}
+  ability2Image: {fileID: 0}
   targetCircle: {fileID: 5345165147588769390}
-  rangeIndicatorCircle: {fileID: 5345165146651367239}
-  maxAbilityDistance: 5
-  Character: {fileID: 0}
+  rangeIndicatorCircle1: {fileID: 0}
+  rangeIndicatorCircle2: {fileID: 0}
   arrowIndicatorPivot: {fileID: 5345165146867905386}
   ability1ProjectilePrefab: {fileID: 0}
   ability2ProjectilePrefab: {fileID: 0}

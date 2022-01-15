@@ -10,12 +10,8 @@ namespace NetworkedPlayer
 		
 		[SerializeField]
 		private Joystick joystick;
-    
-		[SerializeField]
-		private float directionDampTime = 0.25f;
+
 		Animator animator;
-		private static readonly int Jump = Animator.StringToHash("Jump");
-		private static readonly int Direction = Animator.StringToHash("Direction");
 		private static readonly int Speed = Animator.StringToHash("Speed");
 
 		#endregion
@@ -48,17 +44,8 @@ namespace NetworkedPlayer
 			{
 				return;
 			}
-    
-			// deal with Jumping
-			AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);			
-    
-			// only allow jumping if we are running.
-			if (stateInfo.IsName("Base Layer.Run"))
-			{
-				// When using trigger parameter
-				if (Input.GetButtonDown("Fire2")) animator.SetTrigger(Jump); 
-			}
-               
+
+
 			// deal with movement
 			float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
 			float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1);
@@ -74,8 +61,14 @@ namespace NetworkedPlayer
     
 			// set the Animator Parameters
 			animator.SetFloat( Speed, h*h+v*v );
-			animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime );
+			//animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime * 10);
+
+			if (h == 0 && v == 0)
+				return;
 			
+			float heading = Mathf.Atan2(h,v);
+			transform.rotation = Quaternion.Euler(0, heading*Mathf.Rad2Deg, 0);
+
 		}
     
 		#endregion
