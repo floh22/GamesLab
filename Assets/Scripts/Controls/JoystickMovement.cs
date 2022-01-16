@@ -1,6 +1,5 @@
 using System;
-using CharacterV2;
-using CharacterV2.MainHero;
+using Character.MainHero;
 using UnityEngine;
 
 namespace Controls

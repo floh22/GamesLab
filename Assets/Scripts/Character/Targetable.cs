@@ -1,7 +1,6 @@
-using Character;
 using UnityEngine;
 
-namespace CharacterV2
+namespace Character
 {
     public class Targetable : MonoBehaviour
     {

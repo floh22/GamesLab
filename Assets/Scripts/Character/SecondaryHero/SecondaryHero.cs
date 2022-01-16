@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using Character;
 using GameManagement;
 using Photon.Pun;
 using UnityEngine;
 using Utils;
 
-namespace CharacterV2.SecondaryHero
+namespace Character.SecondaryHero
 {
     public class SecondaryHero: MonoBehaviour, IGameUnit
     {

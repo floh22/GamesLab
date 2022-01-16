@@ -2,7 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-namespace CharacterV2
+namespace Character
 {
     public class UpdatableHealthBar: MonoBehaviour
     {

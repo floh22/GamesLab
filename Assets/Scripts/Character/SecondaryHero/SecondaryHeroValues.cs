@@ -1,8 +1,6 @@
-using UnityEngine;
-
-namespace CharacterV2.MainHero
+namespace Character.SecondaryHero
 {
-    public static class MainHeroValues
+    public static class SecondaryHeroValues
     {
         public static float MaxHealth = 100;
         public static float MoveSpeed = 2;

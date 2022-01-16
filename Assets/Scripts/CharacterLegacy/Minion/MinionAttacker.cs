@@ -1,7 +1,5 @@
 using System.Collections;
 using Character.Hero;
-using CharacterV2;
-using CharacterV2.MainHero;
 using UnityEngine;
 
 namespace Character.Minion

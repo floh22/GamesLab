@@ -1,6 +1,6 @@
-namespace CharacterV2.SecondaryHero
+namespace Character.MainHero
 {
-    public static class SecondaryHeroValues
+    public static class MainHeroValues
     {
         public static float MaxHealth = 100;
         public static float MoveSpeed = 2;

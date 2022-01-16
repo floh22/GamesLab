@@ -1,6 +1,5 @@
+using Character.MainHero;
 using Character.StatsUI;
-using CharacterV2;
-using CharacterV2.MainHero;
 
 namespace Character.Stats
 {

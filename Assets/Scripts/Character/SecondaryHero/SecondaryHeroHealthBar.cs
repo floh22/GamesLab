@@ -1,4 +1,4 @@
-namespace CharacterV2.SecondaryHero
+namespace Character.SecondaryHero
 {
     public class SecondaryHeroHealthBar: UpdatableHealthBar
     {

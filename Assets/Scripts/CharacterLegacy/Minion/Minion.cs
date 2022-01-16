@@ -1,6 +1,5 @@
 using System.Collections;
 using Character.Stats;
-using CharacterV2;
 using UnityEngine;
 using Utils;
 
