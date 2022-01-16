@@ -60,7 +60,7 @@ namespace NetworkedPlayer
 				playerHealthSlider.value = target.Health;
 			}
 		}
-		
+
 		private void LateUpdate () {
 
 			// Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the player itself.

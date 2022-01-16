@@ -2,17 +2,37 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ExitGames.Client.Photon;
 using GameUnit;
+using Network;
 using Photon.Pun;
+using Photon.Realtime;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace GameManagement
 {
-    public class MasterController : MonoBehaviourPunCallbacks
+    public class MasterController : MonoBehaviourPunCallbacks, IOnEventCallback
     {
+        
+        #region Events
+        
+        public const byte ChangeMinionTargetEventCode = 1;
+
+        public static void SendChangeMinionTargetEvent(GameData.Team team, GameData.Team target)
+        {
+            object[] content = { team, target }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
+            PhotonNetwork.RaiseEvent(ChangeMinionTargetEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+        
+        
+        #endregion
+
+        public static MasterController Instance;
+        
         private Dictionary<GameData.Team, HashSet<Minion>> minions;
         private Dictionary<GameData.Team, GameData.Team> targets;
-        private Dictionary<GameData.Team, BaseBehavior> bases;
 
         private MinionValues minionValues;
         private GameObject minionPrefab;
@@ -28,27 +48,37 @@ namespace GameManagement
         
         public MasterController()
         {
+            if (Instance == null)
+                Instance = this;
+            
             minions = new Dictionary<GameData.Team,  HashSet<Minion>>();
             targets = new Dictionary<GameData.Team, GameData.Team>();
-            bases = new Dictionary<GameData.Team, BaseBehavior>();
+            
         }
 
         private void Awake()
         {
-            GameObject baseHolder = GameObject.Find("Bases");
-
             foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
             {
                 minions.Add(team, new HashSet<Minion>());
                 
                 //Set default target to opposing team
                 targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
-                
-                if(baseHolder != null && !baseHolder.Equals(null))
-                    bases.Add(team, baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>());
             }
             
             Debug.Log($"Init {minions.Count} teams");
+        }
+
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            PhotonNetwork.AddCallbackTarget(this);
+        }
+
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            PhotonNetwork.RemoveCallbackTarget(this);
         }
 
         public void Init(MinionValues minionValues, GameObject minionPrefab, GameObject spawnPointHolder, GameObject minionPaths)
@@ -98,7 +128,7 @@ namespace GameManagement
             }
             if (UIManager.Instance.GameTimer.timeRemainingInSeconds == 0)
             {
-                foreach (var kvp in bases)
+                foreach (var kvp in GameStateController.Instance.Bases)
                 {
                     kvp.Value.Pages--;
                 }
@@ -151,16 +181,35 @@ namespace GameManagement
             }
         }
 
+        public void RemoveMinion(Minion minion)
+        {
+            minions[minion.Team].Remove(minion);
+        }
 
-        [PunRPC]
+        
         void SetMinionTarget(GameData.Team team, GameData.Team target)
         {
 
             targets[team] = target;
             //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
-            foreach (Minion minionBehavior in minions[team])
+            foreach (Minion minionBehavior in minions[team].NotNull())
             {
                 minionBehavior.SetTargetTeam(target);
+            }
+        }
+
+        public void OnEvent(EventData photonEvent)
+        {
+            byte eventCode = photonEvent.Code;
+
+            if (eventCode == ChangeMinionTargetEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+
+                GameData.Team team = (GameData.Team)data[0];
+                GameData.Team target = (GameData.Team)data[1];
+
+                SetMinionTarget(team, target);
             }
         }
     }

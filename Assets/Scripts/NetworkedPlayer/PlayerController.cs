@@ -24,9 +24,8 @@ namespace NetworkedPlayer
         #region IGameUnit
 
         public int NetworkID { get; set; }
-
         //TODO: Probably merge this with LocalPlayerInstance but I didnt want to break anything so I left it as is for now
-        public GameObject AttachtedObjectInstance { get; set; }
+        public GameObject AttachtedObjectInstance { get; set; } 
 
         [field: SerializeField] public GameData.Team Team { get; set; }
 
@@ -63,6 +62,9 @@ namespace NetworkedPlayer
         [field: SerializeField] public int UpgradesAbility2 { get; set; }
 
         #endregion
+        
+        [field: SerializeField] public float DeathTimerMax { get; set; } = 15;
+        [field: SerializeField] public float DeathTimerCurrently { get; set; } = 0;
 
         #region Public Fields
 
@@ -108,6 +110,8 @@ namespace NetworkedPlayer
         [SerializeField] private bool hasPage;
 
         [SerializeField] private GameObject playerUiPrefab;
+
+        private PlayerUI playerUI;
 
         [FormerlySerializedAs("beams")] [SerializeField]
         private GameObject channelPrefab;
@@ -202,7 +206,8 @@ namespace NetworkedPlayer
             if (this.playerUiPrefab != null)
             {
                 GameObject uiGo = Instantiate(this.playerUiPrefab);
-                uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
+                playerUI = uiGo.GetComponent<PlayerUI>();
+                playerUI.SetTarget(this);
             }
             else
             {
@@ -363,25 +368,84 @@ namespace NetworkedPlayer
                 gameUnit.TargetDied(this);
             }
 
-
             //Stop following alive character
             cameraController.OnStopFollowing();
-
+            CharacterController controller = GetComponent<CharacterController>();
+            controller.enabled = false;
+            GameObject playerUiGo = playerUI.gameObject;
+            playerUiGo.SetActive(false);
+            
             //create dead character
-            var position = transform.position;
+            Vector3 position = transform.position;
             GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
-
+            
             //follow dead character
             deadCameraController.OnStartFollowing();
 
+            transform.position = new Vector3(0, -10, 0);
+            
+            GetComponent<Rigidbody>().position = new Vector3(0, -10, 0);
 
-            StartCoroutine(Respawn(() =>
-            {
-                //Destroy dead player
+            StartCoroutine(Respawn(() => {
+                IsAlive = true;
+                
+                
+                //Get Player spawn point
+                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up ;
+                transform.position = position;
+
+                //Reset stats
+                this.Health = this.MaxHealth;
+                
+                controller.enabled = true;
+                playerUiGo.SetActive(true);
+                
+                //Start following player again
                 deadCameraController.OnStopFollowing();
-                Destroy(deadPlayerObject);
-            }));
+                cameraController.OnStartFollowing();
+                
+                //Destroy dead player
+                Destroy(deadPlayerObject);        }));
+            
+        }
+
+
+        public IEnumerator Respawn(Action nextFunc)
+        {
+            //wait out death timer
+            DeathTimerCurrently = DeathTimerMax;
+
+            while (DeathTimerCurrently > 0)
+            {
+                DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
+                yield return new WaitForSeconds(0.1f);
+            }
+            
+            nextFunc.Invoke();
+        }
+
+        private void ProcessInputs()
+        {
+            if (Input.GetButtonDown("Fire1"))
+            {
+                // we don't want to fire when we interact with UI buttons, and since all EventSystem GameObjects are UI, ignore input when over UI
+                if (EventSystem.current.IsPointerOverGameObject())
+                {
+                    return;
+                }
+
+                if (!this.isChanneling)
+                {
+                    this.isChanneling = true;
+                }
+            }
+
+            if (!Input.GetButtonUp("Fire1")) return;
+            if (this.isChanneling)
+            {
+                this.isChanneling = false;
+            }
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -392,13 +456,15 @@ namespace NetworkedPlayer
                 stream.SendNext(this.isChanneling);
                 stream.SendNext(this.Health);
                 stream.SendNext(this.Team);
+                stream.SendNext(this.Level);
             }
             else
             {
                 // Network player, receive data
-                this.isChanneling = (bool)stream.ReceiveNext();
-                this.Health = (float)stream.ReceiveNext();
-                this.Team = (GameData.Team)stream.ReceiveNext();
+                this.isChanneling = (bool) stream.ReceiveNext();
+                this.Health = (float) stream.ReceiveNext();
+                this.Team = (GameData.Team) stream.ReceiveNext();
+                this.Level = (int)stream.ReceiveNext();
             }
         }
 

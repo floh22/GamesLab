@@ -1,5 +1,9 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using GameManagement;
+using GameUnit;
 using JetBrains.Annotations;
 using NetworkedPlayer;
 using Photon.Pun;
@@ -12,7 +16,7 @@ namespace Network
     public class GameStateController : MonoBehaviourPunCallbacks
     {
         
-        static public GameStateController Instance;
+        public static GameStateController Instance;
         
         [CanBeNull] private MasterController controller;
         
@@ -32,6 +36,10 @@ namespace Network
         [SerializeField] private GameObject minionPrefab;
         [SerializeField] private GameObject minionSpawnPointHolder;
         [SerializeField] private GameObject minionPaths;
+
+
+        public Dictionary<GameData.Team, PlayerController> Players;
+        public Dictionary<GameData.Team, BaseBehavior> Bases;
 
 
         private bool hasLeft = false;
@@ -99,6 +107,9 @@ namespace Network
                 return;
             }
 
+            Players = new Dictionary<GameData.Team, PlayerController>();
+            Bases = new Dictionary<GameData.Team, BaseBehavior>();
+
             if (playerPrefab == null) { // #Tip Never assume public properties of Components are filled up properly, always check and inform the developer of it.
 
                 Debug.LogError("<Color=Red><b>Missing</b></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'", this);
@@ -125,11 +136,22 @@ namespace Network
 
             }
             
+            GameObject baseHolder = GameObject.Find("Bases");
+
+            foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
+            {
+                if(baseHolder != null && !baseHolder.Equals(null))
+                    Bases.Add(team, baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>());
+            }
+
+
+            StartCoroutine(InitPlayersThisRound());
+            
             if (!PhotonNetwork.IsMasterClient) return;
             try
             {
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
-                controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
+                controller.Init(minionValues, minionPrefab, minionSpawnPointHolder, minionPaths);
 
                 controller.StartMinionSpawning(10000);
             }
@@ -138,6 +160,19 @@ namespace Network
                 Debug.LogError("Could not create master controller. Server functionality will not work");
             }
 
+        }
+
+
+        private IEnumerator InitPlayersThisRound()
+        {
+            //Wait 2 seconds to init players to let everyone join
+            yield return new WaitForSeconds(2);
+
+            Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
+            {
+                PlayerController pc = playerGo.GetComponent<PlayerController>();
+                return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
+            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         private void Update()

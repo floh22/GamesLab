@@ -56,7 +56,11 @@ namespace NetworkedPlayer
 				return;
 
 			if (!player.IsAlive)
+			{
+				transform.position = new Vector3(0, -10, 0);
 				return;
+			}
+				
 
 
 			// deal with movement
