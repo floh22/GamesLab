@@ -31,6 +31,8 @@ namespace Character.MainHero
             set => transform.position = value;
         }
 
+        public GameObject AttachtedObjectInstance { get; set; }
+
         [field: SerializeField] public float MaxHealth { get; set; }
         [field: SerializeField] public float Health { get; set; }
         [field: SerializeField] public float MoveSpeed { get; set; }
@@ -38,6 +40,8 @@ namespace Character.MainHero
         [field: SerializeField] public float AttackDamage { get; set; }
         [field: SerializeField] public float AttackSpeed { get; set; }
         [field: SerializeField] public float AttackRange { get; set; }
+        public bool IsAlive { get; set; }
+        public bool IsVisible { get; set; }
         [field: SerializeField] public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
 

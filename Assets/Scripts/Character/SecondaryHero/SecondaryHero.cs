@@ -7,7 +7,7 @@ using Utils;
 
 namespace Character.SecondaryHero
 {
-    public class SecondaryHero: MonoBehaviour, IGameUnit
+    public class SecondaryHero: MonoBehaviour
     {
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
