@@ -241,8 +241,6 @@ namespace NetworkedPlayer
 
             if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
             {
-                Debug.Log($"CATP = {CurrentAttackTarget.Position} > P = {Position}");
-                Debug.Log($"Distance = {Vector3.Distance(CurrentAttackTarget.Position, Position)} > Attack Range = {AttackRange}");
                 return;
             }
 
@@ -272,24 +270,19 @@ namespace NetworkedPlayer
 
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
             
-            Debug.Log("OnTriggerEnter: Photon view is mine");
-            
             var target = other.GetComponent<IGameUnit>();
 
             if (target == self)
             {
                 return;
             }
-            Debug.Log("OnTriggerEnter: Target is not self");
 
             if (CurrentAttackTarget != null)
             {
                 return;
             }
-            Debug.Log("OnTriggerEnter: Have no current attack target");
 
             CurrentAttackTarget = target;
-            Debug.Log("OnTriggerEnter: " + target.Type);
         }
 
         public void OnTriggerStay(Collider other)
@@ -335,7 +328,6 @@ namespace NetworkedPlayer
                 CurrentAttackTarget = null;
             }
 
-            Debug.Log("OnTriggerExit: " + target.Type);
         }
 
         #endregion
@@ -506,13 +498,11 @@ namespace NetworkedPlayer
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);
             CurrentAttackTarget.Damage(self, AttackDamage);
-            Debug.Log("Damaged my target");
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();
             yield return new WaitForSeconds(pauseInSeconds / 2);
             isAttacking = false;
-            Debug.Log("Done attacking my target");
         }
         
         private IEnumerator Attacked()
