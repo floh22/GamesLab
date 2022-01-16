@@ -1,20 +1,35 @@
 using System;
+using Character;
 using Character.MainHero;
+using Photon.Pun;
 using UnityEngine;
 
-namespace Scipts
+namespace Controls
 {
-    public class KeyboardMovement : MonoBehaviour
+    public class KeyboardMovement : MonoBehaviourPun
     {
         private const string VerticalAxis = "Vertical";
         private const string HorizontalAxis = "Horizontal";
 
+        private IGameUnit hero;
         // units moved per second holding down move input
         public float moveSpeed = MainHeroValues.MoveSpeed;
+        
+        private void Start()
+        {
+            hero = gameObject.GetComponent<IGameUnit>();
+            moveSpeed = hero.MoveSpeed;
+        }
 
         // Update is called once per frame
         private void Update()
         {
+            // Prevent control is connected to Photon and represent the localPlayer
+            if(photonView.IsMine == false && PhotonNetwork.IsConnected )
+            {
+                return;
+            }
+
             Move(
                 Input.GetAxis(VerticalAxis),
                 Input.GetAxis(HorizontalAxis)

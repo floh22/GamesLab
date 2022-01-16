@@ -1,20 +1,35 @@
 using System;
+using Character;
 using Character.MainHero;
+using Photon.Pun;
 using UnityEngine;
 
 namespace Controls
 {
-    public class JoystickMovement : MonoBehaviour
+    public class JoystickMovement : MonoBehaviourPun
     {
 
+        private IGameUnit hero;
         public Joystick joystick;
 
         // units moved per second holding down move input
         public float moveSpeed = MainHeroValues.MoveSpeed;
 
-        // Update is called once per frame
+        private void Start()
+        {
+            joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
+            hero = gameObject.GetComponent<IGameUnit>();
+            moveSpeed = hero.MoveSpeed;
+        }
+
         private void Update()
         {
+            // Prevent control is connected to Photon and represent the localPlayer
+            if(photonView.IsMine == false && PhotonNetwork.IsConnected )
+            {
+                return;
+            }
+            
             Move(
                 joystick.Vertical,
                 joystick.Horizontal

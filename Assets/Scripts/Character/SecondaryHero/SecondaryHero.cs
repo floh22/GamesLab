@@ -17,7 +17,11 @@ namespace Character.SecondaryHero
         public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }
         [field: SerializeField] public GameUnitType Type { get; } = GameUnitType.Player;
-        public Vector3 Position => transform.position;
+        public Vector3 Position
+        {
+            get => transform.position;
+            set => transform.position = value;
+        }
         [field: SerializeField] public float MaxHealth { get; set; } = SecondaryHeroValues.MaxHealth;
         [field: SerializeField] public float Health { get; set; } = SecondaryHeroValues.MaxHealth;
         [field: SerializeField] public float MoveSpeed { get; set; } = SecondaryHeroValues.MoveSpeed;
@@ -26,13 +30,14 @@ namespace Character.SecondaryHero
         [field: SerializeField] public float AttackSpeed { get; set; } = SecondaryHeroValues.AttackSpeed;
         [field: SerializeField] public float AttackRange { get; set; } = SecondaryHeroValues.AttackRange;
         public IGameUnit CurrentAttackTarget { get; set; }
-        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; } = new();
+        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
         private SecondaryHeroHealthBar healthBar;
         private bool isAttacked;
         private new MeshRenderer renderer;
 
         void Start()
         {
+            CurrentlyAttackedBy = new HashSet<IGameUnit>();
             renderer = GetComponent<MeshRenderer>();
             healthBar = GetComponentInChildren<SecondaryHeroHealthBar>();
             healthBar.SetName(Type.ToString());
@@ -60,7 +65,7 @@ namespace Character.SecondaryHero
         {
             isAttacked = true;
             OnAttacked();
-            yield return new WaitForSeconds(AttackConstants.AttackedAnimationDuration);
+            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
             OnRest();
             isAttacked = false;
         }

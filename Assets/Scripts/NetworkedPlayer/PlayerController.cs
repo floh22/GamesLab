@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
+using Character.MainHero;
 using GameManagement;
 using Network;
 using Photon.Pun;
@@ -10,22 +11,24 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using Utils;
 
 namespace NetworkedPlayer
 {
     public class PlayerController : MonoBehaviourPunCallbacks, IGameUnit
     {
         #region StaticFields
-        
+
         public static GameObject LocalPlayerInstance;
-        
+
         #endregion
-        
+
         [field: SerializeField] public GameObject DamageText;
 
         private CameraController cameraController;
 
         #region IGameUnit
+
         public int NetworkID { get; set; }
         [field: SerializeField] public GameData.Team Team { get; set; }
 
@@ -37,13 +40,14 @@ namespace NetworkedPlayer
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
-        
+
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
-        
+
         #endregion
-        
+
         #region Level
+
         [field: SerializeField] public int Level { get; set; }
         [field: SerializeField] public int Experience { get; set; }
         [field: SerializeField] public int ExperienceToReachNextLevel { get; set; }
@@ -53,18 +57,35 @@ namespace NetworkedPlayer
         [field: SerializeField] public float DamageMultiplierMinion { get; set; }
         [field: SerializeField] public float DamageMultiplierAbility1 { get; set; }
         [field: SerializeField] public float DamageMultiplierAbility2 { get; set; }
-        
+
         #endregion
-        
+
+        #region Private Fields
+
+        private MainHeroHealthBar healthBar;
+        private bool isAttacking;
+        private bool isAttacked;
+        private IGameUnit self;
+
+        #endregion
+
         public void Damage(IGameUnit unit, float damage)
         {
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
+            // TODO Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
-            
+            if (damage <= 0f)
+            {
+                return;
+            }
+
             Health -= damage;
-            
-            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
-                .GetComponent<DamageIndicator>();
+            healthBar.SetHP(Health);
+
+            DamageIndicator indicator = Instantiate(
+                    DamageText,
+                    transform.position,
+                    Quaternion.identity
+                ).GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
         }
 
@@ -126,12 +147,17 @@ namespace NetworkedPlayer
         {
             cameraController = gameObject.GetComponent<CameraController>();
 
+            self = GetComponent<IGameUnit>();
+
             NetworkID = gameObject.GetInstanceID();
 
-
             //TODO temp
-            Health = 100;
-            MaxHealth = 100;
+            MaxHealth = MainHeroValues.MaxHealth;
+            Health = MaxHealth;
+            MoveSpeed = MainHeroValues.MoveSpeed;
+            AttackDamage = MainHeroValues.AttackDamage;
+            AttackSpeed = MainHeroValues.AttackSpeed;
+            AttackRange = MainHeroValues.AttackRange;
             Level = 0;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
@@ -141,6 +167,10 @@ namespace NetworkedPlayer
             DamageMultiplierMinion = 1f;
             DamageMultiplierAbility1 = 1f;
             DamageMultiplierAbility2 = 1f;
+            
+            healthBar = GetComponentInChildren<MainHeroHealthBar>();
+            healthBar.SetName(Type.ToString());
+            healthBar.SetHP(MaxHealth);
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
@@ -205,6 +235,29 @@ namespace NetworkedPlayer
                     Die();
                 }
             }
+            
+            if (CurrentAttackTarget == null || isAttacking)
+            {
+                return;
+            }
+
+            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+            {
+                Debug.Log($"CATP = {CurrentAttackTarget.Position} > P = {Position}");
+                Debug.Log(
+                    $"Distance = {Vector3.Distance(CurrentAttackTarget.Position, Position)} > Attack Range = {AttackRange}");
+                return;
+            }
+
+            switch (CurrentAttackTarget.Type)
+            {
+                case GameUnitType.Player:
+                    StartCoroutine(Attack());
+                    break;
+                case GameUnitType.Minion:
+                    // TODO implement
+                    break;
+            }
 
             if (this.channelPrefab != null && this.isChanneling != this.channelPrefab.activeInHierarchy)
             {
@@ -222,7 +275,6 @@ namespace NetworkedPlayer
 
         public IEnumerator Respawn()
         {
-            
             yield return new WaitForSeconds(10);
             this.Health = this.MaxHealth;
         }
@@ -241,19 +293,40 @@ namespace NetworkedPlayer
                 return;
             }
 
+            Debug.Log("OnTriggerEnter: Photon view is mine");
 
-            // We are only interested in Beams. Beam weapon for now since its a bit simpler than ammo to sync over network
-            // we should be using tags, but im lazy
-            if (!other.name.Contains("Beam"))
+            var target = other.GetComponent<IGameUnit>();
+            if (target == null)
             {
                 return;
             }
 
-            // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
-            this.Health -= 0.1f;
+            Debug.Log("OnTriggerEnter: Target is not null");
+
+            if (target == self) {
+                return;
+            }
+
+            Debug.Log("OnTriggerEnter: Target is not self");
+
+            if (CurrentAttackTarget != null)
+            {
+                return;
+            }
+
+            Debug.Log("OnTriggerEnter: Have no current attack target");
+
+            if (target.Type is not (GameUnitType.Minion or GameUnitType.Player))
+            {
+                return;
+            }
+            Debug.Log("OnTriggerEnter: current attack target is minion or player");
+
+            CurrentAttackTarget = target;
+            Debug.Log("OnTriggerEnter: " + target.Type);
         }
 
-        public void OnTriggerStay(Collider other)
+        /*public void OnTriggerStay(Collider other)
         {
             // we dont do anything if we are not the local player.
             if (!photonView.IsMine)
@@ -270,6 +343,28 @@ namespace NetworkedPlayer
 
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
             this.Health -= 0.1f * Time.deltaTime;
+        }*/
+
+        private void OnTriggerExit(Collider other)
+        {
+            // we dont do anything if we are not the local player.
+            if (!photonView.IsMine)
+            {
+                return;
+            }
+
+            var target = other.GetComponent<IGameUnit>();
+            if (target == null)
+            {
+                return;
+            }
+
+            if (target == CurrentAttackTarget)
+            {
+                CurrentAttackTarget = null;
+            }
+
+            Debug.Log("OnTriggerExit: " + target.Type);
         }
 
         private void CalledOnLevelWasLoaded(int level)
@@ -320,9 +415,9 @@ namespace NetworkedPlayer
             else
             {
                 // Network player, receive data
-                this.isChanneling = (bool) stream.ReceiveNext();
-                this.Health = (float) stream.ReceiveNext();
-                this.Team = (GameData.Team) stream.ReceiveNext();
+                this.isChanneling = (bool)stream.ReceiveNext();
+                this.Health = (float)stream.ReceiveNext();
+                this.Team = (GameData.Team)stream.ReceiveNext();
             }
         }
 
@@ -352,6 +447,29 @@ namespace NetworkedPlayer
                     DamageMultiplierAbility2 += 0.2f;
                     break;
             }
+        }
+
+        private IEnumerator Attack()
+        {
+            isAttacking = true;
+            // TODO add OnAttacking();
+            CurrentAttackTarget.Damage(this, AttackDamage);
+            Debug.Log("Damaged my target");
+            float pauseInSeconds = 1f * AttackSpeed;
+            yield return new WaitForSeconds(pauseInSeconds / 2);
+            // OnRest();
+            yield return new WaitForSeconds(pauseInSeconds / 2);
+            isAttacking = false;
+            Debug.Log("Done attacking my target");
+        }
+
+        private IEnumerator Attacked()
+        {
+            isAttacked = true;
+            // OnAttacked();
+            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
+            // OnRest();
+            isAttacked = false;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Character.Minion
             _isAttacked = true;
             var material = _renderer.material;
             material.color = Color.red;
-            yield return new WaitForSeconds(AttackConstants.AttackedAnimationDuration);
+            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
             material.color = Color.grey;
             _isAttacked = false;
         }
