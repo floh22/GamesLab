@@ -9,6 +9,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public Abilities.Ability currentAbility;
     public float deadZone = 0.2f;
 
+    [SerializeField] private Image _cirularMeterImage;
     private Abilities _abilities;
     private Image _abilityJoystickImage;
     private Joystick _abilityJoystick;
@@ -21,8 +22,9 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
             return;
         _abilities = Abilities.Instance;
-        _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
-        _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
+        _abilityJoystick = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Joystick>();
+        _abilityJoystickImage = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Image>();
+        _cirularMeterImage = GameObject.Find("Circular_Meter_" + ((int) currentAbility - 1)).GetComponent<Image>();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -42,12 +44,12 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             if (InDeadZone() && !_isInDeadZone)
             {
                 _isInDeadZone = true;
-                this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
+                this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 1f);
             }
             else if (!InDeadZone() && _isInDeadZone)
             {
                 _isInDeadZone = false;
-                this.gameObject.GetComponent<Image>().color = new Color(0, 0.1104961f, 0.9716981f, 0.6f);
+                this.gameObject.GetComponent<Image>().color = new Color(0, 0.1104961f, 0.9716981f, 1f);
             }
         }
     }
@@ -64,8 +66,9 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);
             _abilities.ShowAbilityInterface(this.currentAbility);
             _abilityJoystickImage.enabled = true;
+            _cirularMeterImage.enabled = false;
             _abilities.move(this.currentAbility);
-            this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 0.6f);
+            this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 1f);
         }
     }
 
@@ -85,13 +88,15 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         _isInDeadZone = true;
         this.gameObject.GetComponent<Image>().color = new Color(1, 1, 1, 0.6f);
         _abilityJoystickImage.enabled = false;
+        _cirularMeterImage.enabled = true;
     }
 
     public void RefreshReferences()
     {
-        _abilities = Abilities.Instance;
-        _abilityJoystick = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Joystick>();
-        _abilityJoystickImage = GameObject.FindWithTag("Ability" + (int) this.currentAbility).GetComponent<Image>();
+        _abilities = Abilities.Instance; 
+        _abilityJoystick = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Joystick>();
+        _abilityJoystickImage = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Image>();
+        _cirularMeterImage = GameObject.Find("Circular_Meter_" + ((int) currentAbility - 1)).GetComponent<Image>();
     }
 
     private bool InDeadZone()
