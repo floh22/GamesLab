@@ -273,6 +273,11 @@ namespace NetworkedPlayer
                 return;
             }
 
+            if (target?.Team == self?.Team)
+            {
+                return;
+            }
+
             if (CurrentAttackTarget != null)
             {
                 return;
