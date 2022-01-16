@@ -1,9 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace Character.StatsUI
+namespace CharacterV2
 {
     public class UpdatableHealthBar: MonoBehaviour
     {

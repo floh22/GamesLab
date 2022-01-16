@@ -1,4 +1,6 @@
 using System;
+using CharacterV2;
+using CharacterV2.MainHero;
 using UnityEngine;
 
 namespace Scipts
@@ -9,7 +11,7 @@ namespace Scipts
         private const string HorizontalAxis = "Horizontal";
 
         // units moved per second holding down move input
-        public float moveSpeed = 2;
+        public float moveSpeed = MainHeroValues.MoveSpeed;
 
         // Update is called once per frame
         private void Update()

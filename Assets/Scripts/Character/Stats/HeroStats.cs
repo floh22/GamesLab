@@ -1,4 +1,6 @@
 using Character.StatsUI;
+using CharacterV2;
+using CharacterV2.MainHero;
 
 namespace Character.Stats
 {
@@ -12,11 +14,11 @@ namespace Character.Stats
         public float rotationSpeed;
         public float attackRange;
         public float movementSpeed;
-        private HeroHealthBar _healthBar;
+        private MainHeroHealthBar _healthBar;
 
         void Start()
         {
-            _healthBar = GetComponentInChildren<HeroHealthBar>();
+            _healthBar = GetComponentInChildren<MainHeroHealthBar>();
             _healthBar.SetName(name);
             _healthBar.SetHP(health);
         }

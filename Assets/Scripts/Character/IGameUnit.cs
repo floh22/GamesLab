@@ -10,6 +10,7 @@ namespace Character
     {
         None,
         Structure,
+        MainPlayer,
         Player,
         Minion,
         Monster
@@ -21,7 +22,7 @@ namespace Character
         
         public GameUnitType Type { get; }
         
-        public Vector3 Position { get; set; }
+        public Vector3 Position { get; }
     
         public float MaxHealth { get; set; }
         public float Health { get; set; }

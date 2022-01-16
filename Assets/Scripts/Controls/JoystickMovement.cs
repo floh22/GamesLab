@@ -1,4 +1,6 @@
 using System;
+using CharacterV2;
+using CharacterV2.MainHero;
 using UnityEngine;
 
 namespace Controls
@@ -9,7 +11,7 @@ namespace Controls
         public Joystick joystick;
 
         // units moved per second holding down move input
-        public float moveSpeed = 2;
+        public float moveSpeed = MainHeroValues.MoveSpeed;
 
         // Update is called once per frame
         private void Update()

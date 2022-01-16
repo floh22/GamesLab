@@ -1,11 +1,13 @@
 using System.Collections;
+using CharacterV2;
+using CharacterV2.MainHero;
 using UnityEngine;
 
 namespace Character.Hero
 {
     public abstract class IHeroAttacker : MonoBehaviour
     {
-        private Targeter _targeter;
+        private MainHeroTargeter _mainHeroTargeter;
         private IHero _hero;
         private bool _isAttacking;
         private Targetable _self;
@@ -14,27 +16,27 @@ namespace Character.Hero
         {
             _hero = GetComponentInParent<IHero>();
             _self = GetComponentInParent<Targetable>();
-            _targeter = GetComponentInChildren<Targeter>();
+            _mainHeroTargeter = GetComponentInChildren<MainHeroTargeter>();
         }
 
         void Update()
         {
-            if (!_hero.IsReady())
+            /*if (!_hero.IsReady())
             {
                 return;
             }
 
-            if (!_targeter.HasTarget() || _isAttacking)
+            if (!_mainHeroTargeter.HasTarget() || _isAttacking)
             {
                 return;
             }
 
-            if (_targeter.DistanceToTarget(transform.position) > _hero.AttackRange())
+            if (_mainHeroTargeter.DistanceToTarget(transform.position) > _hero.AttackRange())
             {
                 return;
             }
 
-            var target = _targeter.GetTarget();
+            var target = _mainHeroTargeter.GetTarget();
             switch (target.type)
             {
                 case Targetable.EnemyType.Hero:
@@ -43,7 +45,7 @@ namespace Character.Hero
                 case Targetable.EnemyType.Minion:
                     StartCoroutine(Attack(target));
                     break;
-            }
+            }*/
         }
 
         private IEnumerator Attack(Targetable targetable)

@@ -1,21 +1,20 @@
-using Scipts;
 using UnityEngine;
 
-namespace Character
+namespace Character.Hero
 {
-    public class Targeter : MonoBehaviour
+    public class MainHeroTargeter : MonoBehaviour
     {
 
         // TODO You should be able change the target by clicking on another hero
-        public Targetable firstPriorityTarget;
-        public Targetable target;
+        public IGameUnit firstPriorityTarget;
+        public IGameUnit target;
         public float targetRange;
         private BoxCollider _boxCollider;
-        private Targetable _self;
+        private IGameUnit _self;
 
         public void SetTargetRange(float targetRange)
         {
-            _self = GetComponentInParent<Targetable>();
+            _self = GetComponentInParent<IGameUnit>();
             this.targetRange = targetRange;
             _boxCollider.size = new Vector3(targetRange, 1, targetRange);
         }
@@ -25,7 +24,7 @@ namespace Character
             return target != null;
         }
 
-        public Targetable GetTarget()
+        public IGameUnit GetTarget()
         {
             return target;
         }
@@ -43,7 +42,7 @@ namespace Character
         
         private void OnTriggerEnter(Collider other)
         {
-            var targetable = other.GetComponent<Targetable>();
+            var targetable = other.GetComponent<IGameUnit>();
             if (targetable == null)
             {
                 return;
@@ -60,12 +59,12 @@ namespace Character
             }
 
             target = targetable;
-            Debug.Log("OnTriggerEnter: " + targetable.type);
+            Debug.Log("OnTriggerEnter: " + targetable.Type);
         }
 
         private void OnTriggerExit(Collider other)
         {
-            var targetable = other.GetComponent<Targetable>();
+            var targetable = other.GetComponent<IGameUnit>();
             if (targetable == null)
             {
                 return;
@@ -81,7 +80,7 @@ namespace Character
                 target = null;
             }
 
-            Debug.Log("OnTriggerExit: " + targetable.type);
+            Debug.Log("OnTriggerExit: " + targetable.Type);
         }
     }
 }

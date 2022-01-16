@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Character
+namespace CharacterV2
 {
     public abstract class ITargetable : MonoBehaviour
     {
