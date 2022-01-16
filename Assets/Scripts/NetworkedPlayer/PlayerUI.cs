@@ -41,6 +41,7 @@ namespace NetworkedPlayer
 			canvasGroup = this.GetComponent<CanvasGroup>();
 			
 			this.transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
+			
 		}
 		
 		private void Update()
@@ -53,7 +54,9 @@ namespace NetworkedPlayer
 
 
 			// Reflect the Player Health
-			if (playerHealthSlider != null) {
+			if (playerHealthSlider != null)
+			{
+				playerHealthSlider.maxValue = target.MaxHealth;
 				playerHealthSlider.value = target.Health;
 			}
 		}
@@ -73,6 +76,7 @@ namespace NetworkedPlayer
 			targetPosition.y += characterControllerHeight;
 				
 			this.transform.position = Camera.main!.WorldToScreenPoint (targetPosition) + screenOffset;
+			
 
 		}
 

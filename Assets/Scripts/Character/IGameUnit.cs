@@ -33,6 +33,10 @@ namespace Character
     
         public float AttackRange { get; set; }
         
+        public bool IsAlive { get; set; }
+        
+        public bool IsVisible { get; set; }
+        
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
 

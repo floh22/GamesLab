@@ -154,6 +154,11 @@ namespace Network
             Application.Quit();
         }
 
+        public Vector3 GetPlayerSpawnPoint(GameData.Team team)
+        {
+            return spawnPointHolder.transform.Find(team.ToString()).transform.position;
+        }
+
         
     }
 }

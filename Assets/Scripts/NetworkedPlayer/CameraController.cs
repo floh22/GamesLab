@@ -5,6 +5,8 @@ namespace NetworkedPlayer
 	public class CameraController : MonoBehaviour
 	{
 		#region Private Fields
+		
+		public static object ActiveInstance;
 
 		[Tooltip("The distance in the local x-z plane to the target")]
 		[SerializeField]
@@ -77,7 +79,10 @@ namespace NetworkedPlayer
 		/// Use this when you don't know at the time of editing what to follow, typically instances managed by the photon network.
 		/// </summary>
 		public void OnStartFollowing()
-		{	      
+		{
+			if (ActiveInstance != null)
+				return;
+			ActiveInstance = this;
 			cameraTransform = Camera.main.transform;
 			isFollowing = true;
 			// we don't smooth anything, we go straight to the right camera shot
@@ -87,6 +92,7 @@ namespace NetworkedPlayer
 		public void OnStopFollowing()
 		{
 			isFollowing = false;
+			ActiveInstance = null;
 		}
 		
 		

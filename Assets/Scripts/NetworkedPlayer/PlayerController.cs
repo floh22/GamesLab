@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
+using ExitGames.Client.Photon.StructWrapping;
 using GameManagement;
 using Network;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
@@ -20,7 +22,8 @@ namespace NetworkedPlayer
         
         #endregion
         
-        [field: SerializeField] public GameObject DamageText;
+        [SerializeField] public GameObject DamageText;
+        [FormerlySerializedAs("DeadPlayer")] [SerializeField] public GameObject DeadPlayerPrefab;
 
         private CameraController cameraController;
 
@@ -54,7 +57,9 @@ namespace NetworkedPlayer
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
-        
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
+
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
         
@@ -199,7 +204,7 @@ namespace NetworkedPlayer
             {
                 this.ProcessInputs();
 
-                if (this.Health <= 0f)
+                if (this.Health <= 0f && IsAlive)
                 {
                     Die();
                 }
@@ -265,16 +270,46 @@ namespace NetworkedPlayer
         
         public void Die()
         {
+            IsAlive = false;
+            //Stop following alive character
             cameraController.OnStopFollowing();
-            StartCoroutine(Respawn());
+            
+            //create dead character
+            var position = transform.position;
+            GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
+            DeadPlayerController deadPlayerController = deadPlayerObject.GetComponent<DeadPlayerController>();
+            CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
+            
+            //follow dead character
+            deadCameraController.OnStartFollowing();
+            
+            
+            StartCoroutine(Respawn(() => { 
+                //Respawn at position
+                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
+                Terrain activeTerrain = Terrain.activeTerrain;
+                position = new Vector3( position.x, activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) + activeTerrain.transform.position.y, position.y);
+                transform.position = position;
+            
+                //Reset stats
+                this.Health = this.MaxHealth;
+                IsAlive = true;
+            
+                //Switch cameras
+                deadCameraController.OnStopFollowing();
+                cameraController.OnStartFollowing();
+            
+                Destroy(deadPlayerObject);
+        }));
+            
         }
 
 
-        public IEnumerator Respawn()
+        public IEnumerator Respawn(Action nextFunc)
         {
-            
+            //wait out death timer
             yield return new WaitForSeconds(10);
-            this.Health = this.MaxHealth;
+            nextFunc.Invoke();
         }
 
         private void ProcessInputs()

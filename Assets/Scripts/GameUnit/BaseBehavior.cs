@@ -28,6 +28,8 @@ namespace GameUnit
         public float AttackDamage { get; set; } = 0;
         public float AttackSpeed { get; set; } = 0;
         public float AttackRange { get; set; } = 0;
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
         public IGameUnit CurrentAttackTarget { get; set; } = null;
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
 

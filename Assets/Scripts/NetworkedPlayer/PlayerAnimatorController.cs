@@ -11,6 +11,8 @@ namespace NetworkedPlayer
 		[SerializeField]
 		private Joystick joystick;
 
+		private PlayerController player;
+
 		Animator animator;
 		private static readonly int Speed = Animator.StringToHash("Speed");
 
@@ -44,6 +46,17 @@ namespace NetworkedPlayer
 			{
 				return;
 			}
+
+			if (player == null || player.Equals(null))
+			{
+				player = PlayerController.LocalPlayerController;
+			}
+
+			if (player == null)
+				return;
+
+			if (!player.IsAlive)
+				return;
 
 
 			// deal with movement

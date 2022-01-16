@@ -51,6 +51,9 @@ namespace GameUnit
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
+
         #endregion
         
         #region Animator
