@@ -2,13 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
-using Character.MainHero;
-using ExitGames.Client.Photon.StructWrapping;
 using GameManagement;
 using Network;
 using Photon.Pun;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using Utils;
@@ -160,6 +157,7 @@ namespace NetworkedPlayer
         /// </summary>
         public void Start()
         {
+            AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
             NetworkID = gameObject.GetInstanceID();
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
@@ -184,8 +182,6 @@ namespace NetworkedPlayer
             UpgradesAbility1 = 0;
             UpgradesAbility2 = 0;
 
-            CurrentlyAttackedBy = new HashSet<IGameUnit>();
-            
             self = gameObject.GetComponent<IGameUnit>();
 
             // Debug.Log($"{photonView.Owner.NickName} is on team: {Team.ToString()}");
@@ -250,7 +246,7 @@ namespace NetworkedPlayer
                     StartCoroutine(Attack());
                     break;
                 case GameUnitType.Minion:
-                    // TODO implement
+                    StartCoroutine(Attack());
                     break;
             }
 

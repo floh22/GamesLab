@@ -34,7 +34,7 @@ namespace Character
     
         public float AttackRange { get; set; }
 
-        [field: SerializeField] public static int DistanceForExperienceOnDeath = 5;
+        [field: SerializeField] public static int DistanceForExperienceOnDeath = 10;
         
         public bool IsAlive { get; set; }
         

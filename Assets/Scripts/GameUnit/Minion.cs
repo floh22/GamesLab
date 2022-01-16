@@ -544,7 +544,19 @@ namespace GameUnit
             {
                 if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
                 {
-                    gameUnit.AttachtedObjectInstance.GetComponent<PlayerController>().AddExperienceBySource(true);
+                    var instance = gameUnit.AttachtedObjectInstance;
+                    if (instance == null)
+                    {
+                        Debug.LogError("Attached object instance is missing when Minion dies");
+                        continue;
+                    }
+                    var controller = instance.GetComponent<PlayerController>();
+                    if (controller == null)
+                    {
+                        Debug.LogError("Player Controller is missing when Minion dies");
+                        continue;
+                    }
+                    controller.AddExperienceBySource(true);
                 }
                 gameUnit.TargetDied(this);
             }
