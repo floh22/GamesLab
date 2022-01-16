@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using Utils;
 
 namespace NetworkedPlayer
 {
@@ -228,6 +229,28 @@ namespace NetworkedPlayer
                 {
                     Die();
                 }
+            }
+            
+            if (CurrentAttackTarget == null || isAttacking)
+            {
+                return;
+            }
+
+            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+            {
+                Debug.Log($"CATP = {CurrentAttackTarget.Position} > P = {Position}");
+                Debug.Log($"Distance = {Vector3.Distance(CurrentAttackTarget.Position, Position)} > Attack Range = {AttackRange}");
+                return;
+            }
+
+            switch (CurrentAttackTarget.Type)
+            {
+                case GameUnitType.Player:
+                    StartCoroutine(Attack());
+                    break;
+                case GameUnitType.Minion:
+                    // TODO implement
+                    break;
             }
 
             if (this.channelPrefab != null && this.isChanneling != this.channelPrefab.activeInHierarchy)
@@ -473,6 +496,30 @@ namespace NetworkedPlayer
         #endregion
 
         #region Coroutines
+        
+        private IEnumerator Attack()
+        {
+            isAttacking = true;
+            // OnAttacking();
+            CurrentAttackTarget.AddAttacker(self);
+            CurrentAttackTarget.Damage(self, AttackDamage);
+            Debug.Log("Damaged my target");
+            float pauseInSeconds = 1f * AttackSpeed;
+            yield return new WaitForSeconds(pauseInSeconds / 2);
+            // OnRest();
+            yield return new WaitForSeconds(pauseInSeconds / 2);
+            isAttacking = false;
+            Debug.Log("Done attacking my target");
+        }
+        
+        private IEnumerator Attacked()
+        {
+            isAttacked = true;
+            // OnAttacked();
+            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
+            // OnRest();
+            isAttacked = false;
+        }
 
         public IEnumerator Respawn(Action nextFunc)
         {
