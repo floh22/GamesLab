@@ -82,6 +82,20 @@ namespace GameManagement
         // Update is called once per frame
         void Update()
         {
+            if (UIManager.Instance == null)
+            {
+                return;
+            }
+
+            if (UIManager.Instance.GameTimer == null)
+            {
+                return;
+            }
+
+            if (UIManager.Instance.GameTimer.timeRemainingComponent == null)
+            {
+                return;
+            }
             if (UIManager.Instance.GameTimer.timeRemainingInSeconds == 0)
             {
                 foreach (var kvp in bases)

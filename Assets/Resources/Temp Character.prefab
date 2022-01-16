@@ -407,6 +407,7 @@ GameObject:
   - component: {fileID: 5484970}
   - component: {fileID: 8224698813998025405}
   - component: {fileID: 11413802}
+  - component: {fileID: 5721465396549464312}
   m_Layer: 7
   m_Name: Temp Character
   m_TagString: Player
@@ -461,7 +462,7 @@ CharacterController:
   m_GameObject: {fileID: 100030}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Height: 1.8
   m_Radius: 0.5
@@ -509,11 +510,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82419a8898e38d444b6237db7738eacb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
-    type: 3}
-  DeadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
-    type: 3}
-  hasPage: 0
   <Team>k__BackingField: 0
   <Health>k__BackingField: 0
   <Level>k__BackingField: 0
@@ -525,6 +521,11 @@ MonoBehaviour:
   <UpgradesMinion>k__BackingField: 0
   <UpgradesAbility1>k__BackingField: 0
   <UpgradesAbility2>k__BackingField: 0
+  DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
+    type: 3}
+  DeadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
+    type: 3}
+  hasPage: 0
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   channelPrefab: {fileID: 170262}
 --- !u!114 &11400008
@@ -633,6 +634,19 @@ MonoBehaviour:
     LayerIndex: 0
   - SynchronizeType: 0
     LayerIndex: 1
+--- !u!65 &5721465396549464312
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100030}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2, y: 2.5, z: 2}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &100032
 GameObject:
   m_ObjectHideFlags: 0

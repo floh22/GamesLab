@@ -164,10 +164,13 @@ namespace NetworkedPlayer
             NetworkID = gameObject.GetInstanceID();
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
-
             //TODO temp
-            Health = 100;
-            MaxHealth = 100;
+            MaxHealth = MainHeroValues.MaxHealth;
+            Health = MaxHealth;
+            MoveSpeed = MainHeroValues.MoveSpeed;
+            AttackDamage = MainHeroValues.AttackDamage;
+            AttackSpeed = MainHeroValues.AttackSpeed;
+            AttackRange = MainHeroValues.AttackRange;
             Level = 1;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
