@@ -12,6 +12,9 @@ namespace GameUnit
         public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }
         
+        public GameObject AttachtedObjectInstance { get; set; }
+
+        
         public Vector3 Position
         {
             get => transform.position;

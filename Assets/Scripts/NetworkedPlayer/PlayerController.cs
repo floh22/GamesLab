@@ -16,17 +16,22 @@ namespace NetworkedPlayer
     public class PlayerController : MonoBehaviourPunCallbacks, IGameUnit
     {
         #region StaticFields
-        
+
         public static GameObject LocalPlayerInstance;
-        
+
         #endregion
-        
+
+
         [field: SerializeField] public GameObject DamageText;
 
         private CameraController cameraController;
 
         #region IGameUnit
+
         public int NetworkID { get; set; }
+        //TODO: Probably merge this with LocalPlayerInstance but I didnt want to break anything so I left it as is for now
+        public GameObject AttachtedObjectInstance { get; set; } 
+
         [field: SerializeField] public GameData.Team Team { get; set; }
 
         public GameUnitType Type => GameUnitType.Player;
@@ -37,13 +42,14 @@ namespace NetworkedPlayer
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
-        
+
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
-        
+
         #endregion
-        
+
         #region Level
+
         [field: SerializeField] public int Level { get; set; }
         [field: SerializeField] public int Experience { get; set; }
         [field: SerializeField] public int ExperienceToReachNextLevel { get; set; }
@@ -53,16 +59,20 @@ namespace NetworkedPlayer
         [field: SerializeField] public float DamageMultiplierMinion { get; set; }
         [field: SerializeField] public float DamageMultiplierAbility1 { get; set; }
         [field: SerializeField] public float DamageMultiplierAbility2 { get; set; }
-        
+
+        [field: SerializeField] public int UpgradesMinion { get; set; }
+        [field: SerializeField] public int UpgradesAbility1 { get; set; }
+        [field: SerializeField] public int UpgradesAbility2 { get; set; }
+
         #endregion
-        
+
         public void Damage(IGameUnit unit, float damage)
         {
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
-            
+
             Health -= damage;
-            
+
             DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
@@ -132,7 +142,7 @@ namespace NetworkedPlayer
             //TODO temp
             Health = 100;
             MaxHealth = 100;
-            Level = 0;
+            Level = 1;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
             ExperienceBetweenLevels = 100;
@@ -141,6 +151,9 @@ namespace NetworkedPlayer
             DamageMultiplierMinion = 1f;
             DamageMultiplierAbility1 = 1f;
             DamageMultiplierAbility2 = 1f;
+            UpgradesMinion = 0;
+            UpgradesAbility1 = 0;
+            UpgradesAbility2 = 0;
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
@@ -215,6 +228,16 @@ namespace NetworkedPlayer
 
         public void Die()
         {
+            foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
+            {
+                if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
+                {
+                    gameUnit.AttachtedObjectInstance.GetComponent<PlayerController>().AddExperienceBySource(false);
+                }
+
+                gameUnit.TargetDied(this);
+            }
+
             cameraController.OnStopFollowing();
             StartCoroutine(Respawn());
         }
@@ -222,7 +245,6 @@ namespace NetworkedPlayer
 
         public IEnumerator Respawn()
         {
-            
             yield return new WaitForSeconds(10);
             this.Health = this.MaxHealth;
         }
@@ -338,18 +360,38 @@ namespace NetworkedPlayer
             }
         }
 
+        public void AddExperienceBySource(bool byMinion)
+        {
+            AddExperience(byMinion ? GainedExperienceByMinion : GainedExperienceByPlayer);
+        }
+
         public void UpdateMultiplier(int whatToUpdate)
         {
             switch (whatToUpdate)
             {
                 case 1:
-                    DamageMultiplierMinion += 0.1f;
+                    if (UpgradesMinion < 4)
+                    {
+                        DamageMultiplierMinion += 0.1f;
+                        UpgradesMinion++;
+                    }
+
                     break;
                 case 2:
-                    DamageMultiplierAbility1 += 0.2f;
+                    if (UpgradesAbility1 < 4)
+                    {
+                        DamageMultiplierAbility1 += 0.2f;
+                        UpgradesAbility1++;
+                    }
+
                     break;
                 case 3:
-                    DamageMultiplierAbility2 += 0.2f;
+                    if (UpgradesAbility2 < 4)
+                    {
+                        DamageMultiplierAbility2 += 0.2f;
+                        UpgradesAbility2++;
+                    }
+
                     break;
             }
         }

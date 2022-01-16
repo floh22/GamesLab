@@ -22,6 +22,7 @@ namespace Character
         public GameUnitType Type { get; }
         
         public Vector3 Position { get; set; }
+        public GameObject AttachtedObjectInstance { get; set; }
     
         public float MaxHealth { get; set; }
         public float Health { get; set; }
@@ -32,6 +33,8 @@ namespace Character
         public float AttackSpeed { get; set; }
     
         public float AttackRange { get; set; }
+
+        [field: SerializeField] public static int DistanceForExperienceOnDeath = 5;
         
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
@@ -58,7 +61,5 @@ namespace Character
         public void Damage(IGameUnit unit, float damage);
 
         public bool IsDestroyed();
-        
-        
     }
 }
