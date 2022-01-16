@@ -12,42 +12,92 @@ namespace GameManagement
 {
     public class UIManager : MonoBehaviour
     {
+        public static UIManager Instance;
+        
+        #region Standard
+
+        [CanBeNull] private MasterController controller;
+        private PlayerController _playerController;
+
+        #endregion
+
+        #region BasicUI
+        
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
         public Image MinionSwitchButtonImage;
 
-        private PlayerController _playerController;
         private GameObject PagesContainer;
         private Image[] PagesImages;
 
         [SerializeField] private GameObject AutoAttackOnImage;
         [SerializeField] private GameObject AutoAttackOffImage;
 
-        private TextMeshProUGUI LevelUpLabel;
+        #endregion
+
+        #region Level
+
+        [SerializeField] private TextMeshProUGUI LevelLabel;
+        [SerializeField] private TextMeshProUGUI LevelUpLabel;
         private GameObject[] levelUpButtons;
+        private Image Circular_Meter_1;
+        private Image Circular_Meter_2;
+        private Image Circular_Meter_3;
+        
+        #endregion
+        
+        
+        public Timer GameTimer;
 
-        [CanBeNull] private MasterController controller;
+        #region Scoreboard
 
-        [SerializeField] private MinionValues minionValues;
-        [SerializeField] private GameObject minionPrefab;
-        [SerializeField] private GameObject spawnPointHolder;
-        [SerializeField] private GameObject minionPaths;
+        [SerializeField] private TextMeshProUGUI Player_Pages_Label_1;
+        [SerializeField] private TextMeshProUGUI Player_Pages_Label_2;
+        [SerializeField] private TextMeshProUGUI Player_Pages_Label_3;
+        [SerializeField] private TextMeshProUGUI Player_Level_Label_1;
+        [SerializeField] private TextMeshProUGUI Player_Level_Label_2;
+        [SerializeField] private TextMeshProUGUI Player_Level_Label_3;
 
+        #endregion
 
         void Start()
         {
-            //PauseMenuUI = GameObject.Find("PauseMenu_UI");
-            if(PauseMenuUI != null && !PauseMenuUI.Equals(null))
+            
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+
+            PauseMenuUI = GameObject.Find("PauseMenu_UI");
+            if (PauseMenuUI != null && !PauseMenuUI.Equals(null))
                 PauseMenuUI.SetActive(false);
             IngameUI = GameObject.Find("Ingame_UI");
+
             MinionSwitchButtonImage = GameObject.Find("Player_Color_Sprite").GetComponent<Image>();
-            //AutoAttackOnImage = GameObject.Find("ON_Sprite");
-            //AutoAttackOffImage = GameObject.Find("OFF_Sprite");
+
+            AutoAttackOnImage = GameObject.Find("ON_Sprite");
+            AutoAttackOffImage = GameObject.Find("OFF_Sprite");
+
+            LevelLabel = GameObject.Find("Level_Text").GetComponent<TextMeshProUGUI>();
             LevelUpLabel = GameObject.Find("LevelUp_Label").GetComponent<TextMeshProUGUI>();
             LevelUpLabel.enabled = false;
             levelUpButtons = GameObject.FindGameObjectsWithTag("LevelUpButton");
+            Circular_Meter_1 = GameObject.Find("Circular_Meter_1").GetComponent<Image>();
+            Circular_Meter_2 = GameObject.Find("Circular_Meter_2").GetComponent<Image>();
+            Circular_Meter_3 = GameObject.Find("Circular_Meter_3").GetComponent<Image>();
+
+            Player_Pages_Label_1 = GameObject.Find("Player_Pages_Number_1").GetComponent<TextMeshProUGUI>();
+            Player_Pages_Label_2 = GameObject.Find("Player_Pages_Number_2").GetComponent<TextMeshProUGUI>();
+            Player_Pages_Label_3 = GameObject.Find("Player_Pages_Number_3").GetComponent<TextMeshProUGUI>();
+
+            Player_Level_Label_1 = GameObject.Find("Player_Level_1").GetComponent<TextMeshProUGUI>();
+            Player_Level_Label_2 = GameObject.Find("Player_Level_2").GetComponent<TextMeshProUGUI>();
+            Player_Level_Label_3 = GameObject.Find("Player_Level_3").GetComponent<TextMeshProUGUI>();
+
+            UpdateCircularMeters();
             SetVisibilityOfLevelUpButtons(false);
 
+            _playerController = PlayerController.LocalPlayerController;
 
             SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
 
@@ -57,25 +107,15 @@ namespace GameManagement
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SetInitPages();
-            
-
-            if (!PhotonNetwork.IsMasterClient) return;
-            try
-            {
-                controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
-                controller.Init(minionValues, minionPrefab, spawnPointHolder, minionPaths);
-
-                controller.StartMinionSpawning(2000);
-            }
-            catch
-            {
-                Debug.LogError("Could not create master controller. Server functionality will not work");
-            }
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (_playerController != null)
+            {
+                LevelLabel.text = _playerController.Level.ToString();
+            }
         }
 
         public void TogglePauseMenu()
@@ -124,8 +164,23 @@ namespace GameManagement
         {
             SetAutoAttack(!GameData.Instance.AutoAttack);
         }
+        
+        public void SetPages(int count)
+        {
+            while (count != GameData.Instance.NumberOfPages)
+            {
+                if (count > GameData.Instance.NumberOfPages)
+                {
+                    IncreasePages();
+                }
+                else
+                {
+                    DecreasePages();
+                }
+            }
+        }
 
-        public void increasePages()
+        public void IncreasePages()
         {
             if (GameData.Instance.NumberOfPages < 10)
             {
@@ -134,7 +189,7 @@ namespace GameManagement
             }
         }
 
-        public void decreasePages()
+        public void DecreasePages()
         {
             if (GameData.Instance.NumberOfPages - 1 >= 0)
             {
@@ -179,16 +234,53 @@ namespace GameManagement
         {
             LevelUpLabel.enabled = true;
             SetVisibilityOfLevelUpButtons(true);
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(2);
             LevelUpLabel.enabled = false;
         }
 
         private void SetVisibilityOfLevelUpButtons(bool visibility)
         {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerController;
+                
+                if (_playerController == null || _playerController.Equals(null))
+                    return;
+            }
+
             foreach (GameObject button in levelUpButtons)
             {
-                button.SetActive(visibility);
+                //Don't judge this code it works and I didn't have the time to make it better :P
+                if (button.name == "Uprade_Button_1" && _playerController.UpgradesAbility1 < 4 || !visibility)
+                {
+                    button.SetActive(visibility);
+                }
+
+                if (button.name == "Uprade_Button_2" && _playerController.UpgradesAbility2 < 4 || !visibility)
+                {
+                    button.SetActive(visibility);
+                }
+
+                if (button.name == "Uprade_Button_3" && _playerController.UpgradesMinion < 4 || !visibility)
+                {
+                    button.SetActive(visibility);
+                }
             }
+        }
+
+        private void UpdateCircularMeters()
+        {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerController;
+
+                if (_playerController == null || _playerController.Equals(null))
+                    return;
+            }
+
+            Circular_Meter_1.fillAmount = _playerController.UpgradesAbility1 * 0.25f;
+            Circular_Meter_2.fillAmount = _playerController.UpgradesAbility2 * 0.25f;
+            Circular_Meter_3.fillAmount = _playerController.UpgradesMinion * 0.25f;
         }
 
         public void UpdateButtonClicked(int which)
@@ -197,8 +289,9 @@ namespace GameManagement
             {
                 _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
             }
-            
+
             _playerController.UpdateMultiplier(which);
+            UpdateCircularMeters();
             SetVisibilityOfLevelUpButtons(false);
         }
 
@@ -206,9 +299,12 @@ namespace GameManagement
         {
             if (_playerController == null || _playerController.Equals(null))
             {
-                _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+                _playerController = PlayerController.LocalPlayerController;
+                
+                if (_playerController == null || _playerController.Equals(null))
+                    return;
             }
-            
+
             _playerController.AddExperience(experience);
         }
     }

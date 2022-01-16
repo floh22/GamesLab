@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using Character;
 using GameManagement;
+using Network;
+using NetworkedPlayer;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
@@ -11,6 +14,9 @@ namespace GameUnit
     {
         public int NetworkID { get; set; }
         public GameData.Team Team { get; set; }
+        
+        public GameObject AttachtedObjectInstance { get; set; }
+
         
         public Vector3 Position
         {
@@ -25,10 +31,21 @@ namespace GameUnit
         public float AttackDamage { get; set; } = 0;
         public float AttackSpeed { get; set; } = 0;
         public float AttackRange { get; set; } = 0;
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
         public IGameUnit CurrentAttackTarget { get; set; } = null;
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
-        
-        public int Pages { get; set; }
+
+        private int pages;
+        public int Pages
+        {
+            get => pages;
+            set
+            {
+                pages = value;
+                OnPageUpdate();
+            } 
+        }
         
         // Start is called before the first frame update
         void Start()
@@ -53,6 +70,21 @@ namespace GameUnit
         void Update()
         {
         
+        }
+
+
+        void OnPageUpdate()
+        {
+            if (Team != PersistentData.Team)
+                return;
+            
+            if (Pages <= 0 )
+            {
+                if(PlayerController.LocalPlayerInstance != null && !PlayerController.LocalPlayerInstance.Equals(null))
+                    PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnLoseGame();
+            }
+            
+            UIManager.Instance.SetPages(Pages);
         }
         
         public bool IsDestroyed()

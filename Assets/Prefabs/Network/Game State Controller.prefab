@@ -45,3 +45,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 100030, guid: d07d4dad02303cd4eb88e65df7a9526a, type: 3}
+  abilityPrefab: {fileID: 8131443997823057609, guid: d4322ee10f9384b4b93d6c3575dec820,
+    type: 3}
+  spawnPointHolder: {fileID: 0}
+  minionValues: {fileID: 11400000, guid: 6de01e0c5f1d94042bb13b6492bc8e25, type: 2}
+  minionPrefab: {fileID: 7368097050080284918, guid: 7bba6e589838c08478a5ed3f869c137f,
+    type: 3}
+  minionSpawnPointHolder: {fileID: 0}
+  minionPaths: {fileID: 0}

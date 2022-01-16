@@ -2,16 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
-using Character.MainHero;
+using ExitGames.Client.Photon.StructWrapping;
 using GameManagement;
 using Network;
 using Photon.Pun;
-using Photon.Pun.Demo.PunBasics;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using Utils;
 
 namespace NetworkedPlayer
 {
@@ -20,16 +18,40 @@ namespace NetworkedPlayer
         #region StaticFields
 
         public static GameObject LocalPlayerInstance;
-
+        public static PlayerController LocalPlayerController;
+        
         #endregion
-
-        [field: SerializeField] public GameObject DamageText;
+        
+        [SerializeField] public GameObject DamageText;
+        [FormerlySerializedAs("DeadPlayer")] [SerializeField] public GameObject DeadPlayerPrefab;
+        
 
         private CameraController cameraController;
+
+        [SerializeField] private bool hasPage;
+        
+        public bool HasPage
+        {
+            get => hasPage;
+            set
+            {
+                if (hasPage != value)
+                {
+                    if(value)
+                        PickUpPage();
+                    else
+                        DropPage();
+                }
+                hasPage = value;
+            }
+        }
 
         #region IGameUnit
 
         public int NetworkID { get; set; }
+        //TODO: Probably merge this with LocalPlayerInstance but I didnt want to break anything so I left it as is for now
+        public GameObject AttachtedObjectInstance { get; set; } 
+
         [field: SerializeField] public GameData.Team Team { get; set; }
 
         public GameUnitType Type => GameUnitType.Player;
@@ -40,6 +62,8 @@ namespace NetworkedPlayer
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
 
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
@@ -58,34 +82,21 @@ namespace NetworkedPlayer
         [field: SerializeField] public float DamageMultiplierAbility1 { get; set; }
         [field: SerializeField] public float DamageMultiplierAbility2 { get; set; }
 
-        #endregion
-
-        #region Private Fields
-
-        private MainHeroHealthBar healthBar;
-        private bool isAttacking;
-        private bool isAttacked;
-        private IGameUnit self;
+        [field: SerializeField] public int UpgradesMinion { get; set; }
+        [field: SerializeField] public int UpgradesAbility1 { get; set; }
+        [field: SerializeField] public int UpgradesAbility2 { get; set; }
 
         #endregion
 
         public void Damage(IGameUnit unit, float damage)
         {
-            // TODO Uncomment next line sometime
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
-            if (damage <= 0f)
-            {
-                return;
-            }
 
             Health -= damage;
-            healthBar.SetHP(Health);
 
-            DamageIndicator indicator = Instantiate(
-                    DamageText,
-                    transform.position,
-                    Quaternion.identity
-                ).GetComponent<DamageIndicator>();
+            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+                .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
         }
 
@@ -132,6 +143,7 @@ namespace NetworkedPlayer
             if (photonView.IsMine)
             {
                 LocalPlayerInstance = gameObject;
+                LocalPlayerController = this;
                 Team = PersistentData.Team ?? throw new NullReferenceException();
                 this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
             }
@@ -146,19 +158,14 @@ namespace NetworkedPlayer
         public void Start()
         {
             cameraController = gameObject.GetComponent<CameraController>();
-
-            self = GetComponent<IGameUnit>();
-
             NetworkID = gameObject.GetInstanceID();
+            CurrentlyAttackedBy = new HashSet<IGameUnit>();
+
 
             //TODO temp
-            MaxHealth = MainHeroValues.MaxHealth;
-            Health = MaxHealth;
-            MoveSpeed = MainHeroValues.MoveSpeed;
-            AttackDamage = MainHeroValues.AttackDamage;
-            AttackSpeed = MainHeroValues.AttackSpeed;
-            AttackRange = MainHeroValues.AttackRange;
-            Level = 0;
+            Health = 100;
+            MaxHealth = 100;
+            Level = 1;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
             ExperienceBetweenLevels = 100;
@@ -167,10 +174,9 @@ namespace NetworkedPlayer
             DamageMultiplierMinion = 1f;
             DamageMultiplierAbility1 = 1f;
             DamageMultiplierAbility2 = 1f;
-            
-            healthBar = GetComponentInChildren<MainHeroHealthBar>();
-            healthBar.SetName(Type.ToString());
-            healthBar.SetHP(MaxHealth);
+            UpgradesMinion = 0;
+            UpgradesAbility1 = 0;
+            UpgradesAbility2 = 0;
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
@@ -185,7 +191,7 @@ namespace NetworkedPlayer
             }
             else
             {
-                Debug.LogError("<Color=Red><b>Missing</b></Color> CameraWork Component on player Prefab.", this);
+                Debug.LogError("<Color=Red><b>Missing</b></Color> CameraController Component on player Prefab.", this);
             }
 
             // Create the UI
@@ -198,22 +204,6 @@ namespace NetworkedPlayer
             {
                 Debug.LogWarning("<Color=Red><b>Missing</b></Color> PlayerUiPrefab reference on player Prefab.", this);
             }
-
-#if UNITY_5_4_OR_NEWER
-            // Unity 5.4 has a new scene management. register a method to call CalledOnLevelWasLoaded.
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
-#endif
-        }
-
-
-        public override void OnDisable()
-        {
-            // Always call the base to remove callbacks
-            base.OnDisable();
-
-#if UNITY_5_4_OR_NEWER
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
-#endif
         }
 
 
@@ -230,33 +220,10 @@ namespace NetworkedPlayer
             {
                 this.ProcessInputs();
 
-                if (this.Health <= 0f)
+                if (this.Health <= 0f && IsAlive)
                 {
                     Die();
                 }
-            }
-            
-            if (CurrentAttackTarget == null || isAttacking)
-            {
-                return;
-            }
-
-            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
-            {
-                Debug.Log($"CATP = {CurrentAttackTarget.Position} > P = {Position}");
-                Debug.Log(
-                    $"Distance = {Vector3.Distance(CurrentAttackTarget.Position, Position)} > Attack Range = {AttackRange}");
-                return;
-            }
-
-            switch (CurrentAttackTarget.Type)
-            {
-                case GameUnitType.Player:
-                    StartCoroutine(Attack());
-                    break;
-                case GameUnitType.Minion:
-                    // TODO implement
-                    break;
             }
 
             if (this.channelPrefab != null && this.isChanneling != this.channelPrefab.activeInHierarchy)
@@ -266,25 +233,12 @@ namespace NetworkedPlayer
         }
 
 
-        public void Die()
-        {
-            cameraController.OnStopFollowing();
-            StartCoroutine(Respawn());
-        }
-
-
         public IEnumerator Respawn()
         {
             yield return new WaitForSeconds(10);
             this.Health = this.MaxHealth;
         }
-
-        void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,
-            UnityEngine.SceneManagement.LoadSceneMode loadingMode)
-        {
-            this.CalledOnLevelWasLoaded(scene.buildIndex);
-        }
-
+        
         public void OnTriggerEnter(Collider other)
         {
             // we dont do anything if we are not the local player.
@@ -293,40 +247,19 @@ namespace NetworkedPlayer
                 return;
             }
 
-            Debug.Log("OnTriggerEnter: Photon view is mine");
 
-            var target = other.GetComponent<IGameUnit>();
-            if (target == null)
+            // We are only interested in Beams. Beam weapon for now since its a bit simpler than ammo to sync over network
+            // we should be using tags, but im lazy
+            if (!other.name.Contains("Beam"))
             {
                 return;
             }
 
-            Debug.Log("OnTriggerEnter: Target is not null");
-
-            if (target == self) {
-                return;
-            }
-
-            Debug.Log("OnTriggerEnter: Target is not self");
-
-            if (CurrentAttackTarget != null)
-            {
-                return;
-            }
-
-            Debug.Log("OnTriggerEnter: Have no current attack target");
-
-            if (target.Type is not (GameUnitType.Minion or GameUnitType.Player))
-            {
-                return;
-            }
-            Debug.Log("OnTriggerEnter: current attack target is minion or player");
-
-            CurrentAttackTarget = target;
-            Debug.Log("OnTriggerEnter: " + target.Type);
+            // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
+            this.Health -= 0.1f;
         }
 
-        /*public void OnTriggerStay(Collider other)
+        public void OnTriggerStay(Collider other)
         {
             // we dont do anything if we are not the local player.
             if (!photonView.IsMine)
@@ -343,42 +276,76 @@ namespace NetworkedPlayer
 
             // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
             this.Health -= 0.1f * Time.deltaTime;
-        }*/
-
-        private void OnTriggerExit(Collider other)
-        {
-            // we dont do anything if we are not the local player.
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-
-            var target = other.GetComponent<IGameUnit>();
-            if (target == null)
-            {
-                return;
-            }
-
-            if (target == CurrentAttackTarget)
-            {
-                CurrentAttackTarget = null;
-            }
-
-            Debug.Log("OnTriggerExit: " + target.Type);
         }
-
-        private void CalledOnLevelWasLoaded(int level)
-        {
-            if (!Physics.Raycast(transform.position, -Vector3.up, 5f))
-            {
-                transform.position = new Vector3(0f, 5f, 0f);
-            }
-
-            GameObject uiGo = Instantiate(this.playerUiPrefab);
-            uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
-        }
+        
 
         #endregion
+
+        private void PickUpPage()
+        {
+            
+        }
+
+        private void DropPage()
+        {
+            
+        }
+        
+        public void Die()
+        {
+            IsAlive = false;
+            
+            //remove attackers
+            foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
+            {
+                if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
+                {
+                    gameUnit.AttachtedObjectInstance.GetComponent<PlayerController>().AddExperienceBySource(false);
+                }
+
+                gameUnit.TargetDied(this);
+            }
+            
+            
+            //Stop following alive character
+            cameraController.OnStopFollowing();
+            
+            //create dead character
+            var position = transform.position;
+            GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
+            CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
+            
+            //follow dead character
+            deadCameraController.OnStartFollowing();
+            
+            
+            StartCoroutine(Respawn(() => {
+                //Destroy dead player
+                deadCameraController.OnStopFollowing();
+                Destroy(deadPlayerObject);
+        }));
+            
+        }
+
+
+        public IEnumerator Respawn(Action nextFunc)
+        {
+            //wait out death timer
+            yield return new WaitForSeconds(10);
+            nextFunc.Invoke();
+            
+            var position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
+            Terrain activeTerrain = Terrain.activeTerrain;
+            position = new Vector3( position.x, activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) + activeTerrain.transform.position.y, position.y);
+            transform.position = position;
+            
+            
+            //Reset stats
+            this.Health = this.MaxHealth;
+            IsAlive = true;
+            
+            cameraController.OnStartFollowing();
+        }
 
         private void ProcessInputs()
         {
@@ -415,9 +382,9 @@ namespace NetworkedPlayer
             else
             {
                 // Network player, receive data
-                this.isChanneling = (bool)stream.ReceiveNext();
-                this.Health = (float)stream.ReceiveNext();
-                this.Team = (GameData.Team)stream.ReceiveNext();
+                this.isChanneling = (bool) stream.ReceiveNext();
+                this.Health = (float) stream.ReceiveNext();
+                this.Team = (GameData.Team) stream.ReceiveNext();
             }
         }
 
@@ -433,43 +400,45 @@ namespace NetworkedPlayer
             }
         }
 
+        public void AddExperienceBySource(bool byMinion)
+        {
+            AddExperience(byMinion ? GainedExperienceByMinion : GainedExperienceByPlayer);
+        }
+
         public void UpdateMultiplier(int whatToUpdate)
         {
             switch (whatToUpdate)
             {
                 case 1:
-                    DamageMultiplierMinion += 0.1f;
+                    if (UpgradesMinion < 4)
+                    {
+                        DamageMultiplierMinion += 0.1f;
+                        UpgradesMinion++;
+                    }
+
                     break;
                 case 2:
-                    DamageMultiplierAbility1 += 0.2f;
+                    if (UpgradesAbility1 < 4)
+                    {
+                        DamageMultiplierAbility1 += 0.2f;
+                        UpgradesAbility1++;
+                    }
+
                     break;
                 case 3:
-                    DamageMultiplierAbility2 += 0.2f;
+                    if (UpgradesAbility2 < 4)
+                    {
+                        DamageMultiplierAbility2 += 0.2f;
+                        UpgradesAbility2++;
+                    }
+
                     break;
             }
         }
 
-        private IEnumerator Attack()
+        public void OnLoseGame()
         {
-            isAttacking = true;
-            // TODO add OnAttacking();
-            CurrentAttackTarget.Damage(this, AttackDamage);
-            Debug.Log("Damaged my target");
-            float pauseInSeconds = 1f * AttackSpeed;
-            yield return new WaitForSeconds(pauseInSeconds / 2);
-            // OnRest();
-            yield return new WaitForSeconds(pauseInSeconds / 2);
-            isAttacking = false;
-            Debug.Log("Done attacking my target");
-        }
-
-        private IEnumerator Attacked()
-        {
-            isAttacked = true;
-            // OnAttacked();
-            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
-            // OnRest();
-            isAttacked = false;
+            
         }
     }
 }

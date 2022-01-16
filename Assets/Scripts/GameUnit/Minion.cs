@@ -13,6 +13,7 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using Utils;
 using Network;
+using NetworkedPlayer;
 
 namespace GameUnit
 {
@@ -39,6 +40,8 @@ namespace GameUnit
         public int NetworkID { get; set; }
         [field: SerializeField] public GameData.Team Team { get; set; }
         public GameUnitType Type => GameUnitType.Minion;
+        public GameObject AttachtedObjectInstance { get; set; }
+
         public Vector3 Position
         {
             get => transform.position.XZPlane();
@@ -51,6 +54,9 @@ namespace GameUnit
         public float AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
+        public bool IsAlive { get; set; } = true;
+        public bool IsVisible { get; set; }
+
         #endregion
         
         #region Animator
@@ -536,6 +542,10 @@ namespace GameUnit
         {
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
             {
+                if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
+                {
+                    gameUnit.AttachtedObjectInstance.GetComponent<PlayerController>().AddExperienceBySource(true);
+                }
                 gameUnit.TargetDied(this);
             }
             
