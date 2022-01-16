@@ -23,7 +23,7 @@ public class DeadPlayerController : MonoBehaviour
     {
         float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
         float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1);
-        Vector3 move = new Vector3(h, 0, v);
-        controller.Move(move * Time.deltaTime * (h*h+v*v));
+        Vector3 move = new Vector3(h, 0, v).normalized;
+        controller.Move(move * Time.deltaTime * (h*h+v*v) * 5);
     }
 }

@@ -313,28 +313,15 @@ namespace NetworkedPlayer
             //create dead character
             var position = transform.position;
             GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
-            DeadPlayerController deadPlayerController = deadPlayerObject.GetComponent<DeadPlayerController>();
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
             
             //follow dead character
             deadCameraController.OnStartFollowing();
             
             
-            StartCoroutine(Respawn(() => { 
-                //Respawn at position
-                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
-                Terrain activeTerrain = Terrain.activeTerrain;
-                position = new Vector3( position.x, activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) + activeTerrain.transform.position.y, position.y);
-                transform.position = position;
-            
-                //Reset stats
-                this.Health = this.MaxHealth;
-                IsAlive = true;
-            
-                //Switch cameras
+            StartCoroutine(Respawn(() => {
+                //Destroy dead player
                 deadCameraController.OnStopFollowing();
-                cameraController.OnStartFollowing();
-            
                 Destroy(deadPlayerObject);
         }));
             
@@ -346,6 +333,18 @@ namespace NetworkedPlayer
             //wait out death timer
             yield return new WaitForSeconds(10);
             nextFunc.Invoke();
+            
+            var position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
+            Terrain activeTerrain = Terrain.activeTerrain;
+            position = new Vector3( position.x, activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) + activeTerrain.transform.position.y, position.y);
+            transform.position = position;
+            
+            
+            //Reset stats
+            this.Health = this.MaxHealth;
+            IsAlive = true;
+            
+            cameraController.OnStartFollowing();
         }
 
         private void ProcessInputs()
