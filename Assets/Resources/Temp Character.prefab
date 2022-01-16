@@ -521,6 +521,8 @@ MonoBehaviour:
   <UpgradesMinion>k__BackingField: 0
   <UpgradesAbility1>k__BackingField: 0
   <UpgradesAbility2>k__BackingField: 0
+  <DeathTimerMax>k__BackingField: 15
+  <DeathTimerCurrently>k__BackingField: 0
   DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
     type: 3}
   DeadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,

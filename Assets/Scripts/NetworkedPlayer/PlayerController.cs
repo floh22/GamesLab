@@ -410,44 +410,6 @@ namespace NetworkedPlayer
             
         }
 
-
-        public IEnumerator Respawn(Action nextFunc)
-        {
-            //wait out death timer
-            DeathTimerCurrently = DeathTimerMax;
-
-            while (DeathTimerCurrently > 0)
-            {
-                DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
-                yield return new WaitForSeconds(0.1f);
-            }
-            
-            nextFunc.Invoke();
-        }
-
-        private void ProcessInputs()
-        {
-            if (Input.GetButtonDown("Fire1"))
-            {
-                // we don't want to fire when we interact with UI buttons, and since all EventSystem GameObjects are UI, ignore input when over UI
-                if (EventSystem.current.IsPointerOverGameObject())
-                {
-                    return;
-                }
-
-                if (!this.isChanneling)
-                {
-                    this.isChanneling = true;
-                }
-            }
-
-            if (!Input.GetButtonUp("Fire1")) return;
-            if (this.isChanneling)
-            {
-                this.isChanneling = false;
-            }
-        }
-
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
             if (stream.IsWriting)
@@ -580,26 +542,19 @@ namespace NetworkedPlayer
             // OnRest();
             isAttacked = false;
         }
-
+        
         public IEnumerator Respawn(Action nextFunc)
         {
             //wait out death timer
-            yield return new WaitForSeconds(10);
+            DeathTimerCurrently = DeathTimerMax;
+
+            while (DeathTimerCurrently > 0)
+            {
+                DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
+                yield return new WaitForSeconds(0.1f);
+            }
+            
             nextFunc.Invoke();
-
-            var position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
-            Terrain activeTerrain = Terrain.activeTerrain;
-            position = new Vector3(position.x,
-                activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) +
-                activeTerrain.transform.position.y, position.y);
-            transform.position = position;
-
-
-            //Reset stats
-            this.Health = this.MaxHealth;
-            IsAlive = true;
-
-            cameraController.OnStartFollowing();
         }
 
         #endregion
