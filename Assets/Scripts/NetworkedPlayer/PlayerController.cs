@@ -38,6 +38,7 @@ namespace NetworkedPlayer
         public float AttackSpeed { get; set; }
         public float AttackRange { get; set; }
         public bool IsAlive { get; set; } = true;
+        public bool IsChannelingObjective => isChannelingObjective;
         public bool IsVisible { get; set; }
 
         public IGameUnit CurrentAttackTarget { get; set; }
@@ -117,6 +118,7 @@ namespace NetworkedPlayer
         private GameObject channelPrefab;
 
         private bool isChanneling;
+        private bool isChannelingObjective;
         
         private IGameUnit self;
         
@@ -167,12 +169,12 @@ namespace NetworkedPlayer
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             //TODO temp
-            MaxHealth = MainHeroValues.MaxHealth;
+            MaxHealth = PlayerValues.MaxHealth;
             Health = MaxHealth;
-            MoveSpeed = MainHeroValues.MoveSpeed;
-            AttackDamage = MainHeroValues.AttackDamage;
-            AttackSpeed = MainHeroValues.AttackSpeed;
-            AttackRange = MainHeroValues.AttackRange;
+            MoveSpeed = PlayerValues.MoveSpeed;
+            AttackDamage = PlayerValues.AttackDamage;
+            AttackSpeed = PlayerValues.AttackSpeed;
+            AttackRange = PlayerValues.AttackRange;
             Level = 1;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
@@ -248,10 +250,10 @@ namespace NetworkedPlayer
             switch (CurrentAttackTarget.Type)
             {
                 case GameUnitType.Player:
-                    StartCoroutine(Attack());
+                    StartCoroutine(Attack(AttackDamage));
                     break;
                 case GameUnitType.Minion:
-                    StartCoroutine(Attack());
+                    StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
                     break;
             }
 
@@ -329,7 +331,7 @@ namespace NetworkedPlayer
                 return;
             }
 
-            if (target == CurrentAttackTarget)
+            if (target == CurrentAttackTarget || CurrentAttackTarget == null)
             {
                 CurrentAttackTarget = null;
             }
@@ -410,15 +412,28 @@ namespace NetworkedPlayer
             
         }
 
+        public void OnChannelObjective()
+        {
+            isChannelingObjective = true;
+        }
+
+        public void OnReceiveSlendermanBuff()
+        {
+            isChannelingObjective = false;
+            Debug.Log($"Player from team {Team} received the buff");
+        }
+
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
             if (stream.IsWriting)
             {
+                // TODO sync damage as well
                 // Local player, send data
                 stream.SendNext(this.isChanneling);
                 stream.SendNext(this.Health);
                 stream.SendNext(this.Team);
                 stream.SendNext(this.Level);
+                stream.SendNext(this.isChannelingObjective);
             }
             else
             {
@@ -427,6 +442,7 @@ namespace NetworkedPlayer
                 this.Health = (float) stream.ReceiveNext();
                 this.Team = (GameData.Team) stream.ReceiveNext();
                 this.Level = (int)stream.ReceiveNext();
+                this.isChannelingObjective = (bool)stream.ReceiveNext();
             }
         }
 
@@ -521,12 +537,16 @@ namespace NetworkedPlayer
 
         #region Coroutines
         
-        private IEnumerator Attack()
+        private IEnumerator Attack(float damage)
         {
+            if (isChannelingObjective)
+            {
+                yield break;
+            }
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);
-            CurrentAttackTarget.Damage(self, AttackDamage);
+            CurrentAttackTarget.Damage(self, damage);
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();
