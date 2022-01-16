@@ -88,6 +88,10 @@ namespace NetworkedPlayer
 
         #endregion
 
+
+        [field: SerializeField] public float DeathTimerMax { get; set; } = 15;
+        [field: SerializeField] public float DeathTimerCurrently { get; set; } = 0;
+
         public void Damage(IGameUnit unit, float damage)
         {
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
@@ -114,6 +118,8 @@ namespace NetworkedPlayer
         #region Private Fields
 
         [SerializeField] private GameObject playerUiPrefab;
+
+        private PlayerUI playerUI;
 
         [FormerlySerializedAs("beams")] [SerializeField]
         private GameObject channelPrefab;
@@ -198,7 +204,8 @@ namespace NetworkedPlayer
             if (this.playerUiPrefab != null)
             {
                 GameObject uiGo = Instantiate(this.playerUiPrefab);
-                uiGo.SendMessage("SetTarget", this, SendMessageOptions.RequireReceiver);
+                playerUI = uiGo.GetComponent<PlayerUI>();
+                playerUI.SetTarget(this);
             }
             else
             {
@@ -309,19 +316,43 @@ namespace NetworkedPlayer
             
             //Stop following alive character
             cameraController.OnStopFollowing();
+            CharacterController controller = GetComponent<CharacterController>();
+            controller.enabled = false;
+            GameObject playerUiGo = playerUI.gameObject;
+            playerUiGo.SetActive(false);
             
             //create dead character
-            var position = transform.position;
+            Vector3 position = transform.position;
             GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
             
             //follow dead character
             deadCameraController.OnStartFollowing();
+
+            transform.position = new Vector3(0, -10, 0);
+            
+            GetComponent<Rigidbody>().position = new Vector3(0, -10, 0);
             
             
             StartCoroutine(Respawn(() => {
-                //Destroy dead player
+                IsAlive = true;
+                
+                
+                //Get Player spawn point
+                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up ;
+                transform.position = position;
+
+                //Reset stats
+                this.Health = this.MaxHealth;
+                
+                controller.enabled = true;
+                playerUiGo.SetActive(true);
+                
+                //Start following player again
                 deadCameraController.OnStopFollowing();
+                cameraController.OnStartFollowing();
+                
+                //Destroy dead player
                 Destroy(deadPlayerObject);
         }));
             
@@ -331,20 +362,15 @@ namespace NetworkedPlayer
         public IEnumerator Respawn(Action nextFunc)
         {
             //wait out death timer
-            yield return new WaitForSeconds(10);
+            DeathTimerCurrently = DeathTimerMax;
+
+            while (DeathTimerCurrently > 0)
+            {
+                DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
+                yield return new WaitForSeconds(0.1f);
+            }
+            
             nextFunc.Invoke();
-            
-            var position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
-            Terrain activeTerrain = Terrain.activeTerrain;
-            position = new Vector3( position.x, activeTerrain.SampleHeight(GameStateController.Instance.GetPlayerSpawnPoint(Team)) + activeTerrain.transform.position.y, position.y);
-            transform.position = position;
-            
-            
-            //Reset stats
-            this.Health = this.MaxHealth;
-            IsAlive = true;
-            
-            cameraController.OnStartFollowing();
         }
 
         private void ProcessInputs()
@@ -378,6 +404,7 @@ namespace NetworkedPlayer
                 stream.SendNext(this.isChanneling);
                 stream.SendNext(this.Health);
                 stream.SendNext(this.Team);
+                stream.SendNext(this.Level);
             }
             else
             {
@@ -385,6 +412,7 @@ namespace NetworkedPlayer
                 this.isChanneling = (bool) stream.ReceiveNext();
                 this.Health = (float) stream.ReceiveNext();
                 this.Team = (GameData.Team) stream.ReceiveNext();
+                this.Level = (int)stream.ReceiveNext();
             }
         }
 

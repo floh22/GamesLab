@@ -548,6 +548,11 @@ namespace GameUnit
                 }
                 gameUnit.TargetDied(this);
             }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                MasterController.Instance.RemoveMinion(this);
+            }
             
             PhotonNetwork.Destroy(gameObject);
         }
