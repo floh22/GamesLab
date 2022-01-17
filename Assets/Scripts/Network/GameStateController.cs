@@ -24,6 +24,7 @@ namespace Network
         
         public const byte ChangeMinionTargetEventCode = 1;
         public const byte DamageGameUnitEventCode = 3;
+        public const byte ChannelSlenderManEventCode = 4;
 
         public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
         {

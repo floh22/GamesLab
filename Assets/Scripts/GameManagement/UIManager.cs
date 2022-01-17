@@ -121,7 +121,7 @@ namespace GameManagement
             {
                 LevelLabel.text = _playerController.Level.ToString();
                 HealthbarImage.fillAmount = _playerController.Health / 100;
-                SetPages();
+                //SetPages();
             }
 
             if (IsSlenderCooldown)
@@ -208,6 +208,7 @@ namespace GameManagement
 
         public void SetPages(int count)
         {
+            Debug.Log("Updating page UI");
             for (int i = 9; i >= count; i--)
             {
                 PagesImages[i].enabled = false;
@@ -333,7 +334,7 @@ namespace GameManagement
                 if (_playerController == null || _playerController.Equals(null))
                     return;
             }
-            _playerController.ActivateSlenderBuff();
+            _playerController.OnReceiveSlendermanBuff();
         }
 
         void UpdateScoreboard()

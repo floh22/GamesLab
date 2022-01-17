@@ -464,6 +464,7 @@ namespace NetworkedPlayer
         public void OnReceiveSlendermanBuff()
         {
             isChannelingObjective = false;
+            StartCoroutine(SlenderBuffCoroutine());
             Debug.Log($"Player from team {Team} received the buff");
         }
 
@@ -540,11 +541,6 @@ namespace NetworkedPlayer
             }
         }
 
-        public void ActivateSlenderBuff()
-        {
-            StartCoroutine(SlenderBuffCoroutine());
-        }
-
         private float ReturnMultiplierWithRespectToSlenderBuff(float mulitplier)
         {
             return HasSlenderBuff ? mulitplier * 2 : mulitplier;
@@ -553,7 +549,6 @@ namespace NetworkedPlayer
         IEnumerator SlenderBuffCoroutine()
         {
             Vector3 position = transform.position;
-            position.y = 0.1f;
             HasSlenderBuff = true;
             GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
             effect.transform.SetParent(gameObject.transform);
@@ -582,6 +577,7 @@ namespace NetworkedPlayer
 
         public void DropPage()
         {
+            hasPage = false;
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
 
