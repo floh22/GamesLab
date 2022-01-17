@@ -449,9 +449,24 @@ namespace NetworkedPlayer
             
         }
 
-        public void OnChannelObjective(Vector3 objectivePosition, IChannelable objective)
+        public void OnChannelObjective(Vector3 objectivePosition, int networkId)
         {
             isChannelingObjective = true;
+        }
+
+        public void OnChannelingFinishedAndReceiveSlendermanBuff(int networkId)
+        {
+            OnReceiveSlendermanBuff();
+        }
+        
+        public void OnChannelingFinishedAndPickUpPage(int networkId)
+        {
+            PickUpPage();
+        }
+        
+        public void OnChannelingFinishedAndDropPage(int networkId)
+        {
+            DropPage();
         }
         
         public void InterruptChanneling()

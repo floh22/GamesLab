@@ -15,7 +15,7 @@ using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
-    public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit, IChannelable
+    public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit
     {
         public int NetworkID { get; set; }
         public int OwnerID => GameStateController.Instance.Players[Team].OwnerID;
@@ -127,7 +127,7 @@ namespace GameUnit
                 return;
             }
 
-            channeler.OnChannelObjective(transform.position, this);
+            channeler.OnChannelObjective(transform.position, NetworkID);
             StartCoroutine(Channel(channeler));
         }
         
@@ -229,20 +229,20 @@ namespace GameUnit
                 if (Pages > 0)
                 {
                     --Pages;
-                    channeler.PickUpPage();
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
                 }
             }
             else // Same team
             {
                 if (channeler.HasPage) // Return page back
                 {
-                    channeler.DropPage();
                     ++Pages;
+                    channeler.OnChannelingFinishedAndDropPage(NetworkID);
                 }
                 else if (Pages > 0) // Take a page
                 {
                     --Pages;
-                    channeler.PickUpPage();
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
                 }
             }
 
