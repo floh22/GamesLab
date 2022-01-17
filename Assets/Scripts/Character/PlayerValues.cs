@@ -9,6 +9,10 @@ namespace Character
         public static float AttackDamageMinionsMultiplier = 10;
         public static float AttackSpeed = 1;
         public static float AttackRange = 2;
-        public static float ChannelRange = 5;
+        public static float SlendermanChannelRange = 5;
+        public static float BaseChannelRange = 10;
+        public static int SecondsToChannelPage = 5;
+        public static int SecondsToChannelSlenderman = 5;
+        public static int PagesAmount = 5;
     }
 }

@@ -411,6 +411,16 @@ namespace NetworkedPlayer
         {
             isChannelingObjective = true;
         }
+        
+        public void InterruptChanneling()
+        {
+            if (!isChannelingObjective)
+            {
+                return;
+            }
+            isChannelingObjective = false;
+            Debug.Log($"Player's channeling from team {Team} has been interrupted");
+        }
 
         public void OnReceiveSlendermanBuff()
         {
@@ -494,6 +504,25 @@ namespace NetworkedPlayer
         public void OnLoseGame()
         {
         }
+        
+        public void PickUpPage()
+        {
+            hasPage = true;
+            isChannelingObjective = false;
+            Debug.Log($"Page has been picked up by player of {Team} team");
+        }
+        
+        public void SacrifisePage()
+        {
+            hasPage = false;
+            isChannelingObjective = false;
+            Debug.Log($"Page has been sacrifised by player of {Team} team");
+        }
+
+        public void DropPage()
+        {
+            Debug.Log($"Page has been dropped by player of {Team} team");
+        }
 
         #endregion
 
@@ -520,14 +549,6 @@ namespace NetworkedPlayer
             {
                 this.isChanneling = false;
             }
-        }
-
-        private void PickUpPage()
-        {
-        }
-
-        private void DropPage()
-        {
         }
 
         #endregion

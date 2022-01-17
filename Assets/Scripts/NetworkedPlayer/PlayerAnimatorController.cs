@@ -4,90 +4,93 @@ using UnityEngine;
 
 namespace NetworkedPlayer
 {
-	public class PlayerAnimatorController : MonoBehaviourPun
-	{
-		#region Private Fields
-		
-		[SerializeField]
-		private Joystick joystick;
+    public class PlayerAnimatorController : MonoBehaviourPun
+    {
+        #region Private Fields
 
-		private PlayerController player;
+        [SerializeField] private Joystick joystick;
 
-		Animator animator;
-		private static readonly int Speed = Animator.StringToHash("Speed");
+        private PlayerController player;
 
-		#endregion
-    
-		#region MonoBehaviour CallBacks
-    
-		/// <summary>
-		/// MonoBehaviour method called on GameObject by Unity during initialization phase.
-		/// </summary>
-		private void Start () 
-		{
-			animator = GetComponent<Animator>();
-			joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
-		}
-    	        
-		/// <summary>
-		/// MonoBehaviour method called on GameObject by Unity on every frame.
-		/// </summary>
-		private void Update () 
-		{
-    
-			// Prevent control is connected to Photon and represent the localPlayer
-			if( photonView.IsMine == false && PhotonNetwork.IsConnected )
-			{
-				return;
-			}
-    
-			// failSafe is missing Animator component on GameObject
-			if (!animator)
-			{
-				return;
-			}
+        Animator animator;
+        private static readonly int Speed = Animator.StringToHash("Speed");
 
-			if (player == null || player.Equals(null))
-			{
-				player = PlayerController.LocalPlayerController;
-			}
+        #endregion
 
-			if (player == null)
-				return;
+        #region MonoBehaviour CallBacks
 
-			if (!player.IsAlive)
-			{
-				transform.position = new Vector3(0, -10, 0);
-				return;
-			}
-				
+        /// <summary>
+        /// MonoBehaviour method called on GameObject by Unity during initialization phase.
+        /// </summary>
+        private void Start()
+        {
+            animator = GetComponent<Animator>();
+            joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>();
+        }
 
+        /// <summary>
+        /// MonoBehaviour method called on GameObject by Unity on every frame.
+        /// </summary>
+        private void Update()
+        {
+            // Prevent control is connected to Photon and represent the localPlayer
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+            {
+                return;
+            }
 
-			// deal with movement
-			float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
-			float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1);
+            // failSafe is missing Animator component on GameObject
+            if (!animator)
+            {
+                return;
+            }
 
-			// prevent negative Speed.
-			
-			/*
-			if( v < 0 )
-			{
-				v = 0;
-			}
-			*/
-    
-			// set the Animator Parameters
-			animator.SetFloat( Speed, h*h+v*v );
-			//animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime * 10);
+            if (player == null || player.Equals(null))
+            {
+                player = PlayerController.LocalPlayerController;
+            }
 
-			if (h == 0 && v == 0)
-				return;
-			
-			float heading = Mathf.Atan2(h,v);
-			transform.rotation = Quaternion.Euler(0, heading*Mathf.Rad2Deg, 0);
+            if (player == null)
+                return;
 
-		}
-    
-		#endregion
-	}
+            if (!player.IsAlive)
+            {
+                transform.position = new Vector3(0, -10, 0);
+                return;
+            }
+
+            // deal with movement
+            float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
+            float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1);
+
+            // prevent negative Speed.
+
+            /*
+            if( v < 0 )
+            {
+                v = 0;
+            }
+            */
+
+            // set the Animator Parameters
+            animator.SetFloat(Speed, h * h + v * v);
+            //animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime * 10);
+
+            if (h == 0 && v == 0)
+            {
+                return;
+            }
+
+            if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0
+                || joystick.Horizontal != 0 || joystick.Vertical != 0)
+            {
+                player.InterruptChanneling();
+            }
+
+            float heading = Mathf.Atan2(h, v);
+            transform.rotation = Quaternion.Euler(0, heading * Mathf.Rad2Deg, 0);
+        }
+
+        #endregion
+    }
 }
