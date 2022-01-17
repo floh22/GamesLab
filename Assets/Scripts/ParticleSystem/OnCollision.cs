@@ -24,7 +24,7 @@ public class OnCollision : MonoBehaviour
     {
         Debug.Log($"Collision with {gameObj.name} detected.");
 
-        if (gameObj.name == "RED" || gameObj.name == "Slender")
+        if (gameObj.name == "RED" || gameObj.name == "GREEN" || gameObj.name == "YELLOW" || gameObj.name == "BLUE" || gameObj.name == "Slender")
         {            
             gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
         }

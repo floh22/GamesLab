@@ -185,11 +185,45 @@ namespace GameUnit
                 ParticleSystem ps = channeler.transform.Find("InnerChannelingParticleSystem").gameObject.GetComponent<ParticleSystem>();
 
                 // Set particles color
-                float hSliderValueR = 25.0F / 255;
-                float hSliderValueG = 194.0F / 255;
-                float hSliderValueB = 209.0F / 255;
-                float hSliderValueA = 255.0F / 255;
-                
+                float hSliderValueR = 0.0f;
+                float hSliderValueG = 0.0f;
+                float hSliderValueB = 0.0f;
+                float hSliderValueA = 0.0f;
+
+
+                if(Team.ToString() == "RED")
+                {
+                    // Set particles color
+                    hSliderValueR = 174.0F / 255;
+                    hSliderValueG = 6.0F / 255;
+                    hSliderValueB = 6.0F / 255;
+                    hSliderValueA = 255.0F / 255;
+                }
+                else if (Team.ToString() == "YELLOW")
+                {
+                    // Set particles color
+                    hSliderValueR = 171.0F / 255;
+                    hSliderValueG = 173.0F / 255;
+                    hSliderValueB = 6.0F / 255;
+                    hSliderValueA = 255.0F / 255;
+                }
+                else if (Team.ToString() == "GREEN")
+                {
+                    // Set particles color
+                    hSliderValueR = 7.0F / 255;
+                    hSliderValueG = 173.0F / 255;
+                    hSliderValueB = 16.0F / 255;
+                    hSliderValueA = 255.0F / 255;
+                }
+                else if (Team.ToString() == "BLUE")
+                {
+                    // Set particles color
+                    hSliderValueR = 7.0F / 255;
+                    hSliderValueG = 58.0F / 255;
+                    hSliderValueB = 173.0F / 255;
+                    hSliderValueA = 255.0F / 255;
+                }
+
                 ps.startColor = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
 
                 // Set the force that will change the particles direcion
@@ -228,7 +262,6 @@ namespace GameUnit
                 if (Pages > 0)
                 {
                     --Pages;
-                    Debug.Log($"Should be god now 1");
                     innerChannelingParticleSystem.SetActive(false);
                     channeler.PickUpPage();
                 }
@@ -243,7 +276,6 @@ namespace GameUnit
                 else if (Pages > 0) // Take a page
                 {
                     --Pages;
-                    Debug.Log($"Should be god now 2");
                     innerChannelingParticleSystem.SetActive(false);
                     channeler.PickUpPage();
                 }
