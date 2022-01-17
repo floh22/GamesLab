@@ -338,7 +338,6 @@ namespace Network
                 //I am the owner. Deal the damage. This will get synced by photon
                 if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    Debug.Log("I should take damage now");
                     target.Health = Mathf.Max(0, target.Health - damage);
                 }
             }
