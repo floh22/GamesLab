@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
+using Controls.Channeling;
 using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
@@ -448,7 +449,7 @@ namespace NetworkedPlayer
             
         }
 
-        public void OnChannelObjective()
+        public void OnChannelObjective(Vector3 objectivePosition, IChannelable objective)
         {
             isChannelingObjective = true;
         }

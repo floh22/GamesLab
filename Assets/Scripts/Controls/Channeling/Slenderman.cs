@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Controls.Channeling
 {
-    public class Slenderman : MonoBehaviourPunCallbacks, IPunObservable
+    public class Slenderman : MonoBehaviourPunCallbacks, IPunObservable, IChannelable
     {
         #region Private Fields
 
@@ -18,6 +18,8 @@ namespace Controls.Channeling
         private bool hasBeenAcquired;
 
         private bool isVisible;
+
+        private bool hasBeenChanneledOnce;
 
         private SkinnedMeshRenderer skinnedMeshRenderer;
 
@@ -34,8 +36,24 @@ namespace Controls.Channeling
             GameObject o = gameObject;
             NetworkID = o.GetInstanceID();
             hasBeenAcquired = false;
-            isVisible = true;
             skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+            foreach (var material in skinnedMeshRenderer.materials)
+            {
+                switch (material.name)
+                {
+                    case "Body":
+                        material.color = Color.white;
+                        break;
+                    case "Shoes":
+                        material.color = Color.black;
+                        break;
+                    case "Suit":
+                        material.color = Color.black;
+                        break;
+                }
+            }
+            isVisible = true;
+            StartCoroutine(Glow());
         }
 
         public void Update()
@@ -47,13 +65,13 @@ namespace Controls.Channeling
 
             if (hasBeenAcquired)
             {
-                isVisible = false;
                 skinnedMeshRenderer.enabled = false;
+                isVisible = false;
             }
             else
             {
-                isVisible = true;
                 skinnedMeshRenderer.enabled = true;
+                isVisible = true;
             }
         }
         
@@ -83,7 +101,7 @@ namespace Controls.Channeling
                 return;
             }
 
-            channeler.OnChannelObjective();
+            channeler.OnChannelObjective(transform.position, this);
             StartCoroutine(Channel(channeler));
         }
 
@@ -105,6 +123,7 @@ namespace Controls.Channeling
 
         private IEnumerator Channel(PlayerController channeler)
         {
+            hasBeenChanneledOnce = true;
             float progress = 0;
             float maxProgress = 100;
             float secondsToChannel = PlayerValues.SecondsToChannelSlenderman;
@@ -146,5 +165,59 @@ namespace Controls.Channeling
             hasBeenAcquired = false;
             Debug.Log($"Slenderman has recovered");
         }
+
+        private IEnumerator Glow()
+        {
+            List<Material> materials = new List<Material>();
+            skinnedMeshRenderer.GetSharedMaterials(materials);
+            Dictionary<Material, Color> normalColors = new Dictionary<Material, Color>();
+            foreach (var material in materials)
+            {
+                normalColors[material] = Copy(material.color);
+            }
+            Color glowColor = Color.yellow;
+            float minutesToGlow = 1;
+            float step = 0.1f;
+            int stepsCount = 4;
+            float pause = 3f;
+            float totalRepetitions = (minutesToGlow * 60) / pause;
+            int localRepetitions = 2;
+            while (!hasBeenChanneledOnce && totalRepetitions-- > 0)
+            {
+                for (int i = 0; i < localRepetitions; i++)
+                {
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, glowColor, step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, normalColors[material], step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    foreach (var material in materials)
+                    {
+                        material.color = normalColors[material];
+                    }
+                }
+
+                yield return new WaitForSeconds(pause);
+            }
+        }
+
+        private Color Copy(Color color)
+        {
+            return new Color(color.r, color.g, color.b, color.a);
+        }
+
     }
 }
