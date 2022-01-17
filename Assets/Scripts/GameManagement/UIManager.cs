@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using GameUnit;
 using JetBrains.Annotations;
 using Network;
 using NetworkedPlayer;
@@ -32,6 +35,12 @@ namespace GameManagement
 
         [SerializeField] private GameObject AutoAttackOnImage;
         [SerializeField] private GameObject AutoAttackOffImage;
+        
+        [SerializeField] private Image SlenderImage;
+        private bool IsSlenderCooldown;
+        private float SlenderCooldownDuration;
+
+        private Image HealthbarImage;
 
         #endregion
 
@@ -51,12 +60,13 @@ namespace GameManagement
 
         #region Scoreboard
 
-        [SerializeField] private TextMeshProUGUI Player_Pages_Label_1;
-        [SerializeField] private TextMeshProUGUI Player_Pages_Label_2;
-        [SerializeField] private TextMeshProUGUI Player_Pages_Label_3;
-        [SerializeField] private TextMeshProUGUI Player_Level_Label_1;
-        [SerializeField] private TextMeshProUGUI Player_Level_Label_2;
-        [SerializeField] private TextMeshProUGUI Player_Level_Label_3;
+        [SerializeField] private TextMeshProUGUI[] Player_Pages_Labels;
+        [SerializeField] private TextMeshProUGUI[] Player_Level_Labels;
+        [SerializeField] private Image[] Player_Sprite_Images;
+        [SerializeField] private Image[] Player_Pages_Images;
+        [SerializeField] private Image[] Player_Level_Background_Images;
+
+        public HashSet<GameData.Team> ScoreboardEntries { get; set; }
 
         #endregion
 
@@ -68,6 +78,7 @@ namespace GameManagement
                 Instance = this;
             }
 
+            ScoreboardEntries = new HashSet<GameData.Team>();
             PauseMenuUI = GameObject.Find("PauseMenu_UI");
             if (PauseMenuUI != null && !PauseMenuUI.Equals(null))
                 PauseMenuUI.SetActive(false);
@@ -86,14 +97,6 @@ namespace GameManagement
             Circular_Meter_2 = GameObject.Find("Circular_Meter_2").GetComponent<Image>();
             Circular_Meter_3 = GameObject.Find("Circular_Meter_3").GetComponent<Image>();
 
-            Player_Pages_Label_1 = GameObject.Find("Player_Pages_Number_1").GetComponent<TextMeshProUGUI>();
-            Player_Pages_Label_2 = GameObject.Find("Player_Pages_Number_2").GetComponent<TextMeshProUGUI>();
-            Player_Pages_Label_3 = GameObject.Find("Player_Pages_Number_3").GetComponent<TextMeshProUGUI>();
-
-            Player_Level_Label_1 = GameObject.Find("Player_Level_1").GetComponent<TextMeshProUGUI>();
-            Player_Level_Label_2 = GameObject.Find("Player_Level_2").GetComponent<TextMeshProUGUI>();
-            Player_Level_Label_3 = GameObject.Find("Player_Level_3").GetComponent<TextMeshProUGUI>();
-
             UpdateCircularMeters();
             SetVisibilityOfLevelUpButtons(false);
 
@@ -106,16 +109,31 @@ namespace GameManagement
 
             SetAutoAttack(GameData.Instance.AutoAttack);
 
-            SetInitPages();
+            SlenderImage = GameObject.Find("SlenderImage").GetComponent<Image>();
+            HealthbarImage = GameObject.Find("Healthbar_InnerBar").GetComponent<Image>();
         }
 
         // Update is called once per frame
         void Update()
         {
+            _playerController = PlayerController.LocalPlayerController;
             if (_playerController != null)
             {
                 LevelLabel.text = _playerController.Level.ToString();
+                HealthbarImage.fillAmount = _playerController.Health / 100;
+                SetPages();
             }
+
+            if (IsSlenderCooldown)
+            {
+                SlenderImage.fillAmount -= 1 / SlenderCooldownDuration * Time.deltaTime;
+                if (SlenderImage.fillAmount <= 0)
+                {
+                    IsSlenderCooldown = false;
+                    SlenderImage.enabled = false;
+                }
+            }
+            UpdateScoreboard();
         }
 
         public void TogglePauseMenu()
@@ -164,21 +182,6 @@ namespace GameManagement
         {
             SetAutoAttack(!GameData.Instance.AutoAttack);
         }
-        
-        public void SetPages(int count)
-        {
-            while (count != GameData.Instance.NumberOfPages)
-            {
-                if (count > GameData.Instance.NumberOfPages)
-                {
-                    IncreasePages();
-                }
-                else
-                {
-                    DecreasePages();
-                }
-            }
-        }
 
         public void IncreasePages()
         {
@@ -198,9 +201,14 @@ namespace GameManagement
             }
         }
 
-        void SetInitPages()
+        public void SetPages()
         {
-            for (int i = 9; i >= GameData.Instance.NumberOfPages; i--)
+            SetPages(GetPagesForTeam(PersistentData.Team ?? GameData.Team.RED));
+        }
+
+        public void SetPages(int count)
+        {
+            for (int i = 9; i >= count; i--)
             {
                 PagesImages[i].enabled = false;
             }
@@ -238,7 +246,7 @@ namespace GameManagement
             LevelUpLabel.enabled = false;
         }
 
-        private void SetVisibilityOfLevelUpButtons(bool visibility)
+        void SetVisibilityOfLevelUpButtons(bool visibility)
         {
             if (_playerController == null || _playerController.Equals(null))
             {
@@ -268,7 +276,7 @@ namespace GameManagement
             }
         }
 
-        private void UpdateCircularMeters()
+        void UpdateCircularMeters()
         {
             if (_playerController == null || _playerController.Equals(null))
             {
@@ -295,6 +303,14 @@ namespace GameManagement
             SetVisibilityOfLevelUpButtons(false);
         }
 
+        public void ShowSlenderBuffCountdown(float duration)
+        {
+            SlenderImage.enabled = true;
+            SlenderImage.fillAmount = 1;
+            SlenderCooldownDuration = duration;
+            IsSlenderCooldown = true;
+        }
+
         public void UIHELPERMETHODAddExperience(int experience)
         {
             if (_playerController == null || _playerController.Equals(null))
@@ -306,6 +322,57 @@ namespace GameManagement
             }
 
             _playerController.AddExperience(experience);
+        }
+
+        public void UIHELPERMETHOD2()
+        {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerController;
+                
+                if (_playerController == null || _playerController.Equals(null))
+                    return;
+            }
+            _playerController.ActivateSlenderBuff();
+        }
+
+        void UpdateScoreboard()
+        {
+            int counter = 0;
+            if (GameStateController.Instance == null || GameStateController.Instance.Players == null)
+            {
+                return;
+            }
+            
+            foreach(KeyValuePair<GameData.Team, PlayerController> entry in GameStateController.Instance.Players)
+            {
+                if (entry.Value.Team != (PersistentData.Team ?? GameData.Team.RED))
+                {
+                    ScoreboardEntries.Add(entry.Value.Team);
+                    Player_Sprite_Images[counter].color = GetColor(entry.Value.Team);
+
+                    counter++;
+                }
+            }
+            
+            for (int i = counter; i < 3; i++)
+            {
+                Player_Sprite_Images[i].enabled = false;
+                Player_Pages_Labels[i].enabled = false;
+                Player_Level_Labels[i].enabled = false;
+                Player_Pages_Images[i].enabled = false;
+                Player_Level_Background_Images[i].enabled = false;
+            }
+        }
+        
+        private int GetPagesForTeam(GameData.Team team)
+        {
+            if (GameStateController.Instance == null)
+            {
+                return 0;
+            }
+            BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == team).Value;
+            return currentBase.Pages;
         }
     }
 }
