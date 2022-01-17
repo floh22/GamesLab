@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Character;
 using GameUnit;
 using JetBrains.Annotations;
 using Network;
 using NetworkedPlayer;
-using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -111,6 +111,8 @@ namespace GameManagement
 
             SlenderImage = GameObject.Find("SlenderImage").GetComponent<Image>();
             HealthbarImage = GameObject.Find("Healthbar_InnerBar").GetComponent<Image>();
+            
+            GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
         }
 
         // Update is called once per frame
@@ -121,7 +123,6 @@ namespace GameManagement
             {
                 LevelLabel.text = _playerController.Level.ToString();
                 HealthbarImage.fillAmount = _playerController.Health / 100;
-                //SetPages();
             }
 
             if (IsSlenderCooldown)
@@ -134,6 +135,13 @@ namespace GameManagement
                 }
             }
             UpdateScoreboard();
+        }
+
+        void SetupUI()
+        {
+            SetPages(PlayerValues.PagesAmount);
+            SetVisibilityOfLevelUpButtons(false);
+            UpdateCircularMeters();
         }
 
         public void TogglePauseMenu()
@@ -208,8 +216,13 @@ namespace GameManagement
 
         public void SetPages(int count)
         {
-            Debug.Log("Updating page UI");
-            for (int i = 9; i >= count; i--)
+            int counter = 0;
+            for (int i = 0; i < count; i++)
+            {
+                PagesImages[i].enabled = true;
+                counter++;
+            }
+            for (int i = counter; i < 10; i++)
             {
                 PagesImages[i].enabled = false;
             }
