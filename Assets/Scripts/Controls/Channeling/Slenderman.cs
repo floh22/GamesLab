@@ -23,8 +23,16 @@ namespace Controls.Channeling
 
         #endregion
 
+        #region Public Fields
+
+        public int NetworkID { get; set; }
+
+        #endregion
+
         public void Start()
         {
+            GameObject o = gameObject;
+            NetworkID = o.GetInstanceID();
             hasBeenAcquired = false;
             isVisible = true;
             skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
@@ -84,11 +92,13 @@ namespace Controls.Channeling
             if (stream.IsWriting)
             {
                 // Local player, send data
+                stream.SendNext(this.NetworkID);
                 stream.SendNext(this.hasBeenAcquired);
             }
             else
             {
                 // Network player, receive data
+                this.NetworkID = (int)stream.ReceiveNext();
                 this.hasBeenAcquired = (bool)stream.ReceiveNext();
             }
         }
