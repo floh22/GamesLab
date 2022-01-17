@@ -7,6 +7,7 @@ using UnityEngine;
 public class AutoObjectParenter : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     private const byte ParentToObjectEventCode = 9;
+    private Transform _parent = null; 
 
     public static void SendParentEvent(GameObject objectToParent)
     {
@@ -30,10 +31,11 @@ public class AutoObjectParenter : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnEvent(EventData photonEvent)
     {
         byte eventCode = photonEvent.Code;
-        if (eventCode == ParentToObjectEventCode)
+        if (eventCode == ParentToObjectEventCode && _parent == null)
         {
             object[] data = (object[]) photonEvent.CustomData;
-            gameObject.transform.parent = PhotonView.Find((int)data[0]).gameObject.transform;
+            _parent = PhotonView.Find((int) data[0]).gameObject.transform;
+            gameObject.transform.parent = _parent;
         }
     }
 }
