@@ -12,6 +12,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
@@ -25,7 +26,10 @@ namespace Network
         
         public const byte ChangeMinionTargetEventCode = 1;
         public const byte DamageGameUnitEventCode = 3;
-        public const byte ChannelSlenderManEventCode = 4;
+        public const byte ChannelEventCode = 4;
+        public const byte LoseGameEventCode = 5;
+        public const byte GameTimeEventCode = 6;
+        public const byte UpdateBasePagesEventCode = 7;
 
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
@@ -36,8 +40,22 @@ namespace Network
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(ChangeMinionTargetEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
-        
-        
+
+        public static void SendLoseGameEvent(GameData.Team team)
+        {
+            object[] content = { team}; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            PhotonNetwork.RaiseEvent(LoseGameEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static void SendGameTimeEvent(float gameTime)
+        {
+            object[] content = { gameTime}; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            PhotonNetwork.RaiseEvent(GameTimeEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+
         [Header("Player Data")]
         [SerializeField]
         private GameObject playerPrefab;
@@ -49,18 +67,22 @@ namespace Network
         
         [Header("Minion Data")]
         
-        [SerializeField] private MinionValues minionValues;
-        [SerializeField] private GameObject minionPrefab;
-        [SerializeField] private GameObject minionSpawnPointHolder;
-        [SerializeField] private GameObject minionPaths;
+        [SerializeField] public MinionValues minionValues;
+        [SerializeField] public GameObject minionPrefab;
+        [SerializeField] public GameObject minionSpawnPointHolder;
+        [SerializeField] public GameObject minionPaths;
 
 
+        [Header("Game Data")] 
         public Dictionary<GameData.Team, PlayerController> Players;
         public Dictionary<GameData.Team, BaseBehavior> Bases;
         public Dictionary<GameData.Team, HashSet<Minion>> Minions;
         public HashSet<IGameUnit> GameUnits;
-        
         public Dictionary<GameData.Team, GameData.Team> Targets;
+
+        
+        [field: SerializeField] public float GameTime { get; set; }
+        public bool IsPaused { get; set; }
 
 
         private bool hasLeft = false;
@@ -176,6 +198,11 @@ namespace Network
                 GameUnits.Add(bb);
 
             }
+            
+            
+            //Set minion values here so all clients have them when it comes time to switch masters
+            Minion.Values = minionValues;
+            Minion.Splines = minionPaths;
 
 
             StartCoroutine(InitPlayersThisRound());
@@ -184,9 +211,7 @@ namespace Network
             try
             {
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
-                controller.Init(minionValues, minionPrefab, minionSpawnPointHolder, minionPaths);
-
-                controller.StartMinionSpawning(10000);
+                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs / 1000);
             }
             catch
             {
@@ -273,7 +298,6 @@ namespace Network
             
             if (eventCode == DamageGameUnitEventCode)
             {
-                Debug.Log("Damage Event");
                 object[] data = (object[])photonEvent.CustomData;
 
                 int sourceID = (int)data[0];
@@ -310,6 +334,44 @@ namespace Network
                     target.Health = Mathf.Max(0, target.Health - damage);
                 }
             }
+
+            if (eventCode == LoseGameEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                OnLose((GameData.Team)data[0]);
+            }
+
+            if (eventCode == GameTimeEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                GameTime = (float)data[0];
+            }
+        }
+
+        public void OnLose()
+        {
+            PlayerController.LocalPlayerController.OnLoseGame();
+            
+            SendLoseGameEvent(PlayerController.LocalPlayerController.Team);
+            PhotonNetwork.Destroy(PlayerController.LocalPlayerInstance);
+            
+        }
+
+        public void OnLose(GameData.Team team)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                foreach (Minion minion in Minions[team])
+                {
+                    PhotonNetwork.Destroy(minion.gameObject);
+                }
+            }
+            //Display a lose message? Maybe check that the player object is destroyed, not sure
+            Players.Remove(team);
+            Minions.Remove(team);
+            Bases.Remove(team);
+            Targets.Remove(team);
+            GameUnits.RemoveWhere(unit => unit.Team == team);
         }
         
         

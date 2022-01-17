@@ -17,37 +17,14 @@ namespace GameManagement
 
         public static MasterController Instance;
         
+        private float updateTimer;
 
-        private MinionValues minionValues;
-        private GameObject minionPrefab;
-        private GameObject spawnPointHolder;
-
-        public bool IsPaused = false;
-        
-        [field: SerializeField] public float TimeScale
-        {
-            get => Time.timeScale;
-            set => Time.timeScale = value;
-        }
-        
         public MasterController()
         {
             if (Instance == null)
                 Instance = this;
             
             
-        }
-
-        public void Init(MinionValues minionValues, GameObject minionPrefab, GameObject spawnPointHolder, GameObject minionPaths)
-        {
-            this.minionValues = minionValues;
-            this.minionPrefab = minionPrefab;
-            this.spawnPointHolder = spawnPointHolder;
-
-            Minion.Values = minionValues;
-            Minion.Splines = minionPaths;
-            
-            Debug.Log("Starting Master Client Controller");
         }
 
         public void StartMinionSpawning(int startDelayInMs = 0)
@@ -58,19 +35,27 @@ namespace GameManagement
 
         private IEnumerator SpawnMinions(int startDelayInMs = 0)
         {
-            yield return new WaitForSeconds(minionValues.InitWaveDelayInMs / 1000);
+            yield return new WaitForSeconds(startDelayInMs);
             
-            while (!IsPaused)
+            while (!GameStateController.Instance.IsPaused)
             {
                 StartCoroutine(OnWaveSpawn());
                 
-                yield return new WaitForSeconds(minionValues.WaveDelayInMs / 1000);
+                yield return new WaitForSeconds(Minion.Values.WaveDelayInMs / 1000);
             }
         }
 
         // Update is called once per frame
         void Update()
         {
+            //Update 20 times a second, no reason to do more
+            updateTimer += Time.deltaTime;
+            if (!(updateTimer >= 0.05f)) return;
+            GameStateController.Instance.GameTime += updateTimer;
+            updateTimer = 0;
+            
+            GameStateController.SendGameTimeEvent(GameStateController.Instance.GameTime);
+            
             if (UIManager.Instance == null)
             {
                 return;
@@ -101,10 +86,10 @@ namespace GameManagement
             Debug.Log("Spawning Minion Wave");
 
             int wavesSpawned = 0;
-            while (wavesSpawned++ < minionValues.WaveSize)
+            while (wavesSpawned++ < Minion.Values.WaveSize)
             {
                 SpawnMinions(this, EventArgs.Empty);
-                yield return new WaitForSeconds(minionValues.MinionOffsetInMs / 1000);
+                yield return new WaitForSeconds(Minion.Values.MinionOffsetInMs / 1000);
             }
         }
 
@@ -117,11 +102,11 @@ namespace GameManagement
             }
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
-                Vector3 spawnPoint = spawnPointHolder.transform.Find(team.ToString()).transform.position;
+                Vector3 spawnPoint = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
                 
                 Debug.Log($"Spawning Minion at {spawnPoint}");
 
-                GameObject go = PhotonNetwork.Instantiate(minionPrefab.name, spawnPoint,
+                GameObject go = PhotonNetwork.Instantiate(GameStateController.Instance.minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
 
                 Minion behavior = go.GetComponent<Minion>();

@@ -31,7 +31,17 @@ namespace GameUnit
 
         public float MaxHealth { get; set; } = 1000;
         public GameUnitType Type => GameUnitType.Structure;
-        public float Health { get; set; }
+        [SerializeField] private float _health;
+        public float Health
+        {
+
+            get => _health;
+            set
+            {
+                _health = value;
+                CheckHealth();
+            }
+        }
         public float MoveSpeed { get; set; } = 0;
         public float RotationSpeed { get; set; } = 0;
         public float AttackDamage { get; set; } = 0;
@@ -118,8 +128,9 @@ namespace GameUnit
 
             if (Pages <= 0)
             {
+                IsAlive = false;
                 if (PlayerController.LocalPlayerInstance != null && !PlayerController.LocalPlayerInstance.Equals(null))
-                    PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnLoseGame();
+                    GameStateController.Instance.OnLose();
             }
 
             UIManager.Instance.SetPages(Pages);
@@ -133,6 +144,7 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
+            
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -145,6 +157,7 @@ namespace GameUnit
                 stream.SendNext(this.Health);
                 stream.SendNext(this.MaxHealth);
                 stream.SendNext(this.Pages);
+                stream.SendNext(this.IsAlive);
             }
             else
             {
@@ -154,7 +167,14 @@ namespace GameUnit
                 this.Health = (float)stream.ReceiveNext();
                 this.MaxHealth = (float)stream.ReceiveNext();
                 this.Pages = (int)stream.ReceiveNext();
+                this.IsAlive = (bool)stream.ReceiveNext();
             }
+        }
+
+        private void CheckHealth()
+        {
+            if (_health == 0)
+                --Pages;
         }
 
         private IEnumerator Channel(PlayerController channeler)

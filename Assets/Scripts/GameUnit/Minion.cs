@@ -67,6 +67,7 @@ namespace GameUnit
         private static readonly int AnimMoveSpeed = Animator.StringToHash("MovementSpeed");
         private static readonly int AnimHealth = Animator.StringToHash("Health");
         private static readonly int AnimAttackSpeed = Animator.StringToHash("AttackSpeedMult");
+        private static readonly int AnimDoDeath = Animator.StringToHash("DoDie");
         #endregion
         
         #region MinionAI
@@ -336,7 +337,7 @@ namespace GameUnit
                 IGameUnit unit = res.GetComponent<IGameUnit>();
 
                 //Ignore units without GameUnit component
-                if (unit == null || unit.Equals(null) )
+                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
                 {
                     continue;
                 }
@@ -387,7 +388,7 @@ namespace GameUnit
                     IGameUnit unit = res.GetComponent<IGameUnit>();
 
                     //Ignore units without GameUnit component
-                    if (unit == null || unit.Equals(null))
+                    if (unit == null || unit.Equals(null) || unit.IsAlive == false)
                     {
                         continue;
                     }
@@ -521,7 +522,7 @@ namespace GameUnit
         {
             if (!photonView.IsMine)
                 return;
-            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
+            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || CurrentAttackTarget.IsAlive == false)
             {
                 currentMinionState = MinionState.ReturningToPath;
                 anim.SetBool(AnimAutoAttack, false);
@@ -551,6 +552,7 @@ namespace GameUnit
 
         void Die()
         {
+            IsAlive = false;
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
             {
                 if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
@@ -577,6 +579,13 @@ namespace GameUnit
                 MasterController.Instance.RemoveMinion(this);
             }
             
+            //PhotonNetwork.Destroy(gameObject);
+            anim.SetBool(AnimDoDeath, true);
+        }
+        
+
+        private void DestroyObject()
+        {
             PhotonNetwork.Destroy(gameObject);
         }
 
