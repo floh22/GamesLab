@@ -55,9 +55,17 @@ namespace GameUnit
             }
         }
 
+        private bool hasBeenChanneledOnce;
+        private MeshRenderer meshRenderer;
+
         // Start is called before the first frame update
         void Start()
         {
+            meshRenderer = GetComponent<MeshRenderer>();
+            foreach (var material in meshRenderer.materials)
+            {
+                material.color = Color.white;
+            }
             pages = PlayerValues.PagesAmount;
             GameObject o = gameObject;
             NetworkID = o.GetInstanceID();
@@ -73,6 +81,7 @@ namespace GameUnit
 
             Health = MaxHealth;
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
+            StartCoroutine(Glow());
         }
         
 
@@ -159,6 +168,7 @@ namespace GameUnit
 
         private IEnumerator Channel(PlayerController channeler)
         {
+            hasBeenChanneledOnce = true;
             float progress = 0;
             float maxProgress = 100;
             float secondsToChannel = SecondsToChannelPage;
@@ -216,6 +226,63 @@ namespace GameUnit
             }
 
             channeler.InterruptChanneling();
+        }
+        
+        private IEnumerator Glow()
+        {
+            List<Material> materials = new List<Material>();
+            meshRenderer.GetSharedMaterials(materials);
+            Dictionary<Material, Color> normalColors = new Dictionary<Material, Color>();
+            foreach (var material in materials)
+            {
+                normalColors[material] = Copy(material.color);
+            }
+            Color glowColor = Color.green;
+            float minutesToGlow = 1;
+            float step = 0.1f;
+            int stepsCount = 10;
+            float pause = 3f;
+            float totalRepetitions = (minutesToGlow * 60) / pause;
+            int localRepetitions = 2;
+            while (!hasBeenChanneledOnce && totalRepetitions-- > 0)
+            {
+                for (int i = 0; i < localRepetitions; i++)
+                {
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, glowColor, step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, normalColors[material], step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    foreach (var material in materials)
+                    {
+                        material.color = normalColors[material];
+                    }
+                }
+
+                yield return new WaitForSeconds(pause);
+            }
+            foreach (var baseBehavior in FindObjectsOfType<BaseBehavior>())
+            {
+                baseBehavior.hasBeenChanneledOnce = true;
+            }
+        }
+
+        private Color Copy(Color color)
+        {
+            return new Color(color.r, color.g, color.b, color.a);
         }
     }
 }

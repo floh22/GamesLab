@@ -19,6 +19,8 @@ namespace Controls.Channeling
 
         private bool isVisible;
 
+        private bool hasBeenChanneledOnce;
+
         private SkinnedMeshRenderer skinnedMeshRenderer;
 
         #endregion
@@ -121,6 +123,7 @@ namespace Controls.Channeling
 
         private IEnumerator Channel(PlayerController channeler)
         {
+            hasBeenChanneledOnce = true;
             float progress = 0;
             float maxProgress = 100;
             float secondsToChannel = PlayerValues.SecondsToChannelSlenderman;
@@ -167,21 +170,21 @@ namespace Controls.Channeling
         {
             List<Material> materials = new List<Material>();
             skinnedMeshRenderer.GetSharedMaterials(materials);
-            Debug.Log($"Got {materials.Count} materials");
-            Debug.Log($"Got these {materials} materials");
             Dictionary<Material, Color> normalColors = new Dictionary<Material, Color>();
             foreach (var material in materials)
             {
                 normalColors[material] = Copy(material.color);
             }
             Color glowColor = Color.yellow;
+            float minutesToGlow = 1;
             float step = 0.1f;
             int stepsCount = 4;
             float pause = 3f;
-            int repetitions = 2;
-            while (true)
+            float totalRepetitions = (minutesToGlow * 60) / pause;
+            int localRepetitions = 2;
+            while (!hasBeenChanneledOnce && totalRepetitions-- > 0)
             {
-                for (int i = 0; i < repetitions; i++)
+                for (int i = 0; i < localRepetitions; i++)
                 {
                     for (int j = 0; j < stepsCount; j++)
                     {
