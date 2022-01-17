@@ -1343,7 +1343,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9cea1441a584063af429f69e739a20b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  innerChannelingParticleSystem: {fileID: 0}
+  innerChannelingParticleSystem: {fileID: 5329578861578570427}
 --- !u!114 &2296688873868755920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3003,6 +3003,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: InnerChannelingParticleSystem
       objectReference: {fileID: 0}
+    - target: {fileID: 2913158441812342115, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2913158441812342118, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
         type: 3}
       propertyPath: m_RootOrder
@@ -3063,6 +3068,12 @@ PrefabInstance:
 --- !u!198 &5329578861578570425 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 2913158441812342113, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
+    type: 3}
+  m_PrefabInstance: {fileID: 7033472080711909336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5329578861578570427 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2913158441812342115, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
     type: 3}
   m_PrefabInstance: {fileID: 7033472080711909336}
   m_PrefabAsset: {fileID: 0}

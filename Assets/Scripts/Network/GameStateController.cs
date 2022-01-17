@@ -80,6 +80,12 @@ namespace Network
         [SerializeField] private GameObject spawnPointHolder;
 
 
+        [Header("Slender Data")] 
+        [SerializeField] private GameObject slendermanPrefab;
+
+        [SerializeField] public GameObject slendermanSpawnPosition;
+
+
         [Header("Minion Data")]
         
         [SerializeField] public MinionValues minionValues;
@@ -225,6 +231,7 @@ namespace Network
             try
             {
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
+                controller.SpawnSlenderman();
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs / 1000);
             }
             catch
