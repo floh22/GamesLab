@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Character;
+using Controls.Channeling;
 using ExitGames.Client.Photon;
 using GameManagement;
 using GameUnit;
@@ -26,7 +27,7 @@ namespace Network
 
         public const byte ChangeMinionTargetEventCode = 1;
         public const byte DamageGameUnitEventCode = 3;
-        public const byte ChannelEventCode = 4;
+        public const byte FinishChannelEventCode = 4;
         public const byte LoseGameEventCode = 5;
         public const byte GameTimeEventCode = 6;
         public const byte UpdateBasePagesEventCode = 7;
@@ -54,6 +55,11 @@ namespace Network
             PhotonNetwork.RaiseEvent(GameTimeEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
+        public static void SendFinishChannelEvent(GameData.Team team, IChannelable channeled)
+        {
+            
+        }
+
 
         [Header("Player Data")]
         [SerializeField]
@@ -78,6 +84,7 @@ namespace Network
         public Dictionary<GameData.Team, HashSet<Minion>> Minions;
         public HashSet<IGameUnit> GameUnits;
         public Dictionary<GameData.Team, GameData.Team> Targets;
+        public Slenderman Slenderman;
 
         
         [field: SerializeField] public float GameTime { get; set; }
