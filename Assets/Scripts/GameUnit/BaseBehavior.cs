@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Character;
+using Controls.Channeling;
 using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
@@ -14,7 +15,7 @@ using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
-    public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit
+    public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit, IChannelable
     {
         public int NetworkID { get; set; }
         public int OwnerID => GameStateController.Instance.Players[Team].OwnerID;
@@ -116,7 +117,7 @@ namespace GameUnit
                 return;
             }
 
-            channeler.OnChannelObjective(transform.position);
+            channeler.OnChannelObjective(transform.position, this);
             StartCoroutine(Channel(channeler));
         }
         

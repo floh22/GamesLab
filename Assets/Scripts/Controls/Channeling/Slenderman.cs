@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Controls.Channeling
 {
-    public class Slenderman : MonoBehaviourPunCallbacks, IPunObservable
+    public class Slenderman : MonoBehaviourPunCallbacks, IPunObservable, IChannelable
     {
         #region Private Fields
 
@@ -101,7 +101,7 @@ namespace Controls.Channeling
                 return;
             }
 
-            channeler.OnChannelObjective(transform.position);
+            channeler.OnChannelObjective(transform.position, this);
             StartCoroutine(Channel(channeler));
         }
 
