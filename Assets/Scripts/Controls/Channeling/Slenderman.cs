@@ -19,12 +19,15 @@ namespace Controls.Channeling
 
         private bool isVisible;
 
+        private SkinnedMeshRenderer skinnedMeshRenderer;
+
         #endregion
 
         public void Start()
         {
             hasBeenAcquired = false;
             isVisible = true;
+            skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
         }
 
         public void Update()
@@ -37,12 +40,12 @@ namespace Controls.Channeling
             if (hasBeenAcquired)
             {
                 isVisible = false;
-                gameObject.SetActive(false);
+                skinnedMeshRenderer.enabled = false;
             }
             else
             {
                 isVisible = true;
-                gameObject.SetActive(true);
+                skinnedMeshRenderer.enabled = true;
             }
         }
         
@@ -55,8 +58,14 @@ namespace Controls.Channeling
 
             PlayerController channeler = PlayerController.LocalPlayerController;
 
+            if (!channeler.HasPage)
+            {
+                return;
+            }
+
             Debug.Log("Slenderman has been clicked by player from team " + channeler.Team);
-            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.ChannelRange)
+            
+            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
             {
                 return;
             }
@@ -88,12 +97,13 @@ namespace Controls.Channeling
         {
             float progress = 0;
             float maxProgress = 100;
-            float secondsToChannel = 1;
+            float secondsToChannel = PlayerValues.SecondsToChannelSlenderman;
             while (progress < maxProgress)
             {
                 if (!channeler.IsChannelingObjective ||
-                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.ChannelRange)
+                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
                 {
+                    channeler.InterruptChanneling();
                     yield break;
                 }
 
@@ -107,12 +117,14 @@ namespace Controls.Channeling
                 yield break;
             }
 
-            if (hasBeenAcquired)
+            if (hasBeenAcquired || Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
             {
+                channeler.InterruptChanneling();
                 yield break;
             }
 
             hasBeenAcquired = true;
+            channeler.SacrifisePage();
             channeler.OnReceiveSlendermanBuff();
             StartCoroutine(Recover());
         }

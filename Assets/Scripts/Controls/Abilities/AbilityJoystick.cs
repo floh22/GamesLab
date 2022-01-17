@@ -82,6 +82,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         }
         else
         {
+            PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().InterruptChanneling();
             _abilities.CastAbility(this.currentAbility, _lastPosition);
         }
 
