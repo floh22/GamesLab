@@ -1,5 +1,6 @@
 using Character;
 using NetworkedPlayer;
+using Photon.Pun;
 using UnityEngine;
 using Minion = GameUnit.Minion;
 
@@ -17,8 +18,10 @@ public class DamageObject : MonoBehaviour
     private float timestamp = 0f;
 
 
-    public void Activate(IGameUnit castFrom, bool isAoE, float damageMultiplier)
+    public void Activate(IGameUnit castFrom, float damage, float delayBetweenAoEDamage, bool isAoE, float damageMultiplier)
     {
+        this.damage = damage;
+        this.delayBetweenAoEDamage = delayBetweenAoEDamage;
         _castFrom = castFrom;
         _isAoE = isAoE;
         _damageMultiplier = damageMultiplier;
@@ -26,7 +29,7 @@ public class DamageObject : MonoBehaviour
 
     private void OnTriggerStay(Collider collider)
     {
-        if (!_isAoE)
+        if (!_isAoE )
         {
             return;
         }
@@ -40,7 +43,7 @@ public class DamageObject : MonoBehaviour
 
     private void OnTriggerEnter(Collider collider)
     {
-        if (_isAoE)
+        if (_isAoE )
         {
             return;
         }
@@ -51,7 +54,7 @@ public class DamageObject : MonoBehaviour
 
     private void DealDamage(Collider collider)
     {
-        if (collider == null || _castFrom == null)
+        if (collider == null || _castFrom == null )
         {
             return;
         }
@@ -59,11 +62,11 @@ public class DamageObject : MonoBehaviour
         IGameUnit unit = collider.GetComponent<IGameUnit>();
 
         //Ignore units without GameUnit component
-        if (unit == null || unit.Equals(null) )
+        if (unit == null || unit.Equals(null) || _castFrom.Team == unit.Team)
         {
             return;
         }
-        
+
         unit.Damage(_castFrom, damage * _damageMultiplier);
     }
 }

@@ -1,12 +1,29 @@
+using System;
+using System.Linq;
+using Character;
+using ExitGames.Client.Photon;
+using Network;
 using NetworkedPlayer;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Controls.Abilities
 {
-    public class Abilities : MonoBehaviour
+    public class Abilities : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         public static Abilities Instance;
+        
+        private const byte CastAbilityEventCode = 2;
+        
+        
+        public static void SendCastAbilityEvent(int gameUnitID, Ability ability, Vector3 start, Vector3 target)
+        {
+            object[] content = { gameUnitID, ability, start, target }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            PhotonNetwork.RaiseEvent(CastAbilityEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
         
         // Start is called before the first frame update
         public float maxAbilityDistance1 = 5;
@@ -34,6 +51,8 @@ namespace Controls.Abilities
 
         void Start()
         {
+            if (!photonView.IsMine)
+                return;
             if (Instance == null)
             {
                 Instance = this;
@@ -55,6 +74,8 @@ namespace Controls.Abilities
 
         void Update()
         {
+            if (!photonView.IsMine)
+                return;
             if (isCooldown1)
             {
                 ability1Image.fillAmount += 1 / cooldownAbility1 * Time.deltaTime;
@@ -75,8 +96,20 @@ namespace Controls.Abilities
                 }
             }
         }
+        
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            PhotonNetwork.AddCallbackTarget(this);
+        }
 
-        public void move(Ability ability)
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            PhotonNetwork.RemoveCallbackTarget(this);
+        }
+
+        public void Move(Ability ability)
         {
             Joystick joystick = GameObject.FindWithTag("Ability" + (int) ability).GetComponent<Joystick>();
 
@@ -93,6 +126,10 @@ namespace Controls.Abilities
                     arrowIndicatorPivot.transform.localRotation =
                         Quaternion.Lerp(transRot, arrowIndicatorPivot.transform.localRotation, 0f);
                     break;
+                case Ability.NORMAL:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
         }
 
@@ -108,10 +145,14 @@ namespace Controls.Abilities
                     rangeIndicatorCircle2.GetComponent<Image>().enabled = true;
                     arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = true;
                     break;
+                case Ability.NORMAL:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
         }
 
-        public void HideAbilityInterface(Ability ability)
+        private void HideAbilityInterface(Ability ability)
         {
             switch (ability)
             {
@@ -123,6 +164,10 @@ namespace Controls.Abilities
                     rangeIndicatorCircle2.GetComponent<Image>().enabled = false;
                     arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
                     break;
+                case Ability.NORMAL:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
         }
 
@@ -140,11 +185,15 @@ namespace Controls.Abilities
 
                     startingPosition = transform.position + new Vector3(0, 2, 0);
 
+                    
                     GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
                         Quaternion.identity) as GameObject;
+
+
                     ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position,
                         PlayerController.LocalPlayerController,
                         PlayerController.LocalPlayerController.DamageMultiplierAbility1);
+                    
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
                     break;
@@ -169,22 +218,73 @@ namespace Controls.Abilities
                     direction = transform.TransformPoint(direction);
 
 
+                    
                     GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
                         Quaternion.Euler(0, angle, 0));
+                        
+                    
+                    
+                    
                     ability2ActiveObject.transform.LookAt(direction);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
                         .Activate(direction, PlayerController.LocalPlayerController,
                             0f); //Damage Multiplier not needed here but only below
                     ability2ActiveObject.GetComponent<DamageObject>()
-                        .Activate(PlayerController.LocalPlayerController, false,
+                        .Activate(PlayerController.LocalPlayerController, 10, 1, false,
                             PlayerController.LocalPlayerController.DamageMultiplierAbility2);
 
                     isCooldown2 = true;
                     ability2Image.fillAmount = 0;
                     break;
+                case Ability.NORMAL:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
 
+            //Send ability cast to other players
+            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, transform.position, lastPosition);
+            
             HideAbilityInterface(ability);
+        }
+
+
+        private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability)
+        {
+            switch (ability)
+            {
+                case Ability.NORMAL:
+                    break;
+                case Ability.RANGE:
+                    Instantiate(ability1ProjectilePrefab, start + new Vector3(0, 2, 0),
+                        Quaternion.identity).GetComponent<AbilityProjectile1>().ActivateNoDamage(target, caster);
+
+                    break;
+                case Ability.LINE:
+                    
+                    Vector3 direction = new(target.x, 0, target.y);
+                    direction *= maxAbilityDistance2;
+
+                    float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
+                    if (direction.z <= 0)
+                    {
+                        angle *= -1;
+                    }
+
+                    direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
+                    Transform t;
+                    direction = (t = transform).TransformPoint(direction);
+
+                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
+                        Quaternion.Euler(0, angle, 0));
+                    
+                    ability2ActiveObject.transform.LookAt(direction);
+                    ability2ActiveObject.GetComponent<AbilityProjectile2>()
+                        .ActivateNoDamage(direction, caster);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
+            }
         }
 
         public void DontCastAbility(Ability ability)
@@ -192,9 +292,26 @@ namespace Controls.Abilities
             HideAbilityInterface(ability);
         }
 
-        public bool isCooldown(Ability ability)
+        public bool IsCooldown(Ability ability)
         {
             return ability == Ability.RANGE ? isCooldown1 : isCooldown2;
+        }
+
+        public void OnEvent(EventData photonEvent)
+        {
+            byte eventCode = photonEvent.Code;
+
+            if (eventCode == CastAbilityEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+
+                int casterID = (int)data[0];
+                Vector3 start = (Vector3)data[1];
+                Vector3 target = (Vector3)data[2];
+                Ability ability = (Ability)data[3];
+                
+                CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
+            }
         }
     }
 }

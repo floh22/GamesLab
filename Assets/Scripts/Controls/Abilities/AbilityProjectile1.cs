@@ -23,7 +23,8 @@ public class AbilityProjectile1 : AbilityProjectile
     {
         abilityPrefab.SetActive(true);
         GameObject explosion = Instantiate(abilityPrefab, _targetPosition, Quaternion.identity) as GameObject;
-        explosion.GetComponent<DamageObject>().Activate(castFrom, true, _damageMultiplier);
+        if(dealsDamage)
+            explosion.GetComponent<DamageObject>().Activate(castFrom, 10,1.3f, true, _damageMultiplier);
         Destroy(gameObject);
     }
 }

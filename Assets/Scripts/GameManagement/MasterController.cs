@@ -99,8 +99,10 @@ namespace GameManagement
             StartCoroutine(SpawnMinions());
         }
 
-        private IEnumerator SpawnMinions()
+        private IEnumerator SpawnMinions(int startDelayInMs = 0)
         {
+            yield return new WaitForSeconds(minionValues.InitWaveDelayInMs / 1000);
+            
             while (!IsPaused)
             {
                 StartCoroutine(OnWaveSpawn());

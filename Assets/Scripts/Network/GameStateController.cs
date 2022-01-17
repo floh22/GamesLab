@@ -126,7 +126,8 @@ namespace Network
                     
                     pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
 
-                    GameObject.Instantiate(abilityPrefab);
+                    GameObject abilityGo = PhotonNetwork.Instantiate("PlayerAbilities", Vector3.zero, Quaternion.identity);
+                    abilityGo.GetComponent<GameUnitFollower>().StartFollowing(pl.transform);
                 }
                 else{
 

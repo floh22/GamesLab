@@ -34,10 +34,10 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             RefreshReferences();
         }
             
-        if (!_abilities.isCooldown(currentAbility))
+        if (!_abilities.IsCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnDrag", eventData);
-            _abilities.move(this.currentAbility);
+            _abilities.Move(this.currentAbility);
             _lastPosition = new Vector3(
                 _abilityJoystick.Vertical,
                 _abilityJoystick.Horizontal, 0);
@@ -61,13 +61,13 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             RefreshReferences();
         }
         
-        if (!_abilities.isCooldown(currentAbility))
+        if (!_abilities.IsCooldown(currentAbility))
         {
             GetComponentInParent<FixedJoystick>().SendMessage("OnPointerDown", eventData);
             _abilities.ShowAbilityInterface(this.currentAbility);
             _abilityJoystickImage.enabled = true;
             _cirularMeterImage.enabled = false;
-            _abilities.move(this.currentAbility);
+            _abilities.Move(this.currentAbility);
             this.gameObject.GetComponent<Image>().color = new Color(0.490566f, 0, 0, 1f);
         }
     }

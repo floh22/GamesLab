@@ -17,7 +17,7 @@ using NetworkedPlayer;
 
 namespace GameUnit
 {
-    public class Minion : MonoBehaviour, IGameUnit
+    public class Minion : MonoBehaviourPunCallbacks, IGameUnit
     {
         #region Enums
         public enum MinionState {Idle, Walking, LookingForPath, Attacking, ChasingTarget, ReturningToPath }
@@ -153,6 +153,10 @@ namespace GameUnit
         // Update is called once per frame
         void Update()
         {
+            //Only do logic for the minion on the server
+            if (!photonView.IsMine)
+                return;
+            
             attackingID = CurrentAttackTarget?.NetworkID??-1;
             updateTimer += Time.deltaTime;
             if (!(updateTimer >= Values.UpdateRateInS)) return;
@@ -337,7 +341,7 @@ namespace GameUnit
                 float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
                 
                 
-                foundUnits.Add(unit, distance);
+                foundUnits.TryAdd(unit, distance);
                 
             }
             
@@ -510,6 +514,8 @@ namespace GameUnit
 
         void AttackTarget()
         {
+            if (!photonView.IsMine)
+                return;
             if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
             {
                 currentMinionState = MinionState.ReturningToPath;
@@ -614,6 +620,11 @@ namespace GameUnit
 
         public void Damage(IGameUnit unit, float damageTaken)
         {
+            //Cant take damage from a null object
+            if (unit == null || unit.Equals(null))
+                return;
+            
+            
             //Because this is a hashset, duplicates will not be added
             CurrentlyAttackedBy.Add(unit);
             this.Health -= damageTaken;
