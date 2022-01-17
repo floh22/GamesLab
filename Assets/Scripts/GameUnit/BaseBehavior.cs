@@ -42,6 +42,7 @@ namespace GameUnit
         public int SecondsToChannelPage { get; set; } = PlayerValues.SecondsToChannelPage;
         public IGameUnit CurrentAttackTarget { get; set; } = null;
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
+        public GameObject innerChannelingParticleSystem;
 
         private int pages;
 
@@ -162,17 +163,43 @@ namespace GameUnit
             float progress = 0;
             float maxProgress = 100;
             float secondsToChannel = SecondsToChannelPage;
-            while (progress < maxProgress)
+
+            while (progress <= maxProgress)
             {
                 if (!channeler.IsChannelingObjective ||
                     Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
                 {
+                    // Disable channeling effects if player moves
+                    innerChannelingParticleSystem.SetActive(false);
                     channeler.InterruptChanneling();
                     yield break;
                 }
 
                 progress += maxProgress / secondsToChannel;
                 Debug.Log($"{Team} Base being channeled, {progress} / {maxProgress}");
+
+                // Enable channeling effects when channeling Slenderman on the channeler.
+                // The channeling effect on Slenderman will be activated in the OnCollision.cs script
+                // when the particles from the channeler hit Slenderman.
+                channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
+                ParticleSystem ps = channeler.transform.Find("InnerChannelingParticleSystem").gameObject.GetComponent<ParticleSystem>();
+
+                // Set particles color
+                float hSliderValueR = 25.0F / 255;
+                float hSliderValueG = 194.0F / 255;
+                float hSliderValueB = 209.0F / 255;
+                float hSliderValueA = 255.0F / 255;
+                
+                ps.startColor = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
+
+                // Set the force that will change the particles direcion
+                var fo = ps.forceOverLifetime;
+                fo.enabled = true;
+
+                fo.x = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.x - channeler.transform.position.x);
+                fo.y = new ParticleSystem.MinMaxCurve(-innerChannelingParticleSystem.transform.position.y + channeler.transform.position.y);
+                fo.z = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.z - channeler.transform.position.z);
+
                 yield return new WaitForSeconds(1);
             }
 
@@ -183,6 +210,8 @@ namespace GameUnit
 
             if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
             {
+                // Disable channeling effects if player moves
+                innerChannelingParticleSystem.SetActive(false);
                 channeler.InterruptChanneling();
                 yield break;
             }
@@ -191,6 +220,7 @@ namespace GameUnit
             {
                 if (channeler.HasPage) // No page if already has a page
                 {
+                    innerChannelingParticleSystem.SetActive(false);
                     channeler.InterruptChanneling();
                     yield break;
                 }
@@ -198,6 +228,8 @@ namespace GameUnit
                 if (Pages > 0)
                 {
                     --Pages;
+                    Debug.Log($"Should be god now 1");
+                    innerChannelingParticleSystem.SetActive(false);
                     channeler.PickUpPage();
                 }
             }
@@ -211,10 +243,13 @@ namespace GameUnit
                 else if (Pages > 0) // Take a page
                 {
                     --Pages;
+                    Debug.Log($"Should be god now 2");
+                    innerChannelingParticleSystem.SetActive(false);
                     channeler.PickUpPage();
                 }
             }
 
+            innerChannelingParticleSystem.SetActive(false);
             channeler.InterruptChanneling();
         }
     }

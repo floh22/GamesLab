@@ -460,6 +460,10 @@ namespace NetworkedPlayer
                 return;
             }
             isChannelingObjective = false;
+
+            // Disable the channeling effect
+            transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
+
             Debug.Log($"Player's channeling from team {Team} has been interrupted");
         }
 
@@ -567,6 +571,8 @@ namespace NetworkedPlayer
         {
             hasPage = true;
             isChannelingObjective = false;
+            // Disable the channeling effect
+            transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
             Debug.Log($"Page has been picked up by player of {Team} team");
         }
         
