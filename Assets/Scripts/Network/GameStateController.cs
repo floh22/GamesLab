@@ -2,23 +2,36 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Character;
+using ExitGames.Client.Photon;
 using GameManagement;
 using GameUnit;
 using JetBrains.Annotations;
 using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Network
 {
-    public class GameStateController : MonoBehaviourPunCallbacks
+    public class GameStateController : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         
         public static GameStateController Instance;
         
         [CanBeNull] private MasterController controller;
+        
+        public const byte ChangeMinionTargetEventCode = 1;
+        public const byte DamageGameUnitEventCode = 3;
+
+        public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
+        {
+            object[] content = { team, target }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            PhotonNetwork.RaiseEvent(ChangeMinionTargetEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
         
         
         [Header("Player Data")]
@@ -40,6 +53,10 @@ namespace Network
 
         public Dictionary<GameData.Team, PlayerController> Players;
         public Dictionary<GameData.Team, BaseBehavior> Bases;
+        public Dictionary<GameData.Team, HashSet<Minion>> Minions;
+        public HashSet<IGameUnit> GameUnits;
+        
+        public Dictionary<GameData.Team, GameData.Team> Targets;
 
 
         private bool hasLeft = false;
@@ -109,6 +126,9 @@ namespace Network
 
             Players = new Dictionary<GameData.Team, PlayerController>();
             Bases = new Dictionary<GameData.Team, BaseBehavior>();
+            Minions = new Dictionary<GameData.Team, HashSet<Minion>>();
+            Targets = new Dictionary<GameData.Team, GameData.Team>();
+            GameUnits = new HashSet<IGameUnit>();
 
             if (playerPrefab == null) { // #Tip Never assume public properties of Components are filled up properly, always check and inform the developer of it.
 
@@ -141,8 +161,16 @@ namespace Network
 
             foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
             {
-                if(baseHolder != null && !baseHolder.Equals(null))
-                    Bases.Add(team, baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>());
+                Minions.Add(team, new HashSet<Minion>());
+                
+                //Set default target to opposing team
+                Targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
+
+                if (baseHolder == null || baseHolder.Equals(null)) continue;
+                BaseBehavior bb = baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>();
+                Bases.Add(team, bb);
+                GameUnits.Add(bb);
+
             }
 
 
@@ -162,8 +190,28 @@ namespace Network
             }
 
         }
+        
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            PhotonNetwork.AddCallbackTarget(this);
+        }
 
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            PhotonNetwork.RemoveCallbackTarget(this);
+        }
 
+        private void Update()
+        {
+            // "back" button of phone equals "Escape". quit app if that's pressed
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                QuitApplication();
+            }
+        }
+        
         private IEnumerator InitPlayersThisRound()
         {
             //Wait 2 seconds to init players to let everyone join
@@ -174,14 +222,23 @@ namespace Network
                 PlayerController pc = playerGo.GetComponent<PlayerController>();
                 return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
             }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        private void Update()
-        {
-            // "back" button of phone equals "Escape". quit app if that's pressed
-            if (Input.GetKeyDown(KeyCode.Escape))
+            
+            //Add them to gameUnits
+            Debug.Log($"{Players.Count} Players found");
+            int preSize = GameUnits.Count;
+            foreach (PlayerController player in Players.Values)
             {
-                QuitApplication();
+                int size = GameUnits.Count;
+                GameUnits.Add(player);
+                if (size + 1 != GameUnits.Count)
+                {
+                    Debug.LogError("Could not add player to GameUnit list");
+                }
+            }
+
+            if (GameUnits.Count != preSize + Players.Count)
+            {
+                Debug.LogError("Something went wrong adding players to GameUnit list");
             }
         }
         
@@ -195,6 +252,77 @@ namespace Network
             return spawnPointHolder.transform.Find(team.ToString()).transform.position;
         }
 
+        
+        public void OnEvent(EventData photonEvent)
+        {
+            byte eventCode = photonEvent.Code;
+
+            if (eventCode == ChangeMinionTargetEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+
+                GameData.Team team = (GameData.Team)data[0];
+                GameData.Team target = (GameData.Team)data[1];
+
+                SetMinionTarget(team, target);
+            }
+            
+            if (eventCode == DamageGameUnitEventCode)
+            {
+                Debug.Log("Damage Event");
+                object[] data = (object[])photonEvent.CustomData;
+
+                int sourceID = (int)data[0];
+                int targetID = (int)data[1];
+                float damage = (float)data[2];
+
+                IGameUnit? source = null;
+                IGameUnit? target = null;
+
+                foreach (IGameUnit unit in GameUnits)
+                {
+                    if (unit.NetworkID == sourceID)
+                        source = unit;
+                    if (unit.NetworkID == targetID)
+                        target = unit;
+                    if (source != null && target != null)
+                        break;
+                }
+
+                if (target == null || source == null)
+                {
+                    Debug.Log($"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
+                    Debug.Log(GameUnits.Select(unit => unit.NetworkID).ToList().Aggregate("GameUnits: ", (current, item) => current + (item + ", ")));
+                    
+                    return;
+                }
+                Debug.Log("showing damage dealt");
+                target.DoDamageVisual(source, damage);
+                
+                //I am the owner. Deal the damage. This will get synced by photon
+                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    Debug.Log("I should take damage now");
+                    target.Health = Mathf.Max(0, target.Health - damage);
+                }
+            }
+        }
+        
+        
+        
+        void SetMinionTarget(GameData.Team team, GameData.Team target)
+        {
+
+            Targets[team] = target;
+            
+            if (!PhotonNetwork.IsMasterClient) return;
+            
+            //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
+            foreach (Minion minionBehavior in Minions[team].NotNull())
+            {
+                minionBehavior.SetTargetTeam(target);
+            }
+        }
         
     }
 }

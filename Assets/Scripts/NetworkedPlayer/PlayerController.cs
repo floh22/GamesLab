@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
+using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
 using Photon.Pun;
@@ -24,6 +25,9 @@ namespace NetworkedPlayer
         #region IGameUnit
 
         public int NetworkID { get; set; }
+
+        public int OwnerID => photonView.OwnerActorNr;
+
         //TODO: Probably merge this with LocalPlayerInstance but I didnt want to break anything so I left it as is for now
         public GameObject AttachtedObjectInstance { get; set; } 
 
@@ -165,7 +169,7 @@ namespace NetworkedPlayer
         {
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
-            NetworkID = gameObject.GetInstanceID();
+            
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             //TODO temp
@@ -214,6 +218,11 @@ namespace NetworkedPlayer
             else
             {
                 Debug.LogWarning("<Color=Red><b>Missing</b></Color> PlayerUiPrefab reference on player Prefab.", this);
+            }
+
+            if (photonView.IsMine)
+            {
+                NetworkID = gameObject.GetInstanceID();
             }
         }
 
@@ -271,8 +280,9 @@ namespace NetworkedPlayer
                 return;
             }
 
-            // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
-            
+            if (other.gameObject == gameObject)
+                return;
+
             var target = other.GetComponent<IGameUnit>();
 
             if (target == self)
@@ -293,25 +303,6 @@ namespace NetworkedPlayer
             CurrentAttackTarget = target;
         }
 
-        public void OnTriggerStay(Collider other)
-        {
-            // we dont do anything if we are not the local player.
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-
-            // We are only interested in Beams. Beam weapon for now since its a bit simpler than ammo to sync over network
-            // we should be using tags, but im lazy
-            if (!other.name.Contains("Beam"))
-            {
-                return;
-            }
-
-            // we slowly affect health when beam is constantly hitting us, so player has to move to prevent death.
-            this.Health -= 0.1f * Time.deltaTime;
-        }
-        
         private void OnTriggerExit(Collider other)
         {
             // we dont do anything if we are not the local player.
@@ -342,16 +333,20 @@ namespace NetworkedPlayer
 
         #region Public API
 
-        public void Damage(IGameUnit unit, float damage)
+        public void DoDamageVisual(IGameUnit unit, float damage)
         {
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
 
-            Health -= damage;
-
             DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
+        }
+
+
+        public void SendDealDamageEvent(IGameUnit unit, float damage)
+        {
+            
         }
 
         public void Die()
@@ -429,6 +424,7 @@ namespace NetworkedPlayer
             {
                 // TODO sync damage as well
                 // Local player, send data
+                stream.SendNext(this.NetworkID);
                 stream.SendNext(this.isChanneling);
                 stream.SendNext(this.Health);
                 stream.SendNext(this.Team);
@@ -438,6 +434,7 @@ namespace NetworkedPlayer
             else
             {
                 // Network player, receive data
+                this.NetworkID = (int)stream.ReceiveNext();
                 this.isChanneling = (bool) stream.ReceiveNext();
                 this.Health = (float) stream.ReceiveNext();
                 this.Team = (GameData.Team) stream.ReceiveNext();
@@ -546,7 +543,7 @@ namespace NetworkedPlayer
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);
-            CurrentAttackTarget.Damage(self, damage);
+            ((IGameUnit)this).SendDealDamageEvent(CurrentAttackTarget, damage);
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();

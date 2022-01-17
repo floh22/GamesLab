@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BezierSolution;
 using Character;
+using ExitGames.Client.Photon;
 using GameManagement;
 using JetBrains.Annotations;
 using Photon.Pun;
@@ -38,6 +39,7 @@ namespace GameUnit
         
         #region GameUnit
         public int NetworkID { get; set; }
+        public int OwnerID => photonView.OwnerActorNr;
         [field: SerializeField] public GameData.Team Team { get; set; }
         public GameUnitType Type => GameUnitType.Minion;
         public GameObject AttachtedObjectInstance { get; set; }
@@ -148,6 +150,9 @@ namespace GameUnit
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             currentMinionState = MinionState.LookingForPath;
+
+            GameStateController.Instance.GameUnits.Add(this);
+            GameStateController.Instance.Minions[Team].Add(this);
         }
 
         // Update is called once per frame
@@ -163,7 +168,7 @@ namespace GameUnit
             AILogic();
             updateTimer = 0;
         }
-        
+
         public bool IsDestroyed()
         {
             return !gameObject;
@@ -525,7 +530,7 @@ namespace GameUnit
             
             if (CurrentAttackTarget.Team != this.Team)
             {
-                CurrentAttackTarget.Damage(this, Values.MinionAttackDamage);
+                ((IGameUnit)this).SendDealDamageEvent(CurrentAttackTarget, Values.MinionAttackDamage);
             }
         }
 
@@ -541,7 +546,7 @@ namespace GameUnit
             Vector3 lookPos = pos - transform.position;
             lookPos.y = 0;
             Quaternion rotation = Quaternion.LookRotation(lookPos);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, RotationSpeed);  
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, RotationSpeed);
         }
 
         void Die()
@@ -618,7 +623,7 @@ namespace GameUnit
             
         }
 
-        public void Damage(IGameUnit unit, float damageTaken)
+        public void DoDamageVisual(IGameUnit unit, float damageTaken)
         {
             //Cant take damage from a null object
             if (unit == null || unit.Equals(null))
@@ -627,7 +632,8 @@ namespace GameUnit
             
             //Because this is a hashset, duplicates will not be added
             CurrentlyAttackedBy.Add(unit);
-            this.Health -= damageTaken;
+            
+            //this.Health -= damageTaken;
             
             Vector3 spawnPosition = transform.position;
             spawnPosition.y = 1;
@@ -675,5 +681,7 @@ namespace GameUnit
                 this.AttackSpeed = (float)stream.ReceiveNext();
             }
         }
+
+        
     }
 }

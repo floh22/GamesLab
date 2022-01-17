@@ -67,6 +67,7 @@ public class DamageObject : MonoBehaviour
             return;
         }
 
-        unit.Damage(_castFrom, damage * _damageMultiplier);
+        float actualDamage = damage * _damageMultiplier;
+        IGameUnit.SendDealDamageEvent(_castFrom, unit, actualDamage);
     }
 }

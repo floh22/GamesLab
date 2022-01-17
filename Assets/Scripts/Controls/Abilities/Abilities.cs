@@ -306,9 +306,10 @@ namespace Controls.Abilities
                 object[] data = (object[])photonEvent.CustomData;
 
                 int casterID = (int)data[0];
-                Vector3 start = (Vector3)data[1];
-                Vector3 target = (Vector3)data[2];
-                Ability ability = (Ability)data[3];
+                Ability ability = (Ability)data[1];
+                Vector3 start = (Vector3)data[2];
+                Vector3 target = (Vector3)data[3];
+                
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }

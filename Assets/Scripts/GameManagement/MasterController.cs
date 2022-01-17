@@ -12,27 +12,11 @@ using UnityEngine;
 
 namespace GameManagement
 {
-    public class MasterController : MonoBehaviourPunCallbacks, IOnEventCallback
+    public class MasterController : MonoBehaviourPunCallbacks
     {
-        
-        #region Events
-        
-        public const byte ChangeMinionTargetEventCode = 1;
-
-        public static void SendChangeMinionTargetEvent(GameData.Team team, GameData.Team target)
-        {
-            object[] content = { team, target }; 
-            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
-            PhotonNetwork.RaiseEvent(ChangeMinionTargetEventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        }
-        
-        
-        #endregion
 
         public static MasterController Instance;
         
-        private Dictionary<GameData.Team, HashSet<Minion>> minions;
-        private Dictionary<GameData.Team, GameData.Team> targets;
 
         private MinionValues minionValues;
         private GameObject minionPrefab;
@@ -51,34 +35,7 @@ namespace GameManagement
             if (Instance == null)
                 Instance = this;
             
-            minions = new Dictionary<GameData.Team,  HashSet<Minion>>();
-            targets = new Dictionary<GameData.Team, GameData.Team>();
             
-        }
-
-        private void Awake()
-        {
-            foreach (GameData.Team team in (GameData.Team[])Enum.GetValues(typeof(GameData.Team)))
-            {
-                minions.Add(team, new HashSet<Minion>());
-                
-                //Set default target to opposing team
-                targets.Add(team, (GameData.Team)(((int)team + 2) % 4));
-            }
-            
-            Debug.Log($"Init {minions.Count} teams");
-        }
-
-        public override void OnEnable()
-        {
-            base.OnEnable();
-            PhotonNetwork.AddCallbackTarget(this);
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-            PhotonNetwork.RemoveCallbackTarget(this);
         }
 
         public void Init(MinionValues minionValues, GameObject minionPrefab, GameObject spawnPointHolder, GameObject minionPaths)
@@ -168,8 +125,9 @@ namespace GameManagement
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
 
                 Minion behavior = go.GetComponent<Minion>();
-                behavior.Init(go.GetInstanceID(), team, targets[team]);
-                minions[team].Add(behavior);
+                behavior.Init(go.GetInstanceID(), team, GameStateController.Instance.Targets[team]);
+                GameStateController.Instance.Minions[team].Add(behavior);
+                
 
                 //Debug
                 /*
@@ -185,34 +143,8 @@ namespace GameManagement
 
         public void RemoveMinion(Minion minion)
         {
-            minions[minion.Team].Remove(minion);
+            GameStateController.Instance.Minions[minion.Team].Remove(minion);
         }
-
         
-        void SetMinionTarget(GameData.Team team, GameData.Team target)
-        {
-
-            targets[team] = target;
-            //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
-            foreach (Minion minionBehavior in minions[team].NotNull())
-            {
-                minionBehavior.SetTargetTeam(target);
-            }
-        }
-
-        public void OnEvent(EventData photonEvent)
-        {
-            byte eventCode = photonEvent.Code;
-
-            if (eventCode == ChangeMinionTargetEventCode)
-            {
-                object[] data = (object[])photonEvent.CustomData;
-
-                GameData.Team team = (GameData.Team)data[0];
-                GameData.Team target = (GameData.Team)data[1];
-
-                SetMinionTarget(team, target);
-            }
-        }
     }
 }

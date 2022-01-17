@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Character;
+using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
 using NetworkedPlayer;
@@ -10,9 +12,10 @@ using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
-    public class BaseBehavior : MonoBehaviour, IGameUnit
+    public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit
     {
         public int NetworkID { get; set; }
+        public int OwnerID => GameStateController.Instance.Players[Team].OwnerID;
         public GameData.Team Team { get; set; }
         
         public GameObject AttachtedObjectInstance { get; set; }
@@ -66,13 +69,6 @@ namespace GameUnit
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
-
-
         void OnPageUpdate()
         {
             if (Team != PersistentData.Team)
@@ -92,10 +88,9 @@ namespace GameUnit
             return !gameObject;
         }
         
-        public void Damage(IGameUnit unit, float damage)
+        public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
-            this.Health -= damage;
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

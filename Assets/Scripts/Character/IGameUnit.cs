@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using ExitGames.Client.Photon;
 using GameManagement;
+using Network;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 namespace Character
@@ -16,7 +19,9 @@ namespace Character
     }
     public interface IGameUnit : IPunObservable
     {
+        
         public int NetworkID { get; set; }
+        public int OwnerID { get; }
         public GameData.Team Team { get; set; }
         
         public GameUnitType Type { get; }
@@ -62,8 +67,23 @@ namespace Character
             }
         }
         
-        public void Damage(IGameUnit unit, float damage);
+        public void DoDamageVisual(IGameUnit unit, float damage);
+
+
+        public static void SendDealDamageEvent(IGameUnit source, IGameUnit target, float damage)
+        {
+            Debug.Log(source.NetworkID + ", " + target.NetworkID);
+            object[] content = { source.NetworkID, target.NetworkID, damage }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All}; 
+            var res = PhotonNetwork.RaiseEvent(GameStateController.DamageGameUnitEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public void SendDealDamageEvent(IGameUnit target, float damage)
+        {
+            SendDealDamageEvent(this, target, damage);
+        }
 
         public bool IsDestroyed();
+        
     }
 }
