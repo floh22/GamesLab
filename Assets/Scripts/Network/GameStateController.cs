@@ -12,6 +12,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace Network
@@ -25,6 +26,9 @@ namespace Network
         public const byte ChangeMinionTargetEventCode = 1;
         public const byte DamageGameUnitEventCode = 3;
         public const byte ChannelSlenderManEventCode = 4;
+
+
+        public static UnityEvent LocalPlayerSpawnEvent = new();
 
         public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
         {
