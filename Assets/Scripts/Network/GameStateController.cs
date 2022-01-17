@@ -27,10 +27,11 @@ namespace Network
 
         public const byte ChangeMinionTargetEventCode = 1;
         public const byte DamageGameUnitEventCode = 3;
-        public const byte FinishChannelEventCode = 4;
-        public const byte LoseGameEventCode = 5;
-        public const byte GameTimeEventCode = 6;
-        //public const byte UpdateBasePagesEventCode = 7;
+        public const byte StartChannelEventCode = 4;
+        public const byte FinishChannelEventCode = 5;
+        public const byte LoseGameEventCode = 6;
+        public const byte GameTimeEventCode = 7;
+        //public const byte UpdateBasePagesEventCode = 8;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -53,6 +54,13 @@ namespace Network
             object[] content = { gameTime}; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(GameTimeEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static void SendStartChannelEvent(GameData.Team team, int networkID)
+        {
+            object[] content = { team, networkID}; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
+            PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void SendFinishChannelEvent(GameData.Team team, int networkID, int value)
@@ -352,6 +360,30 @@ namespace Network
             {
                 object[] data = (object[])photonEvent.CustomData;
                 GameTime = (float)data[0];
+            }
+
+            if (eventCode == StartChannelEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                
+                
+                GameData.Team team = (GameData.Team) data[0];
+                int targetNetworkID = (int)data[1];
+                PlayerController source = Players[team];
+
+                if (targetNetworkID == Slenderman.NetworkID)
+                {
+                    //Channeled slenderman
+                    Slenderman.OnStartChannel(source);
+                    return;
+                }
+                
+                foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
+                {
+                    //channeled a base
+                    baseStructure.OnStartChannel(source);
+                    return;
+                }
             }
 
             if (eventCode == FinishChannelEventCode)
