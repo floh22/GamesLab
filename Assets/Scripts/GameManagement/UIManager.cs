@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Character;
 using GameUnit;
 using JetBrains.Annotations;
 using Network;
 using NetworkedPlayer;
-using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,7 +16,7 @@ namespace GameManagement
     public class UIManager : MonoBehaviour
     {
         public static UIManager Instance;
-        
+
         #region Standard
 
         [CanBeNull] private MasterController controller;
@@ -25,7 +25,7 @@ namespace GameManagement
         #endregion
 
         #region BasicUI
-        
+
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
         public Image MinionSwitchButtonImage;
@@ -35,12 +35,13 @@ namespace GameManagement
 
         [SerializeField] private GameObject AutoAttackOnImage;
         [SerializeField] private GameObject AutoAttackOffImage;
-        
+
         [SerializeField] private Image SlenderImage;
         private bool IsSlenderCooldown;
         private float SlenderCooldownDuration;
 
         private Image HealthbarImage;
+        [SerializeField] private Image OwnPlayerLevelBackgroundImage; 
 
         #endregion
 
@@ -52,27 +53,26 @@ namespace GameManagement
         private Image Circular_Meter_1;
         private Image Circular_Meter_2;
         private Image Circular_Meter_3;
-        
+
         #endregion
-        
-        
+
+
         public Timer GameTimer;
 
         #region Scoreboard
 
+        public HashSet<GameData.Team> ScoreboardEntries { get; set; }
         [SerializeField] private TextMeshProUGUI[] Player_Pages_Labels;
         [SerializeField] private TextMeshProUGUI[] Player_Level_Labels;
         [SerializeField] private Image[] Player_Sprite_Images;
         [SerializeField] private Image[] Player_Pages_Images;
         [SerializeField] private Image[] Player_Level_Background_Images;
-
-        public HashSet<GameData.Team> ScoreboardEntries { get; set; }
+        private int _currentlyDisplayedPlaser;
 
         #endregion
 
         void Start()
         {
-            
             if (Instance == null)
             {
                 Instance = this;
@@ -102,8 +102,6 @@ namespace GameManagement
 
             _playerController = PlayerController.LocalPlayerController;
 
-            SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
-
             PagesContainer = GameObject.Find("Pages Container");
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
 
@@ -111,6 +109,8 @@ namespace GameManagement
 
             SlenderImage = GameObject.Find("SlenderImage").GetComponent<Image>();
             HealthbarImage = GameObject.Find("Healthbar_InnerBar").GetComponent<Image>();
+
+            GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
         }
 
         // Update is called once per frame
@@ -121,7 +121,6 @@ namespace GameManagement
             {
                 LevelLabel.text = _playerController.Level.ToString();
                 HealthbarImage.fillAmount = _playerController.Health / 100;
-                //SetPages();
             }
 
             if (IsSlenderCooldown)
@@ -133,7 +132,20 @@ namespace GameManagement
                     SlenderImage.enabled = false;
                 }
             }
+
             UpdateScoreboard();
+        }
+
+        void SetupUI()
+        {
+            _playerController = PlayerController.LocalPlayerController;
+
+            SetPages(PlayerValues.PagesAmount);
+            SetVisibilityOfLevelUpButtons(false);
+            UpdateCircularMeters();
+            OwnPlayerLevelBackgroundImage.color = GetColor(_playerController.Team);
+            SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
+
         }
 
         public void TogglePauseMenu()
@@ -154,7 +166,12 @@ namespace GameManagement
 
         public void SetMinionTarget(GameData.Team target)
         {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+            }
             GameData.Instance.SelectedMinionTarget = target;
+            GameStateController.SendChangeTargetEvent(_playerController.Team, target);
             MinionSwitchButtonImage.color = GetColor(target);
         }
 
@@ -183,21 +200,26 @@ namespace GameManagement
             SetAutoAttack(!GameData.Instance.AutoAttack);
         }
 
+        //HELPERMETHODDONTUSE
         public void IncreasePages()
         {
             if (GameData.Instance.NumberOfPages < 10)
             {
-                PagesImages[GameData.Instance.NumberOfPages].enabled = true;
-                GameData.Instance.NumberOfPages++;
+                BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == PersistentData.Team).Value;
+                currentBase.Pages--;
+                SetPages(currentBase.Pages);
             }
         }
 
+        //HELPERMETHODDONTUSE
         public void DecreasePages()
         {
             if (GameData.Instance.NumberOfPages - 1 >= 0)
             {
-                GameData.Instance.NumberOfPages--;
-                PagesImages[GameData.Instance.NumberOfPages].enabled = false;
+                BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == PersistentData.Team).Value;
+                currentBase.Pages--;
+                SetPages(currentBase.Pages);
+
             }
         }
 
@@ -208,8 +230,14 @@ namespace GameManagement
 
         public void SetPages(int count)
         {
-            Debug.Log("Updating page UI");
-            for (int i = 9; i >= count; i--)
+            int counter = 0;
+            for (int i = 0; i < count; i++)
+            {
+                PagesImages[i].enabled = true;
+                counter++;
+            }
+
+            for (int i = counter; i < 10; i++)
             {
                 PagesImages[i].enabled = false;
             }
@@ -252,7 +280,7 @@ namespace GameManagement
             if (_playerController == null || _playerController.Equals(null))
             {
                 _playerController = PlayerController.LocalPlayerController;
-                
+
                 if (_playerController == null || _playerController.Equals(null))
                     return;
             }
@@ -317,7 +345,7 @@ namespace GameManagement
             if (_playerController == null || _playerController.Equals(null))
             {
                 _playerController = PlayerController.LocalPlayerController;
-                
+
                 if (_playerController == null || _playerController.Equals(null))
                     return;
             }
@@ -330,48 +358,72 @@ namespace GameManagement
             if (_playerController == null || _playerController.Equals(null))
             {
                 _playerController = PlayerController.LocalPlayerController;
-                
+
                 if (_playerController == null || _playerController.Equals(null))
                     return;
             }
+
             _playerController.OnReceiveSlendermanBuff();
         }
 
         void UpdateScoreboard()
         {
-            int counter = 0;
             if (GameStateController.Instance == null || GameStateController.Instance.Players == null)
             {
                 return;
             }
-            
-            foreach(KeyValuePair<GameData.Team, PlayerController> entry in GameStateController.Instance.Players)
-            {
-                if (entry.Value.Team != (PersistentData.Team ?? GameData.Team.RED))
-                {
-                    ScoreboardEntries.Add(entry.Value.Team);
-                    Player_Sprite_Images[counter].color = GetColor(entry.Value.Team);
+            Dictionary<GameData.Team, PlayerController> players = GameStateController.Instance.Players;
 
-                    counter++;
+            int counter = 0;
+            foreach (KeyValuePair<GameData.Team, PlayerController> entry in players)
+            {
+                if (!ScoreboardEntries.Contains(entry.Key))
+                {
+                    if (entry.Key != (PersistentData.Team ?? GameData.Team.RED))
+                    {
+                        ScoreboardEntries.Add(entry.Value.Team);
+                        DisplayRowInScoreboard(counter, true);
+                        UpdateRowInScoreboard(counter, entry.Value.Team);
+                    }
                 }
+                else
+                {
+                    UpdateRowInScoreboard(counter, entry.Value.Team);
+                }
+                counter++;
             }
             
             for (int i = counter; i < 3; i++)
             {
-                Player_Sprite_Images[i].enabled = false;
-                Player_Pages_Labels[i].enabled = false;
-                Player_Level_Labels[i].enabled = false;
-                Player_Pages_Images[i].enabled = false;
-                Player_Level_Background_Images[i].enabled = false;
+                DisplayRowInScoreboard(i, false);
             }
         }
-        
+
+        void DisplayRowInScoreboard(int i, bool value)
+        {
+            Player_Sprite_Images[i].enabled = value;
+            Player_Pages_Labels[i].enabled = value;
+            Player_Level_Labels[i].enabled = value;
+            Player_Pages_Images[i].enabled = value;
+            Player_Level_Background_Images[i].enabled = value;
+        }
+
+        void UpdateRowInScoreboard(int i, GameData.Team team)
+        {
+            PlayerController currentPlayer = GameStateController.Instance.Players.FirstOrDefault(x => x.Key == team).Value;
+            BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == team).Value;
+            Player_Level_Labels[i].text = currentPlayer.Level.ToString();
+            Player_Pages_Labels[i].text = currentBase.Pages.ToString();
+            Player_Sprite_Images[i].color = GetColor(team);
+        }
+
         private int GetPagesForTeam(GameData.Team team)
         {
             if (GameStateController.Instance == null)
             {
                 return 0;
             }
+
             BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == team).Value;
             return currentBase.Pages;
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Character;
+using Controls.Channeling;
 using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
@@ -31,7 +32,17 @@ namespace GameUnit
 
         public float MaxHealth { get; set; } = 1000;
         public GameUnitType Type => GameUnitType.Structure;
-        public float Health { get; set; }
+        [SerializeField] private float _health;
+        public float Health
+        {
+
+            get => _health;
+            set
+            {
+                _health = value;
+                CheckHealth();
+            }
+        }
         public float MoveSpeed { get; set; } = 0;
         public float RotationSpeed { get; set; } = 0;
         public float AttackDamage { get; set; } = 0;
@@ -56,9 +67,17 @@ namespace GameUnit
             }
         }
 
+        private bool hasBeenChanneledOnce;
+        private MeshRenderer meshRenderer;
+
         // Start is called before the first frame update
         void Start()
         {
+            meshRenderer = GetComponent<MeshRenderer>();
+            foreach (var material in meshRenderer.materials)
+            {
+                material.color = Color.white;
+            }
             pages = PlayerValues.PagesAmount;
             GameObject o = gameObject;
             NetworkID = o.GetInstanceID();
@@ -74,6 +93,7 @@ namespace GameUnit
 
             Health = MaxHealth;
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
+            StartCoroutine(Glow());
         }
         
 
@@ -108,7 +128,7 @@ namespace GameUnit
                 return;
             }
 
-            channeler.OnChannelObjective(transform.position);
+            channeler.OnChannelObjective(transform.position, NetworkID);
             StartCoroutine(Channel(channeler));
         }
         
@@ -119,8 +139,9 @@ namespace GameUnit
 
             if (Pages <= 0)
             {
+                IsAlive = false;
                 if (PlayerController.LocalPlayerInstance != null && !PlayerController.LocalPlayerInstance.Equals(null))
-                    PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnLoseGame();
+                    GameStateController.Instance.OnLose();
             }
 
             UIManager.Instance.SetPages(Pages);
@@ -134,6 +155,7 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
+            
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -146,6 +168,7 @@ namespace GameUnit
                 stream.SendNext(this.Health);
                 stream.SendNext(this.MaxHealth);
                 stream.SendNext(this.Pages);
+                stream.SendNext(this.IsAlive);
             }
             else
             {
@@ -155,11 +178,19 @@ namespace GameUnit
                 this.Health = (float)stream.ReceiveNext();
                 this.MaxHealth = (float)stream.ReceiveNext();
                 this.Pages = (int)stream.ReceiveNext();
+                this.IsAlive = (bool)stream.ReceiveNext();
             }
+        }
+
+        private void CheckHealth()
+        {
+            if (_health == 0)
+                --Pages;
         }
 
         private IEnumerator Channel(PlayerController channeler)
         {
+            hasBeenChanneledOnce = true;
             float progress = 0;
             float maxProgress = 100;
             float secondsToChannel = SecondsToChannelPage;
@@ -263,26 +294,83 @@ namespace GameUnit
                 {
                     --Pages;
                     innerChannelingParticleSystem.SetActive(false);
-                    channeler.PickUpPage();
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
                 }
             }
             else // Same team
             {
                 if (channeler.HasPage) // Return page back
                 {
-                    channeler.DropPage();
                     ++Pages;
+                    channeler.OnChannelingFinishedAndDropPage(NetworkID);
                 }
                 else if (Pages > 0) // Take a page
                 {
                     --Pages;
                     innerChannelingParticleSystem.SetActive(false);
-                    channeler.PickUpPage();
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
                 }
             }
 
             innerChannelingParticleSystem.SetActive(false);
             channeler.InterruptChanneling();
+        }
+        
+        private IEnumerator Glow()
+        {
+            List<Material> materials = new List<Material>();
+            meshRenderer.GetSharedMaterials(materials);
+            Dictionary<Material, Color> normalColors = new Dictionary<Material, Color>();
+            foreach (var material in materials)
+            {
+                normalColors[material] = Copy(material.color);
+            }
+            Color glowColor = Color.green;
+            float minutesToGlow = 1;
+            float step = 0.1f;
+            int stepsCount = 10;
+            float pause = 3f;
+            float totalRepetitions = (minutesToGlow * 60) / pause;
+            int localRepetitions = 2;
+            while (!hasBeenChanneledOnce && totalRepetitions-- > 0)
+            {
+                for (int i = 0; i < localRepetitions; i++)
+                {
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, glowColor, step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    for (int j = 0; j < stepsCount; j++)
+                    {
+                        foreach (var material in materials)
+                        {
+                            material.color = Color.Lerp(material.color, normalColors[material], step);
+                            yield return new WaitForSeconds(0.01f);
+                        }
+                    }
+
+                    foreach (var material in materials)
+                    {
+                        material.color = normalColors[material];
+                    }
+                }
+
+                yield return new WaitForSeconds(pause);
+            }
+            foreach (var baseBehavior in FindObjectsOfType<BaseBehavior>())
+            {
+                baseBehavior.hasBeenChanneledOnce = true;
+            }
+        }
+
+        private Color Copy(Color color)
+        {
+            return new Color(color.r, color.g, color.b, color.a);
         }
     }
 }
