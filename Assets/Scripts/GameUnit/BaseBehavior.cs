@@ -107,7 +107,7 @@ namespace GameUnit
                 return;
             }
 
-            channeler.OnChannelObjective();
+            channeler.OnChannelObjective(transform.position);
             StartCoroutine(Channel(channeler));
         }
         

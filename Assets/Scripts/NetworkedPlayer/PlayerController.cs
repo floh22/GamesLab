@@ -448,7 +448,7 @@ namespace NetworkedPlayer
             
         }
 
-        public void OnChannelObjective()
+        public void OnChannelObjective(Vector3 objectivePosition)
         {
             isChannelingObjective = true;
         }

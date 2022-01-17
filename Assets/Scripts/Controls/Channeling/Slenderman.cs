@@ -83,7 +83,7 @@ namespace Controls.Channeling
                 return;
             }
 
-            channeler.OnChannelObjective();
+            channeler.OnChannelObjective(transform.position);
             StartCoroutine(Channel(channeler));
         }
 
