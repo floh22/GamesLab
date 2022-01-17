@@ -59,6 +59,10 @@ namespace NetworkedPlayer
 				playerHealthSlider.maxValue = target.MaxHealth;
 				playerHealthSlider.value = target.Health;
 			}
+			else
+			{
+				Debug.LogError("playerHealthSlider is null in PlayerUI");
+			}
 		}
 
 		private void LateUpdate () {
