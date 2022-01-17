@@ -234,9 +234,10 @@ namespace Network
                 controller.SpawnSlenderman();
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs / 1000);
             }
-            catch
+            catch (Exception e)
             {
                 Debug.LogError("Could not create master controller. Server functionality will not work");
+                Debug.Log(e.Message);
             }
         }
 
@@ -289,6 +290,9 @@ namespace Network
             {
                 Debug.LogError("Something went wrong adding players to GameUnit list");
             }
+
+
+            Slenderman = GameObject.FindWithTag("Slenderman").GetComponent<Slenderman>();
         }
 
         public void QuitApplication()

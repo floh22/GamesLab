@@ -1179,7 +1179,7 @@ GameObject:
   - component: {fileID: 1363318469528110231}
   m_Layer: 0
   m_Name: Slender
-  m_TagString: Untagged
+  m_TagString: Slenderman
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
