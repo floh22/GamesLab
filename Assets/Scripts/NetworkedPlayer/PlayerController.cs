@@ -163,6 +163,7 @@ namespace NetworkedPlayer
 
         private bool isChanneling;
         private bool isChannelingObjective;
+        private Vector3 channelingTo = Vector3.positiveInfinity;
         
         private IGameUnit self;
         
@@ -384,12 +385,7 @@ namespace NetworkedPlayer
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
         }
-
-
-        public void SendDealDamageEvent(IGameUnit unit, float damage)
-        {
-            
-        }
+        
 
         public void Die()
         {
@@ -452,21 +448,25 @@ namespace NetworkedPlayer
         public void OnChannelObjective(Vector3 objectivePosition, int networkId)
         {
             isChannelingObjective = true;
+            channelingTo = objectivePosition;
         }
 
         public void OnChannelingFinishedAndReceiveSlendermanBuff(int networkId)
         {
             OnReceiveSlendermanBuff();
+            GameStateController.SendFinishChannelEvent(Team, networkId, 0);
         }
         
-        public void OnChannelingFinishedAndPickUpPage(int networkId)
+        public void OnChannelingFinishedAndPickUpPage(int networkId, int pages)
         {
             PickUpPage();
+            GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
         
-        public void OnChannelingFinishedAndDropPage(int networkId)
+        public void OnChannelingFinishedAndDropPage(int networkId, int pages)
         {
             DropPage();
+            GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
         
         public void InterruptChanneling()
@@ -476,6 +476,7 @@ namespace NetworkedPlayer
                 return;
             }
             isChannelingObjective = false;
+            channelingTo = Vector3.positiveInfinity;
             Debug.Log($"Player's channeling from team {Team} has been interrupted");
         }
 
@@ -498,6 +499,7 @@ namespace NetworkedPlayer
                 stream.SendNext(this.Team);
                 stream.SendNext(this.Level);
                 stream.SendNext(this.isChannelingObjective);
+                stream.SendNext(this.channelingTo);
             }
             else
             {
@@ -508,6 +510,7 @@ namespace NetworkedPlayer
                 this.Team = (GameData.Team) stream.ReceiveNext();
                 this.Level = (int)stream.ReceiveNext();
                 this.isChannelingObjective = (bool)stream.ReceiveNext();
+                this.channelingTo = (Vector3)stream.ReceiveNext();
             }
         }
 

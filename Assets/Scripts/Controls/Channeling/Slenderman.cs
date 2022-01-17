@@ -151,10 +151,16 @@ namespace Controls.Channeling
                 channeler.InterruptChanneling();
                 yield break;
             }
-
-            hasBeenAcquired = true;
+            
             channeler.SacrifisePage();
             channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
+            OnChanneled();
+        }
+
+
+        public void OnChanneled()
+        {
+            hasBeenAcquired = true;
             StartCoroutine(Recover());
         }
 

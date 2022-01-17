@@ -229,7 +229,7 @@ namespace GameUnit
                 if (Pages > 0)
                 {
                     --Pages;
-                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
                 }
             }
             else // Same team
@@ -237,12 +237,12 @@ namespace GameUnit
                 if (channeler.HasPage) // Return page back
                 {
                     ++Pages;
-                    channeler.OnChannelingFinishedAndDropPage(NetworkID);
+                    channeler.OnChannelingFinishedAndDropPage(NetworkID, Pages);
                 }
                 else if (Pages > 0) // Take a page
                 {
                     --Pages;
-                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID);
+                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
                 }
             }
 

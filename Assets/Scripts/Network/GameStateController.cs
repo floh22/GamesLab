@@ -30,7 +30,7 @@ namespace Network
         public const byte FinishChannelEventCode = 4;
         public const byte LoseGameEventCode = 5;
         public const byte GameTimeEventCode = 6;
-        public const byte UpdateBasePagesEventCode = 7;
+        //public const byte UpdateBasePagesEventCode = 7;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -55,9 +55,11 @@ namespace Network
             PhotonNetwork.RaiseEvent(GameTimeEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
-        public static void SendFinishChannelEvent(GameData.Team team, IChannelable channeled)
+        public static void SendFinishChannelEvent(GameData.Team team, int networkID, int value)
         {
-            
+            object[] content = { team, networkID, value}; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
+            PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
 
@@ -351,6 +353,30 @@ namespace Network
             {
                 object[] data = (object[])photonEvent.CustomData;
                 GameTime = (float)data[0];
+            }
+
+            if (eventCode == FinishChannelEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                
+                
+                GameData.Team team = (GameData.Team) data[0];
+                int targetNetworkID = (int)data[1];
+                int value = (int)data[2];
+
+                if (targetNetworkID == Slenderman.NetworkID)
+                {
+                    //Channeled slenderman
+                    Slenderman.OnChanneled();
+                    return;
+                }
+                
+                foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
+                {
+                    //channeled a base
+                    baseStructure.Pages = value;
+                    return;
+                }
             }
         }
 
