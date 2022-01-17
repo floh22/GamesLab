@@ -413,7 +413,7 @@ namespace GameManagement
             PlayerController currentPlayer = GameStateController.Instance.Players.FirstOrDefault(x => x.Key == team).Value;
             BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == team).Value;
             Player_Level_Labels[i].text = currentPlayer.Level.ToString();
-            Player_Pages_Labels[i].text = currentBase.Pages.ToString();
+            Player_Pages_Labels[i].text = "x" + currentBase.Pages.ToString();
             Player_Sprite_Images[i].color = GetColor(team);
         }
 

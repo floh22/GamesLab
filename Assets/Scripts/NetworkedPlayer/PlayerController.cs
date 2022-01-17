@@ -552,11 +552,12 @@ namespace NetworkedPlayer
         {
             Vector3 position = transform.position;
             HasSlenderBuff = true;
-            GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
+            GameObject effect = PhotonNetwork.Instantiate("SlenderBuffVisual", position, Quaternion.identity);
+            // GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
             effect.transform.SetParent(gameObject.transform);
             GameObject.Find("UIManager").GetComponent<UIManager>().ShowSlenderBuffCountdown(SlenderBuffDuration);
             yield return new WaitForSeconds(SlenderBuffDuration);
-            Destroy(effect);
+            PhotonNetwork.Destroy(effect);
         }
 
         public void OnLoseGame()
