@@ -1,5 +1,4 @@
 using Character;
-using GameManagement;
 using UnityEngine;
 
 public class AbilityProjectile : MonoBehaviour

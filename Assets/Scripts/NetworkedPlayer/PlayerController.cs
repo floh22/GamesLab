@@ -19,9 +19,8 @@ namespace NetworkedPlayer
 
         public static GameObject LocalPlayerInstance;
         public static PlayerController LocalPlayerController;
-
         #endregion
-        
+
         #region IGameUnit
 
         public int NetworkID { get; set; }
@@ -44,6 +43,9 @@ namespace NetworkedPlayer
         public bool IsAlive { get; set; } = true;
         public bool IsChannelingObjective => isChannelingObjective;
         public bool IsVisible { get; set; }
+        [SerializeField] public bool HasSlenderBuff { get; set; }
+        [SerializeField] public float SlenderBuffDuration = 45;
+        
 
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
@@ -58,9 +60,45 @@ namespace NetworkedPlayer
         public int ExperienceBetweenLevels { get; set; }
         public int GainedExperienceByMinion { get; set; }
         public int GainedExperienceByPlayer { get; set; }
-        [field: SerializeField] public float DamageMultiplierMinion { get; set; }
-        [field: SerializeField] public float DamageMultiplierAbility1 { get; set; }
-        [field: SerializeField] public float DamageMultiplierAbility2 { get; set; }
+
+        private float _damageMultiplierMinion;
+        [field: SerializeField] public float DamageMultiplierMinion
+        {
+            get
+            {
+                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierMinion);
+            }
+            set
+            {
+                _damageMultiplierMinion = value;
+            }
+        }
+
+        private float _damageMultiplierAbility1;
+        [field: SerializeField] public float DamageMultiplierAbility1 
+        {
+            get
+            {
+                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility1);
+            }
+            set
+            {
+                _damageMultiplierAbility1 = value;
+            }
+        }
+
+        private float _damageMultiplierAbility2;
+        [field: SerializeField] public float DamageMultiplierAbility2 
+        {
+            get
+            {
+                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility2);
+            }
+            set
+            {
+                _damageMultiplierAbility2 = value;
+            }
+        }
 
         [field: SerializeField] public int UpgradesMinion { get; set; }
         [field: SerializeField] public int UpgradesAbility1 { get; set; }
@@ -77,6 +115,7 @@ namespace NetworkedPlayer
 
         [FormerlySerializedAs("DeadPlayer")] [SerializeField]
         public GameObject DeadPlayerPrefab;
+        [SerializeField] public GameObject SlenderBuffPrefab;
 
         public bool HasPage
         {
@@ -499,6 +538,28 @@ namespace NetworkedPlayer
 
                     break;
             }
+        }
+
+        public void ActivateSlenderBuff()
+        {
+            StartCoroutine(SlenderBuffCoroutine());
+        }
+
+        private float ReturnMultiplierWithRespectToSlenderBuff(float mulitplier)
+        {
+            return HasSlenderBuff ? mulitplier * 2 : mulitplier;
+        }
+
+        IEnumerator SlenderBuffCoroutine()
+        {
+            Vector3 position = transform.position;
+            position.y = 0.1f;
+            HasSlenderBuff = true;
+            GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
+            effect.transform.SetParent(gameObject.transform);
+            GameObject.Find("UIManager").GetComponent<UIManager>().ShowSlenderBuffCountdown(SlenderBuffDuration);
+            yield return new WaitForSeconds(SlenderBuffDuration);
+            Destroy(effect);
         }
 
         public void OnLoseGame()

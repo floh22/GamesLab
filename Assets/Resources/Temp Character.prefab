@@ -512,12 +512,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Team>k__BackingField: 0
   <Health>k__BackingField: 0
+  SlenderBuffDuration: 45
   <Level>k__BackingField: 0
   <Experience>k__BackingField: 0
   <ExperienceToReachNextLevel>k__BackingField: 0
-  <DamageMultiplierMinion>k__BackingField: 0
-  <DamageMultiplierAbility1>k__BackingField: 0
-  <DamageMultiplierAbility2>k__BackingField: 0
   <UpgradesMinion>k__BackingField: 0
   <UpgradesAbility1>k__BackingField: 0
   <UpgradesAbility2>k__BackingField: 0
@@ -526,6 +524,8 @@ MonoBehaviour:
   DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
     type: 3}
   DeadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
+    type: 3}
+  SlenderBuffPrefab: {fileID: 1726926769373873527, guid: 03de876cb360cf24db2f39b0b718114f,
     type: 3}
   hasPage: 0
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}

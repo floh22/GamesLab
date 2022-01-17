@@ -18,7 +18,6 @@ namespace Network
 {
     public class GameStateController : MonoBehaviourPunCallbacks, IOnEventCallback
     {
-        
         public static GameStateController Instance;
         
         [CanBeNull] private MasterController controller;
