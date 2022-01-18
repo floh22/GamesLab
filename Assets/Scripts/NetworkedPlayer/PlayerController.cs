@@ -56,6 +56,7 @@ namespace NetworkedPlayer
         #region Level
 
         [field: SerializeField] public int Level { get; set; }
+        [field: SerializeField] public int MaxLevel { get; set; }
         [field: SerializeField] public int Experience { get; set; }
         [field: SerializeField] public int ExperienceToReachNextLevel { get; set; }
         public int ExperienceBetweenLevels { get; set; }
@@ -216,6 +217,7 @@ namespace NetworkedPlayer
             AttackSpeed = PlayerValues.AttackSpeed;
             AttackRange = PlayerValues.AttackRange;
             Level = 1;
+            MaxLevel = 12;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
             ExperienceBetweenLevels = 100;
@@ -522,6 +524,10 @@ namespace NetworkedPlayer
 
         public void AddExperience(int amount)
         {
+            if (Level >= MaxLevel)
+            {
+                return;
+            }
             Experience += amount;
             if (Experience >= ExperienceToReachNextLevel)
             {
@@ -534,6 +540,7 @@ namespace NetworkedPlayer
 
         public void AddExperienceBySource(bool byMinion)
         {
+            Debug.Log(byMinion);
             AddExperience(byMinion ? GainedExperienceByMinion : GainedExperienceByPlayer);
         }
 

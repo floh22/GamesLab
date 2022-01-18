@@ -516,6 +516,7 @@ MonoBehaviour:
   <Health>k__BackingField: 0
   SlenderBuffDuration: 45
   <Level>k__BackingField: 0
+  <MaxLevel>k__BackingField: 0
   <Experience>k__BackingField: 0
   <ExperienceToReachNextLevel>k__BackingField: 0
   <UpgradesMinion>k__BackingField: 0

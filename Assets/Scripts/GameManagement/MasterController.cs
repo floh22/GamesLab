@@ -142,7 +142,7 @@ namespace GameManagement
         public void RemoveMinion(Minion minion)
         {
             GameStateController.Instance.Minions[minion.Team].Remove(minion);
+            PhotonNetwork.Destroy(minion.gameObject);
         }
-        
     }
 }
