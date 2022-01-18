@@ -35,7 +35,8 @@ namespace Controls.Abilities
         public float cooldownAbility2 = 7;
         public bool isCooldown1 = false;
         public bool isCooldown2 = false;
-        private Dictionary<Ability, bool> IsAbilityEventAvailable;
+        private bool isRangeAvailable = true;
+        private bool isLineAvailable = true;
 
         public Image ability1Image;
         public Image ability2Image;
@@ -62,12 +63,6 @@ namespace Controls.Abilities
                 Instance = this;
             }
 
-            IsAbilityEventAvailable = new Dictionary<Ability, bool>
-            {
-                [Ability.NORMAL] = true,
-                [Ability.RANGE] = true,
-                [Ability.LINE] = true
-            };
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
@@ -333,11 +328,14 @@ namespace Controls.Abilities
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
 
+                Debug.Log($"Event with ability {ability} invocation");
                 if (!IsAbilityAvailable(ability))
                 {
+                    Debug.Log($"Event with ability {ability} ignored");
                     return;
                 }
                 StartCoroutine(EventCoroutineCooldown(ability));
+                Debug.Log($"Event with ability {ability} not ignored");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
@@ -345,29 +343,51 @@ namespace Controls.Abilities
 
         private bool IsAbilityAvailable(Ability ability)
         {
-            if (IsAbilityEventAvailable == null)
+            switch (ability)
             {
-                IsAbilityEventAvailable = new Dictionary<Ability, bool>
-                {
-                    [Ability.NORMAL] = true,
-                    [Ability.RANGE] = true,
-                    [Ability.LINE] = true
-                };
+                case Ability.LINE:
+                    Debug.Log($"IsAbilityAvailable LINE = {isLineAvailable}");
+                    return isLineAvailable;
+                case Ability.RANGE:
+                    Debug.Log($"IsAbilityAvailable isRangeAvailable = {isRangeAvailable}");
+                    return isRangeAvailable;
+                default:
+                    Debug.Log("IsAbilityAvailable DEFAULT");
+                    return true;
             }
-
-            if (!IsAbilityEventAvailable.ContainsKey(ability))
-            {
-                IsAbilityEventAvailable[ability] = true;
-            }
-
-            return IsAbilityEventAvailable[ability];
         }
 
         private IEnumerator EventCoroutineCooldown(Ability ability)
         {
-            IsAbilityEventAvailable[ability] = false;
-            yield return new WaitForSeconds(Math.Min(cooldownAbility1, cooldownAbility2));
-            IsAbilityEventAvailable[ability] = true;
+            switch (ability)
+            {
+                case Ability.LINE:
+                    isLineAvailable = false;
+                    Debug.Log($"EventCoroutineCooldown set to false LINE = {isLineAvailable}");
+                    break;
+                case Ability.RANGE:
+                    isRangeAvailable = false;
+                    Debug.Log($"EventCoroutineCooldown set to false RANGE = {isRangeAvailable}");
+                    break;
+                default:
+                    Debug.Log("EventCoroutineCooldown DEFAULT");
+                    break;
+            }
+            yield return new WaitForSeconds(5f);
+            switch (ability)
+            {
+                case Ability.LINE:
+                    isLineAvailable = true;
+                    Debug.Log($"EventCoroutineCooldown set to true LINE = {isLineAvailable}");
+                    break;
+                case Ability.RANGE:
+                    isRangeAvailable = true;
+                    Debug.Log($"EventCoroutineCooldown set to true RANGE = {isRangeAvailable}");
+                    break;
+                default:
+                    Debug.Log("EventCoroutineCooldown DEFAULT");
+                    break;
+            }
         }
     }
 }
