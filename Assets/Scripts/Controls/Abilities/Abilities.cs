@@ -180,7 +180,7 @@ namespace Controls.Abilities
 
         public void CastAbility(Ability ability, Vector3 lastPosition)
         {
-            Vector3 startingPosition;
+            Vector3 startingPosition = new Vector3();
 
             switch (ability)
             {
@@ -203,6 +203,7 @@ namespace Controls.Abilities
                     
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
+                    lastPosition = targetCircle.transform.position;
                     break;
 
                 case Ability.LINE:
@@ -250,7 +251,7 @@ namespace Controls.Abilities
             }
 
             //Send ability cast to other players
-            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, transform.position, lastPosition);
+            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, lastPosition);
             
             HideAbilityInterface(ability);
         }
@@ -317,6 +318,7 @@ namespace Controls.Abilities
 
         public void OnEvent(EventData photonEvent)
         {
+            Debug.Log("here???????????????");
             byte eventCode = photonEvent.Code;
 
             if (eventCode == CastAbilityEventCode)
