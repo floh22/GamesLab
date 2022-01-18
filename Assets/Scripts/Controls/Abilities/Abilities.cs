@@ -333,10 +333,6 @@ namespace Controls.Abilities
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
 
-                if (!IsAbilityEventAvailable.ContainsKey(ability))
-                {
-                    IsAbilityEventAvailable[ability] = true;
-                }
                 if (!IsAbilityAvailable(ability))
                 {
                     return;
