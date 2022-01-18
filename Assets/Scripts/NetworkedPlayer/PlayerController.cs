@@ -499,7 +499,7 @@ namespace NetworkedPlayer
         {
             if (stream.IsWriting)
             {
-                // TODO sync damage as well
+                // TODO sync damage as well. Cause we have dmg increased during Slenderman buff.
                 // Local player, send data
                 stream.SendNext(this.NetworkID);
                 stream.SendNext(this.Health);
