@@ -17,9 +17,7 @@ public class OnCollision : MonoBehaviour
     }
 
     void OnParticleCollision(GameObject gameObj)
-    {
-        Debug.Log($"Collision with {gameObj.name} detected.");
-        
+    {        
         if (gameObj.name == "RED" || gameObj.name == "GREEN" || gameObj.name == "YELLOW" || gameObj.name == "BLUE" || gameObj.name.StartsWith("Slender"))
         {
             if (gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.activeSelf == false)
