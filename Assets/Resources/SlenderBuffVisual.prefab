@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6666176118157628310}
+  - component: {fileID: 5687017463068883134}
+  - component: {fileID: 3938822624570911130}
   m_Layer: 0
   m_Name: SlenderBuffVisual
   m_TagString: Untagged
@@ -33,6 +35,40 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5687017463068883134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726926769373873527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &3938822624570911130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726926769373873527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e03d9e45ecae85543b5dd65ca892b996, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1805644081117556341
 GameObject:
   m_ObjectHideFlags: 0
@@ -44,6 +80,7 @@ GameObject:
   - component: {fileID: 3942165553860270759}
   - component: {fileID: 2702730744471714377}
   - component: {fileID: 5079738791707929486}
+  - component: {fileID: 2849123221577390364}
   m_Layer: 0
   m_Name: Waves
   m_TagString: Untagged
@@ -4903,6 +4940,20 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &2849123221577390364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1805644081117556341}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a475ef61726d9249aeda01a2a7604b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myParticleSystem: {fileID: 2702730744471714377}
+  threshold: 0.1
 --- !u!1 &5722562215990358828
 GameObject:
   m_ObjectHideFlags: 0
@@ -4914,6 +4965,7 @@ GameObject:
   - component: {fileID: 8214924145579577470}
   - component: {fileID: 8681874358630260363}
   - component: {fileID: 8281016378277213574}
+  - component: {fileID: 75163227336949405}
   m_Layer: 0
   m_Name: Swirl
   m_TagString: Untagged
@@ -9773,3 +9825,17 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &75163227336949405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5722562215990358828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a475ef61726d9249aeda01a2a7604b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myParticleSystem: {fileID: 8681874358630260363}
+  threshold: 0.1
