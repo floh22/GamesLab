@@ -159,6 +159,10 @@ namespace GameUnit
         // Update is called once per frame
         void Update()
         {
+            if (!IsAlive)
+            {
+                return;
+            }
             //Only do logic for the minion on the server
             if (!photonView.IsMine)
                 return;
