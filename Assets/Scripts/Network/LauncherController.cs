@@ -49,7 +49,9 @@ namespace Network
         private List<RoomInfo> RoomList = new();
 
 
-        private bool InLobby = false;
+        private bool InLobby;
+        private bool IsReady;
+        private bool JoinWhenReady;
         #endregion
 
 
@@ -81,6 +83,12 @@ namespace Network
             // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
             if (PhotonNetwork.IsConnected && PhotonNetwork.NickName != "")
             {
+                if (!IsReady)
+                {
+                    JoinWhenReady = true;
+                    return;
+                }
+                
                 if (RoomList.Count == 0)
                 {
                     CreateRoom();
@@ -121,7 +129,12 @@ namespace Network
             PhotonNetwork.JoinLobby();
             connectionStatus.text = "Connected to Server";
         }
-    
+
+        public void OnConnectedToServer()
+        {
+            IsReady = true;
+        }
+
         public override void OnDisconnected(DisconnectCause cause)
         {
             Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
@@ -164,6 +177,10 @@ namespace Network
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
                 return;
+            if (!IsReady)
+            {
+                JoinWhenReady = true;
+            }
             PhotonNetwork.CurrentRoom.IsVisible = false;
             PhotonNetwork.CurrentRoom.IsOpen = false;
             PhotonNetwork.LoadLevel(1);
@@ -173,7 +190,13 @@ namespace Network
         {
             base.OnRoomListUpdate(roomList);
             RoomList = roomList;
+            IsReady = true;
             Debug.Log($"{RoomList.Count} rooms available");
+            if (JoinWhenReady)
+            {
+                CreateRoom();
+                JoinWhenReady = false;
+            }
         }
 
         public override void OnCreatedRoom()

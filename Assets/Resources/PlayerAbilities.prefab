@@ -170,7 +170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5928196448754791592
 RectTransform:
   m_ObjectHideFlags: 0
@@ -417,6 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1b973821b1cf741bc3081ec43fe256, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  abilityCanvas: {fileID: 2248521662807714989}
   maxAbilityDistance1: 5
   maxAbilityDistance2: 7
   cooldownAbility1: 5
@@ -463,7 +464,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 4873637737933295394}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0

@@ -16,8 +16,9 @@ namespace Controls.Abilities
         public static Abilities Instance;
         
         private const byte CastAbilityEventCode = 2;
-        
-        
+
+        [SerializeField] private GameObject abilityCanvas;
+
         public static void SendCastAbilityEvent(int gameUnitID, Ability ability, Vector3 start, Vector3 target)
         {
             object[] content = { gameUnitID, ability, start, target }; 
@@ -57,6 +58,7 @@ namespace Controls.Abilities
             {
                 Instance = this;
             }
+            abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
             rangeIndicatorCircle1.GetComponent<Image>().enabled = false;
