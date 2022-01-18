@@ -170,6 +170,8 @@ namespace NetworkedPlayer
         private bool isAttacking;
         
         private bool isAttacked;
+        
+        private Page page;
 
         #endregion
 
@@ -212,7 +214,9 @@ namespace NetworkedPlayer
         {
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
-            
+           
+            page = GetComponentInChildren<Page>();
+
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             //TODO temp
@@ -287,6 +291,15 @@ namespace NetworkedPlayer
                 {
                     Die();
                 }
+            }
+
+            if (HasPage && !page.IsActive)
+            {
+                ShowPage();
+            }
+            if (!HasPage && page.IsActive)
+            {
+                HidePage();
             }
             
             if (CurrentAttackTarget == null || isAttacking)
@@ -390,6 +403,8 @@ namespace NetworkedPlayer
         public void Die()
         {
             IsAlive = false;
+            
+            DropPage();
 
             //remove attackers
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
@@ -503,6 +518,7 @@ namespace NetworkedPlayer
                 stream.SendNext(this.Level);
                 stream.SendNext(this.isChannelingObjective);
                 stream.SendNext(this.channelingTo);
+                stream.SendNext(this.hasPage);
             }
             else
             {
@@ -514,6 +530,7 @@ namespace NetworkedPlayer
                 this.Level = (int)stream.ReceiveNext();
                 this.isChannelingObjective = (bool)stream.ReceiveNext();
                 this.channelingTo = (Vector3)stream.ReceiveNext();
+                this.hasPage = (bool) stream.ReceiveNext();
             }
         }
 
@@ -588,6 +605,7 @@ namespace NetworkedPlayer
         
         public void PickUpPage()
         {
+            ShowPage();
             hasPage = true;
             isChannelingObjective = false;
             // Disable the channeling effect
@@ -597,6 +615,7 @@ namespace NetworkedPlayer
         
         public void SacrifisePage()
         {
+            HidePage();
             hasPage = false;
             isChannelingObjective = false;
             Debug.Log($"Page has been sacrifised by player of {Team} team");
@@ -604,6 +623,7 @@ namespace NetworkedPlayer
 
         public void DropPage()
         {
+            HidePage();
             hasPage = false;
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
@@ -611,6 +631,16 @@ namespace NetworkedPlayer
         #endregion
 
         #region Utils
+        
+        private void ShowPage()
+        {
+            page.TurnOn();
+        }
+		
+        private void HidePage()
+        {
+            page.TurnOff();
+        }
 
         private void ProcessInputs()
         {
