@@ -158,10 +158,9 @@ namespace NetworkedPlayer
 
         private PlayerUI playerUI;
 
-        [FormerlySerializedAs("beams")] [SerializeField]
-        private GameObject channelPrefab;
-
-        private bool isChanneling;
+        [SerializeField]
+        public GameObject ChannelParticleSystem;
+        
         private bool isChannelingObjective;
         private Vector3 channelingTo = Vector3.positiveInfinity;
         
@@ -182,16 +181,6 @@ namespace NetworkedPlayer
         /// </summary>
         public void Awake()
         {
-            if (this.channelPrefab == null)
-            {
-                Debug.LogError("<Color=Red><b>Missing</b></Color> Beams Reference.", this);
-            }
-            else
-            {
-                this.channelPrefab.SetActive(false);
-            }
-
-
             // in GameStateController we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.IsMine)
             {
@@ -285,12 +274,30 @@ namespace NetworkedPlayer
             // we only process Inputs and check health if we are the local player
             if (photonView.IsMine)
             {
-                this.ProcessInputs();
-
                 if (this.Health <= 0f && IsAlive)
                 {
                     Die();
                 }
+                
+                if (!(CurrentAttackTarget == null || isAttacking))
+                {
+                    if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+                    {
+                        return;
+                    }
+
+                    switch (CurrentAttackTarget.Type)
+                    {
+                        case GameUnitType.Player:
+                            StartCoroutine(Attack(AttackDamage));
+                            break;
+                        case GameUnitType.Minion:
+                            StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
+                            break;
+                    }
+                }
+
+                
             }
 
             if (HasPage && !page.IsActive)
@@ -301,30 +308,10 @@ namespace NetworkedPlayer
             {
                 HidePage();
             }
-            
-            if (CurrentAttackTarget == null || isAttacking)
-            {
-                return;
-            }
 
-            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+            if (this.ChannelParticleSystem != null && this.isChannelingObjective != this.ChannelParticleSystem.activeInHierarchy)
             {
-                return;
-            }
-
-            switch (CurrentAttackTarget.Type)
-            {
-                case GameUnitType.Player:
-                    StartCoroutine(Attack(AttackDamage));
-                    break;
-                case GameUnitType.Minion:
-                    StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
-                    break;
-            }
-
-            if (this.channelPrefab != null && this.isChanneling != this.channelPrefab.activeInHierarchy)
-            {
-                this.channelPrefab.SetActive(this.isChanneling);
+                this.ChannelParticleSystem.SetActive(this.isChannelingObjective);
             }
         }
 
@@ -464,6 +451,7 @@ namespace NetworkedPlayer
         {
             isChannelingObjective = true;
             channelingTo = objectivePosition;
+            GameStateController.SendStartChannelEvent(Team, networkId);
         }
 
         public void OnChannelingFinishedAndReceiveSlendermanBuff(int networkId)
@@ -494,7 +482,7 @@ namespace NetworkedPlayer
             channelingTo = Vector3.positiveInfinity;
 
             // Disable the channeling effect
-            transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
+            ChannelParticleSystem.SetActive(false);
             Debug.Log($"Player's channeling from team {Team} has been interrupted");
         }
 
@@ -512,7 +500,6 @@ namespace NetworkedPlayer
                 // TODO sync damage as well
                 // Local player, send data
                 stream.SendNext(this.NetworkID);
-                stream.SendNext(this.isChanneling);
                 stream.SendNext(this.Health);
                 stream.SendNext(this.Team);
                 stream.SendNext(this.Level);
@@ -524,7 +511,6 @@ namespace NetworkedPlayer
             {
                 // Network player, receive data
                 this.NetworkID = (int)stream.ReceiveNext();
-                this.isChanneling = (bool) stream.ReceiveNext();
                 this.Health = (float) stream.ReceiveNext();
                 this.Team = (GameData.Team) stream.ReceiveNext();
                 this.Level = (int)stream.ReceiveNext();
@@ -542,7 +528,7 @@ namespace NetworkedPlayer
                 Level++;
                 Experience -= ExperienceToReachNextLevel;
                 ExperienceToReachNextLevel += ExperienceBetweenLevels;
-                StartCoroutine(GameObject.Find("UIManager").GetComponent<UIManager>().ShowLevelUpLabel());
+                StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
             }
         }
 
@@ -594,7 +580,7 @@ namespace NetworkedPlayer
             GameObject effect = PhotonNetwork.Instantiate("SlenderBuffVisual", position, Quaternion.identity);
             // GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
             AutoObjectParenter.SendParentEvent(gameObject);
-            GameObject.Find("UIManager").GetComponent<UIManager>().ShowSlenderBuffCountdown(SlenderBuffDuration);
+            UIManager.Instance.ShowSlenderBuffCountdown(SlenderBuffDuration);
             yield return new WaitForSeconds(SlenderBuffDuration);
             PhotonNetwork.Destroy(effect);
         }
@@ -609,7 +595,7 @@ namespace NetworkedPlayer
             hasPage = true;
             isChannelingObjective = false;
             // Disable the channeling effect
-            transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
+            ChannelParticleSystem.SetActive(false);
             Debug.Log($"Page has been picked up by player of {Team} team");
         }
         
@@ -640,29 +626,6 @@ namespace NetworkedPlayer
         private void HidePage()
         {
             page.TurnOff();
-        }
-
-        private void ProcessInputs()
-        {
-            if (Input.GetButtonDown("Fire1"))
-            {
-                // we don't want to fire when we interact with UI buttons, and since all EventSystem GameObjects are UI, ignore input when over UI
-                if (EventSystem.current.IsPointerOverGameObject())
-                {
-                    return;
-                }
-
-                if (!this.isChanneling)
-                {
-                    this.isChanneling = true;
-                }
-            }
-
-            if (!Input.GetButtonUp("Fire1")) return;
-            if (this.isChanneling)
-            {
-                this.isChanneling = false;
-            }
         }
 
         #endregion

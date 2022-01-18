@@ -51,6 +51,9 @@ MonoBehaviour:
   slendermanPrefab: {fileID: 4061999138098054953, guid: c0ec2cd63f93487d92d6623d393c83ba,
     type: 3}
   slendermanSpawnPosition: {fileID: 0}
+  basePrefab: {fileID: 5911255106793160592, guid: 4c9e746362ad82c44a78d660504cdbb2,
+    type: 3}
+  baseSpawnPosition: {fileID: 0}
   minionValues: {fileID: 11400000, guid: 6de01e0c5f1d94042bb13b6492bc8e25, type: 2}
   minionPrefab: {fileID: 7368097050080284918, guid: 7bba6e589838c08478a5ed3f869c137f,
     type: 3}

@@ -56,7 +56,7 @@ namespace GameUnit
         public GameObject innerChannelingParticleSystem;
 
         private int pages;
-
+        
         public int Pages
         {
             get => pages;
@@ -69,6 +69,7 @@ namespace GameUnit
 
         private bool hasBeenChanneledOnce;
         private MeshRenderer meshRenderer;
+        private bool isBeingChanneled;
 
         // Start is called before the first frame update
         void Start()
@@ -78,6 +79,14 @@ namespace GameUnit
             {
                 material.color = Color.white;
             }
+            
+            CurrentlyAttackedBy = new HashSet<IGameUnit>();
+            StartCoroutine(Glow());
+
+            if (!photonView.IsMine)
+                return;
+            
+            //Init these by owner only since these values get synced
             pages = PlayerValues.PagesAmount;
             GameObject o = gameObject;
             NetworkID = o.GetInstanceID();
@@ -92,8 +101,7 @@ namespace GameUnit
             }
 
             Health = MaxHealth;
-            CurrentlyAttackedBy = new HashSet<IGameUnit>();
-            StartCoroutine(Glow());
+            
         }
         
 
@@ -193,8 +201,13 @@ namespace GameUnit
             // Enable channeling effects when channeling Slenderman on the channeler.
                 // The channeling effect on Slenderman will be activated in the OnCollision.cs script
                 // when the particles from the channeler hit Slenderman.
-                channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
-                ParticleSystem ps = channeler.transform.Find("InnerChannelingParticleSystem").gameObject.GetComponent<ParticleSystem>();
+                
+                
+                // Set this in the player themselves
+                // channeler.ChannelParticleSystem.SetActive(true);
+                
+                
+                ParticleSystem ps = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
 
                 // Set particles color
                 float hSliderValueR = 0.0f;
@@ -245,6 +258,12 @@ namespace GameUnit
                 fo.x = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.x - channeler.transform.position.x);
                 fo.y = new ParticleSystem.MinMaxCurve(-innerChannelingParticleSystem.transform.position.y + channeler.transform.position.y);
                 fo.z = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.z - channeler.transform.position.z);
+        }
+        
+
+        public void DisableChannelEffects()
+        {
+            innerChannelingParticleSystem.SetActive(false);
         }
 
         private IEnumerator Channel(PlayerController channeler)

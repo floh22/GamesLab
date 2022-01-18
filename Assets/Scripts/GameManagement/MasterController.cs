@@ -34,6 +34,12 @@ namespace GameManagement
             slenderGo.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
         }
 
+        public void SpawnBases()
+        {
+            Transform spawnT = GameStateController.Instance.baseSpawnPosition.transform;
+            GameObject baseGo = PhotonNetwork.Instantiate("Bases", spawnT.position, spawnT.rotation);
+        }
+
         public void StartMinionSpawning(int startDelayInMs = 0)
         {
             Debug.Log($"Spawning Minions in {startDelayInMs}ms");

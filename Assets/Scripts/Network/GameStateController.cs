@@ -59,14 +59,14 @@ namespace Network
         public static void SendStartChannelEvent(GameData.Team team, int networkID)
         {
             object[] content = { team, networkID}; 
-            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
-            PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            PhotonNetwork.RaiseEvent(StartChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void SendFinishChannelEvent(GameData.Team team, int networkID, int value)
         {
             object[] content = { team, networkID, value}; 
-            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.MasterClient }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
@@ -84,6 +84,10 @@ namespace Network
         [SerializeField] private GameObject slendermanPrefab;
 
         [SerializeField] public GameObject slendermanSpawnPosition;
+
+        [Header("Base Data")] [SerializeField] private GameObject basePrefab;
+        [SerializeField] public GameObject baseSpawnPosition;
+            
 
 
         [Header("Minion Data")]
@@ -212,11 +216,6 @@ namespace Network
 
                 //Set default target to opposing team
                 Targets.Add(team, (GameData.Team) (((int) team + 2) % 4));
-
-                if (baseHolder == null || baseHolder.Equals(null)) continue;
-                BaseBehavior bb = baseHolder.transform.Find(team.ToString()).GetComponent<BaseBehavior>();
-                Bases.Add(team, bb);
-                GameUnits.Add(bb);
             }
             
             
@@ -225,13 +224,14 @@ namespace Network
             Minion.Splines = minionPaths;
 
 
-            StartCoroutine(InitPlayersThisRound());
+            StartCoroutine(InitSyncedGameObjects());
 
             if (!PhotonNetwork.IsMasterClient) return;
             try
             {
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
                 controller.SpawnSlenderman();
+                controller.SpawnBases();
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs / 1000);
             }
             catch (Exception e)
@@ -262,9 +262,9 @@ namespace Network
             }
         }
 
-        private IEnumerator InitPlayersThisRound()
+        private IEnumerator InitSyncedGameObjects()
         {
-            //Wait 2 seconds to init players to let everyone join
+            //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
             yield return new WaitForSeconds(2);
 
             Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
@@ -274,7 +274,7 @@ namespace Network
             }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             //Add them to gameUnits
-            Debug.Log($"{Players.Count} Players found");
+            
             int preSize = GameUnits.Count;
             foreach (PlayerController player in Players.Values)
             {
@@ -293,6 +293,19 @@ namespace Network
 
 
             Slenderman = GameObject.FindWithTag("Slenderman").GetComponent<Slenderman>();
+            
+            
+            foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
+            {
+                BaseBehavior bb = GameObject.Find("Bases(Clone)").transform.Find(team.ToString()).GetComponent<BaseBehavior>();
+                Bases.Add(team, bb);
+                GameUnits.Add(bb);
+            }
+            
+            Debug.Log($"{Players.Count} Players, {Bases.Count} Bases found");
+            if(Slenderman != null && !Slenderman.Equals(null))
+                Debug.Log("Slenderman found");
+            
         }
 
         public void QuitApplication()
@@ -381,6 +394,8 @@ namespace Network
                 GameData.Team team = (GameData.Team) data[0];
                 int targetNetworkID = (int)data[1];
                 PlayerController source = Players[team];
+                
+                Debug.Log($"{team} started channeling {targetNetworkID}");
 
                 if (targetNetworkID == Slenderman.NetworkID)
                 {
@@ -405,16 +420,24 @@ namespace Network
                 GameData.Team team = (GameData.Team) data[0];
                 int targetNetworkID = (int)data[1];
                 int value = (int)data[2];
+                
+                Debug.Log($"{team} finished channeling {targetNetworkID}");
 
                 if (targetNetworkID == Slenderman.NetworkID)
                 {
                     //Channeled slenderman
+                    Slenderman.DisableChannelEffects();
+                    if (!PhotonNetwork.IsMasterClient)
+                        return;
                     Slenderman.OnChanneled();
                     return;
                 }
                 
                 foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
                 {
+                    baseStructure.DisableChannelEffects();
+                    if (!PhotonNetwork.IsMasterClient)
+                        return;
                     //channeled a base
                     baseStructure.Pages = value;
                     return;

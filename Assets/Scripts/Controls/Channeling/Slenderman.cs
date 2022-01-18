@@ -128,8 +128,12 @@ namespace Controls.Channeling
             // Enable channeling effects when channeling Slenderman on the channeler.
             // The channeling effect on Slenderman will be activated in the OnCollision.cs script
             // when the particles from the channeler hit Slenderman.
-            channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
-            ParticleSystem ps = channeler.transform.Find("InnerChannelingParticleSystem").gameObject.GetComponent<ParticleSystem>();
+            
+            
+            
+            //Set this in the player themselves
+            //channeler.ChannelParticleSystem.SetActive(true);
+            ParticleSystem ps = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
 
 
             // Set particles color
@@ -198,6 +202,11 @@ namespace Controls.Channeling
 
             channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
             OnChanneled();
+        }
+
+        public void DisableChannelEffects()
+        {
+            innerChannelingParticleSystem.SetActive(false);
         }
 
 
