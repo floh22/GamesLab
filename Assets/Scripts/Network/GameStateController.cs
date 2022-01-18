@@ -364,7 +364,7 @@ namespace Network
                     return;
                 }
 
-                Debug.Log("showing damage dealt");
+                // Debug.Log("showing damage dealt");
                 target.DoDamageVisual(source, damage);
 
                 //I am the owner. Deal the damage. This will get synced by photon

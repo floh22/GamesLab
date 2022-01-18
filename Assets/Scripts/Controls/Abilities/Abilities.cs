@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Character;
 using ExitGames.Client.Photon;
@@ -33,6 +35,7 @@ namespace Controls.Abilities
         public float cooldownAbility2 = 7;
         public bool isCooldown1 = false;
         public bool isCooldown2 = false;
+        private Dictionary<Ability, bool> IsAbilityEventAvailable;
 
         public Image ability1Image;
         public Image ability2Image;
@@ -58,6 +61,13 @@ namespace Controls.Abilities
             {
                 Instance = this;
             }
+
+            IsAbilityEventAvailable = new Dictionary<Ability, bool>
+            {
+                [Ability.NORMAL] = true,
+                [Ability.RANGE] = true,
+                [Ability.LINE] = true
+            };
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
@@ -258,12 +268,23 @@ namespace Controls.Abilities
                 case Ability.NORMAL:
                     break;
                 case Ability.RANGE:
+                    if (isCooldown1)
+                    {
+                        return;
+                    }
+
+                    isCooldown1 = true;
                     Instantiate(ability1ProjectilePrefab, start + new Vector3(0, 2, 0),
                         Quaternion.identity).GetComponent<AbilityProjectile1>().ActivateNoDamage(target, caster);
 
                     break;
                 case Ability.LINE:
-                    
+                    if (isCooldown2)
+                    {
+                        return;
+                    }
+                    isCooldown2 = true;
+
                     Vector3 direction = new(target.x, 0, target.y);
                     direction *= maxAbilityDistance2;
 
@@ -311,10 +332,46 @@ namespace Controls.Abilities
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
-                
+
+                if (!IsAbilityEventAvailable.ContainsKey(ability))
+                {
+                    IsAbilityEventAvailable[ability] = true;
+                }
+                if (!IsAbilityAvailable(ability))
+                {
+                    return;
+                }
+                StartCoroutine(EventCoroutineCooldown(ability));
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
+        }
+
+        private bool IsAbilityAvailable(Ability ability)
+        {
+            if (IsAbilityEventAvailable == null)
+            {
+                IsAbilityEventAvailable = new Dictionary<Ability, bool>
+                {
+                    [Ability.NORMAL] = true,
+                    [Ability.RANGE] = true,
+                    [Ability.LINE] = true
+                };
+            }
+
+            if (!IsAbilityEventAvailable.ContainsKey(ability))
+            {
+                IsAbilityEventAvailable[ability] = true;
+            }
+
+            return IsAbilityEventAvailable[ability];
+        }
+
+        private IEnumerator EventCoroutineCooldown(Ability ability)
+        {
+            IsAbilityEventAvailable[ability] = false;
+            yield return new WaitForSeconds(Math.Min(cooldownAbility1, cooldownAbility2));
+            IsAbilityEventAvailable[ability] = true;
         }
     }
 }
