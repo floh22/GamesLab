@@ -72,7 +72,7 @@ namespace Character
 
         public static void SendDealDamageEvent(IGameUnit source, IGameUnit target, float damage)
         {
-            Debug.Log(source.NetworkID + ", " + target.NetworkID);
+            // Debug.Log(source.NetworkID + ", " + target.NetworkID);
             object[] content = { source.NetworkID, target.NetworkID, damage }; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All}; 
             var res = PhotonNetwork.RaiseEvent(GameStateController.DamageGameUnitEventCode, content, raiseEventOptions, SendOptions.SendReliable);
