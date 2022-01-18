@@ -289,7 +289,11 @@ namespace GameManagement
 
         void CheckForUnspentLevelUps()
         {
-            if (_playerController == null || _playerController.Equals(null))
+            if (PlayerController.LocalPlayerInstance == null)
+            {
+                return;
+            }
+            if (_playerController == null)
             {
                 _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
             }
