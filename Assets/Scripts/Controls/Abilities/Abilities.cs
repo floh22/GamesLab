@@ -236,8 +236,6 @@ namespace Controls.Abilities
                         Quaternion.Euler(0, angle, 0));
                         
                     
-                    
-                    
                     ability2ActiveObject.transform.LookAt(direction);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
                         .Activate(direction, PlayerController.LocalPlayerController,
@@ -299,7 +297,7 @@ namespace Controls.Abilities
                     Transform t;
                     direction = (t = transform).TransformPoint(direction);
 
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
+                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, caster.AttachtedObjectInstance.transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
                         Quaternion.Euler(0, angle, 0));
                     
                     ability2ActiveObject.transform.LookAt(direction);
@@ -323,7 +321,6 @@ namespace Controls.Abilities
 
         public void OnEvent(EventData photonEvent)
         {
-            Debug.Log("here???????????????");
             byte eventCode = photonEvent.Code;
 
             if (eventCode == CastAbilityEventCode)
@@ -331,6 +328,11 @@ namespace Controls.Abilities
                 object[] data = (object[])photonEvent.CustomData;
 
                 int casterID = (int)data[0];
+                if (PlayerController.LocalPlayerController != null && PlayerController.LocalPlayerController.NetworkID == casterID)
+                {
+                    return;
+                }
+                
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
