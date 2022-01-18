@@ -1175,7 +1175,6 @@ GameObject:
   - component: {fileID: 2891481974308657385}
   - component: {fileID: 2204723295046812077}
   - component: {fileID: 7394835135228230881}
-  - component: {fileID: 2296688873868755920}
   - component: {fileID: 1363318469528110231}
   - component: {fileID: 5558431469048110235}
   m_Layer: 11
@@ -1345,19 +1344,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   innerChannelingParticleSystem: {fileID: 5329578861578570427}
---- !u!114 &2296688873868755920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4061999138098054953}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df5df75b0668e0f42a3b494b1394b1bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  part: {fileID: 5329578861578570425}
 --- !u!114 &1363318469528110231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3088,12 +3074,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4910c07a6baf14d4ba4520ffdb4f4a51, type: 3}
---- !u!198 &5329578861578570425 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 2913158441812342113, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
-    type: 3}
-  m_PrefabInstance: {fileID: 7033472080711909336}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5329578861578570427 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2913158441812342115, guid: 4910c07a6baf14d4ba4520ffdb4f4a51,
