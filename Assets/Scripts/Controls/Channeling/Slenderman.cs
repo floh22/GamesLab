@@ -148,7 +148,7 @@ namespace Controls.Channeling
             fo.enabled = true;
 
             fo.x = new ParticleSystem.MinMaxCurve(transform.position.x - channeler.transform.position.x);
-            fo.y = new ParticleSystem.MinMaxCurve(-transform.position.y + channeler.transform.position.y);
+            fo.y = new ParticleSystem.MinMaxCurve(-transform.position.y + channeler.transform.position.y + (GetComponent<BoxCollider>().bounds.size.y / 2));
             fo.z = new ParticleSystem.MinMaxCurve(transform.position.z - channeler.transform.position.z);
         }
 
