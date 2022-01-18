@@ -30,7 +30,8 @@ namespace GameManagement
         public void SpawnSlenderman()
         {
             Transform spawnT = GameStateController.Instance.slendermanSpawnPosition.transform;
-            PhotonNetwork.Instantiate("Slender", spawnT.position, spawnT.rotation);
+            GameObject slenderGo = PhotonNetwork.Instantiate("Slender", spawnT.position, spawnT.rotation);
+            slenderGo.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
         }
 
         public void StartMinionSpawning(int startDelayInMs = 0)

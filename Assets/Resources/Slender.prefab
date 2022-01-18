@@ -1177,6 +1177,7 @@ GameObject:
   - component: {fileID: 7394835135228230881}
   - component: {fileID: 2296688873868755920}
   - component: {fileID: 1363318469528110231}
+  - component: {fileID: 5558431469048110235}
   m_Layer: 0
   m_Name: Slender
   m_TagString: Slenderman
@@ -1377,9 +1378,26 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 7394835135228230881}
+  - {fileID: 5558431469048110235}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &5558431469048110235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4061999138098054953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 1
+  m_UseLocal: 1
 --- !u!1 &4162965382049386049
 GameObject:
   m_ObjectHideFlags: 0
