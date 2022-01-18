@@ -204,7 +204,7 @@ namespace GameUnit
                 
                 
                 // Set this in the player themselves
-                // channeler.ChannelParticleSystem.SetActive(true);
+                channeler.ChannelParticleSystem.SetActive(true);
                 
                 
                 ParticleSystem ps = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
@@ -213,7 +213,7 @@ namespace GameUnit
                 float hSliderValueR = 0.0f;
                 float hSliderValueG = 0.0f;
                 float hSliderValueB = 0.0f;
-                float hSliderValueA = 0.0f;
+                float hSliderValueA = 1.0f;
 
 
                 if(Team.ToString() == "RED")
