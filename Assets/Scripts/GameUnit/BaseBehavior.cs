@@ -351,7 +351,7 @@ namespace GameUnit
             Color glowColor = Color.green;
             float minutesToGlow = 1;
             float step = 0.1f;
-            int stepsCount = 10;
+            int stepsCount = 6;
             float pause = 3f;
             float totalRepetitions = (minutesToGlow * 60) / pause;
             int localRepetitions = 2;

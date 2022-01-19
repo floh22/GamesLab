@@ -35,7 +35,6 @@ namespace Controls.Abilities
         public float cooldownAbility2 = 7;
         public bool isCooldown1 = false;
         public bool isCooldown2 = false;
-        private Dictionary<Ability, bool> IsAbilityEventAvailable;
 
         public Image ability1Image;
         public Image ability2Image;
@@ -62,12 +61,6 @@ namespace Controls.Abilities
                 Instance = this;
             }
 
-            IsAbilityEventAvailable = new Dictionary<Ability, bool>
-            {
-                [Ability.NORMAL] = true,
-                [Ability.RANGE] = true,
-                [Ability.LINE] = true
-            };
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
@@ -336,42 +329,52 @@ namespace Controls.Abilities
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
-
-                if (!IsAbilityAvailable(ability))
+                
+                Debug.Log($"Event with ability {ability} invocation");
+                if (!IsAbilityAvailable(casterID, ability))
                 {
+                    Debug.Log($"Event with ability {ability} ignored");
                     return;
                 }
-                StartCoroutine(EventCoroutineCooldown(ability));
+                StartCoroutine(EventCoroutineCooldown(casterID, ability));
+                Debug.Log($"Event with ability {ability} not ignored");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
         }
 
-        private bool IsAbilityAvailable(Ability ability)
+        private bool IsAbilityAvailable(int casterID, Ability ability)
         {
-            if (IsAbilityEventAvailable == null)
+            var cds = GameStateController.Instance.Cooldowns;
+            if (!cds.ContainsKey(casterID))
             {
-                IsAbilityEventAvailable = new Dictionary<Ability, bool>
-                {
-                    [Ability.NORMAL] = true,
-                    [Ability.RANGE] = true,
-                    [Ability.LINE] = true
-                };
+                cds[casterID] = new Dictionary<Ability, bool>();
             }
 
-            if (!IsAbilityEventAvailable.ContainsKey(ability))
+            if (!cds[casterID].ContainsKey(ability))
             {
-                IsAbilityEventAvailable[ability] = true;
+                cds[casterID][ability] = true;
             }
 
-            return IsAbilityEventAvailable[ability];
+            return cds[casterID][ability];
         }
 
-        private IEnumerator EventCoroutineCooldown(Ability ability)
+        private IEnumerator EventCoroutineCooldown(int casterID, Ability ability)
         {
-            IsAbilityEventAvailable[ability] = false;
+            var cds = GameStateController.Instance.Cooldowns;
+            if (!cds.ContainsKey(casterID))
+            {
+                cds[casterID] = new Dictionary<Ability, bool>();
+            }
+            if (!cds[casterID].ContainsKey(ability))
+            {
+                cds[casterID][ability] = true;
+            }
+
+            cds[casterID][ability] = false;
             yield return new WaitForSeconds(Math.Min(cooldownAbility1, cooldownAbility2));
-            IsAbilityEventAvailable[ability] = true;
+            cds[casterID][ability] = true;
         }
+        
     }
 }
