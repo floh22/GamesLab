@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Character;
 using ExitGames.Client.Photon;
@@ -58,6 +60,7 @@ namespace Controls.Abilities
             {
                 Instance = this;
             }
+
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
@@ -175,7 +178,7 @@ namespace Controls.Abilities
 
         public void CastAbility(Ability ability, Vector3 lastPosition)
         {
-            Vector3 startingPosition;
+            Vector3 startingPosition = new Vector3();
 
             switch (ability)
             {
@@ -198,6 +201,7 @@ namespace Controls.Abilities
                     
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
+                    lastPosition = targetCircle.transform.position;
                     break;
 
                 case Ability.LINE:
@@ -223,10 +227,8 @@ namespace Controls.Abilities
                     
                     GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
                         Quaternion.Euler(0, angle, 0));
-                        
-                    
-                    
-                    
+
+                    lastPosition = direction;
                     ability2ActiveObject.transform.LookAt(direction);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
                         .Activate(direction, PlayerController.LocalPlayerController,
@@ -245,7 +247,7 @@ namespace Controls.Abilities
             }
 
             //Send ability cast to other players
-            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, transform.position, lastPosition);
+            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, lastPosition);
             
             HideAbilityInterface(ability);
         }
@@ -258,12 +260,23 @@ namespace Controls.Abilities
                 case Ability.NORMAL:
                     break;
                 case Ability.RANGE:
+                    if (isCooldown1)
+                    {
+                        return;
+                    }
+
+                    isCooldown1 = true;
                     Instantiate(ability1ProjectilePrefab, start + new Vector3(0, 2, 0),
                         Quaternion.identity).GetComponent<AbilityProjectile1>().ActivateNoDamage(target, caster);
 
                     break;
                 case Ability.LINE:
-                    
+                    if (isCooldown2)
+                    {
+                        return;
+                    }
+                    isCooldown2 = true;
+
                     Vector3 direction = new(target.x, 0, target.y);
                     direction *= maxAbilityDistance2;
 
@@ -273,16 +286,12 @@ namespace Controls.Abilities
                         angle *= -1;
                     }
 
-                    direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
-                    Transform t;
-                    direction = (t = transform).TransformPoint(direction);
-
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
+                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start,
                         Quaternion.Euler(0, angle, 0));
                     
-                    ability2ActiveObject.transform.LookAt(direction);
+                    ability2ActiveObject.transform.LookAt(target);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                        .ActivateNoDamage(direction, caster);
+                        .ActivateNoDamage(target, caster);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
@@ -312,9 +321,9 @@ namespace Controls.Abilities
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
                 
-                
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
         }
+
     }
 }

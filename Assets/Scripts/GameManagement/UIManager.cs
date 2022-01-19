@@ -28,7 +28,9 @@ namespace GameManagement
 
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
+        public GameObject GameOverUI;
         public Image MinionSwitchButtonImage;
+        public GameObject ActionButtonsGroup;
 
         private GameObject PagesContainer;
         private Image[] PagesImages;
@@ -40,8 +42,18 @@ namespace GameManagement
         private bool IsSlenderCooldown;
         private float SlenderCooldownDuration;
 
+        [SerializeField] private Image DeathIndicatorImage; 
+        private bool IsDeathCooldown;
+        private float DeathCooldownDuration;
+
         private Image HealthbarImage;
         [SerializeField] private Image OwnPlayerLevelBackgroundImage; 
+
+        
+        [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_1; 
+        [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_2; 
+        [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_3; 
+
 
         #endregion
 
@@ -58,6 +70,7 @@ namespace GameManagement
 
 
         public Timer GameTimer;
+        private bool isGameOver = false;
 
         #region Scoreboard
 
@@ -116,6 +129,10 @@ namespace GameManagement
         // Update is called once per frame
         void Update()
         {
+            if (isGameOver)
+            {
+                return;
+            }
             _playerController = PlayerController.LocalPlayerController;
             if (_playerController != null)
             {
@@ -132,8 +149,20 @@ namespace GameManagement
                     SlenderImage.enabled = false;
                 }
             }
+            
+            if (IsDeathCooldown)
+            {
+                DeathIndicatorImage.fillAmount -= 1 / DeathCooldownDuration * Time.deltaTime;
+                if (DeathIndicatorImage.fillAmount <= 0)
+                {
+                    IsDeathCooldown = false;
+                    DeathIndicatorImage.enabled = false;
+                    ActionButtonsGroup.SetActive(true);
+                }
+            }
 
             UpdateScoreboard();
+            CheckForUnspentLevelUps();
         }
 
         void SetupUI()
@@ -275,6 +304,23 @@ namespace GameManagement
             LevelUpLabel.enabled = false;
         }
 
+        void CheckForUnspentLevelUps()
+        {
+            if (PlayerController.LocalPlayerInstance == null)
+            {
+                return;
+            }
+            if (_playerController == null)
+            {
+                _playerController = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
+            }
+
+            if (_playerController.UnspentLevelUps > 0)
+            {
+                SetVisibilityOfLevelUpButtons(true);
+            }
+        }
+
         void SetVisibilityOfLevelUpButtons(bool visibility)
         {
             if (_playerController == null || _playerController.Equals(null))
@@ -340,6 +386,15 @@ namespace GameManagement
             IsSlenderCooldown = true;
         }
 
+        public void ShowDeathIndicatorCountdown(float duration)
+        {
+            DeathIndicatorImage.enabled = true;
+            DeathIndicatorImage.fillAmount = 1;
+            DeathCooldownDuration = duration + 0.5f;
+            IsDeathCooldown = true;
+            ActionButtonsGroup.SetActive(false);
+        }
+
         public void UIHELPERMETHODAddExperience(int experience)
         {
             if (_playerController == null || _playerController.Equals(null))
@@ -364,6 +419,20 @@ namespace GameManagement
             }
 
             _playerController.OnReceiveSlendermanBuff();
+        }
+        
+        public void UIHELPERMETHOD3()
+        {
+            if (_playerController == null || _playerController.Equals(null))
+            {
+                _playerController = PlayerController.LocalPlayerController;
+
+                if (_playerController == null || _playerController.Equals(null))
+                    return;
+            }
+
+            _playerController.Health -= 200;
+            // SetGameOver(66, 66, 66);
         }
 
         void UpdateScoreboard()
@@ -426,6 +495,17 @@ namespace GameManagement
 
             BaseBehavior currentBase = GameStateController.Instance.Bases.FirstOrDefault(x => x.Key == team).Value;
             return currentBase.Pages;
+        }
+
+        public void SetGameOver(int kills, int deaths, int playerRemaining)
+        {
+            isGameOver = true;
+            PauseMenuUI.SetActive(false);
+            IngameUI.SetActive(false);
+            GameOverUI.SetActive(true);
+            GameOver_Stat_Text_1.text = kills.ToString();
+            GameOver_Stat_Text_2.text = deaths.ToString();
+            GameOver_Stat_Text_3.text = playerRemaining.ToString();
         }
     }
 }

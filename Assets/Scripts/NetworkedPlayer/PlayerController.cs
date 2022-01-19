@@ -106,6 +106,8 @@ namespace NetworkedPlayer
         [field: SerializeField] public int UpgradesAbility1 { get; set; }
         [field: SerializeField] public int UpgradesAbility2 { get; set; }
 
+        [field: SerializeField] public int UnspentLevelUps { get; set; }
+
         #endregion
         
         [field: SerializeField] public float DeathTimerMax { get; set; } = 15;
@@ -218,7 +220,7 @@ namespace NetworkedPlayer
             AttackSpeed = PlayerValues.AttackSpeed;
             AttackRange = PlayerValues.AttackRange;
             Level = 1;
-            MaxLevel = 12;
+            MaxLevel = 13;
             Experience = 0;
             ExperienceToReachNextLevel = 200;
             ExperienceBetweenLevels = 100;
@@ -414,6 +416,7 @@ namespace NetworkedPlayer
             controller.enabled = false;
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(false);
+            UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);
             
             //create dead character
             Vector3 position = transform.position;
@@ -534,6 +537,7 @@ namespace NetworkedPlayer
             if (Experience >= ExperienceToReachNextLevel)
             {
                 Level++;
+                UnspentLevelUps++;
                 Experience -= ExperienceToReachNextLevel;
                 ExperienceToReachNextLevel += ExperienceBetweenLevels;
                 StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
@@ -548,6 +552,12 @@ namespace NetworkedPlayer
 
         public void UpdateMultiplier(int whatToUpdate)
         {
+            if (UnspentLevelUps <= 0)
+            {
+                return;
+            }
+
+            UnspentLevelUps--;
             switch (whatToUpdate)
             {
                 case 1:
