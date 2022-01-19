@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Character;
+using Controls.Abilities;
 using Controls.Channeling;
 using ExitGames.Client.Photon;
 using GameManagement;
@@ -99,6 +100,7 @@ namespace Network
 
 
         [Header("Game Data")] 
+        public Dictionary<int, Dictionary<Abilities.Ability, bool>> Cooldowns;
         public Dictionary<GameData.Team, PlayerController> Players;
         public Dictionary<GameData.Team, BaseBehavior> Bases;
         public Dictionary<GameData.Team, HashSet<Minion>> Minions;
@@ -173,6 +175,7 @@ namespace Network
                 return;
             }
 
+            Cooldowns = new Dictionary<int, Dictionary<Abilities.Ability, bool>>();
             Players = new Dictionary<GameData.Team, PlayerController>();
             Bases = new Dictionary<GameData.Team, BaseBehavior>();
             Minions = new Dictionary<GameData.Team, HashSet<Minion>>();

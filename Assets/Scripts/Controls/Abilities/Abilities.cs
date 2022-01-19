@@ -35,8 +35,6 @@ namespace Controls.Abilities
         public float cooldownAbility2 = 7;
         public bool isCooldown1 = false;
         public bool isCooldown2 = false;
-        private bool isRangeAvailable = true;
-        private bool isLineAvailable = true;
 
         public Image ability1Image;
         public Image ability2Image;
@@ -318,7 +316,6 @@ namespace Controls.Abilities
 
         public void OnEvent(EventData photonEvent)
         {
-            Debug.Log("here???????????????");
             byte eventCode = photonEvent.Code;
 
             if (eventCode == CastAbilityEventCode)
@@ -329,67 +326,52 @@ namespace Controls.Abilities
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
-
+                
                 Debug.Log($"Event with ability {ability} invocation");
-                if (!IsAbilityAvailable(ability))
+                if (!IsAbilityAvailable(casterID, ability))
                 {
                     Debug.Log($"Event with ability {ability} ignored");
                     return;
                 }
-                StartCoroutine(EventCoroutineCooldown(ability));
+                StartCoroutine(EventCoroutineCooldown(casterID, ability));
                 Debug.Log($"Event with ability {ability} not ignored");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
         }
 
-        private bool IsAbilityAvailable(Ability ability)
+        private bool IsAbilityAvailable(int casterID, Ability ability)
         {
-            switch (ability)
+            var cds = GameStateController.Instance.Cooldowns;
+            if (!cds.ContainsKey(casterID))
             {
-                case Ability.LINE:
-                    Debug.Log($"IsAbilityAvailable LINE = {isLineAvailable}");
-                    return isLineAvailable;
-                case Ability.RANGE:
-                    Debug.Log($"IsAbilityAvailable isRangeAvailable = {isRangeAvailable}");
-                    return isRangeAvailable;
-                default:
-                    Debug.Log("IsAbilityAvailable DEFAULT");
-                    return true;
+                cds[casterID] = new Dictionary<Ability, bool>();
             }
+
+            if (!cds[casterID].ContainsKey(ability))
+            {
+                cds[casterID][ability] = true;
+            }
+
+            return cds[casterID][ability];
         }
 
-        private IEnumerator EventCoroutineCooldown(Ability ability)
+        private IEnumerator EventCoroutineCooldown(int casterID, Ability ability)
         {
-            switch (ability)
+            var cds = GameStateController.Instance.Cooldowns;
+            if (!cds.ContainsKey(casterID))
             {
-                case Ability.LINE:
-                    isLineAvailable = false;
-                    Debug.Log($"EventCoroutineCooldown set to false LINE = {isLineAvailable}");
-                    break;
-                case Ability.RANGE:
-                    isRangeAvailable = false;
-                    Debug.Log($"EventCoroutineCooldown set to false RANGE = {isRangeAvailable}");
-                    break;
-                default:
-                    Debug.Log("EventCoroutineCooldown DEFAULT");
-                    break;
+                cds[casterID] = new Dictionary<Ability, bool>();
             }
-            yield return new WaitForSeconds(5f);
-            switch (ability)
+            if (!cds[casterID].ContainsKey(ability))
             {
-                case Ability.LINE:
-                    isLineAvailable = true;
-                    Debug.Log($"EventCoroutineCooldown set to true LINE = {isLineAvailable}");
-                    break;
-                case Ability.RANGE:
-                    isRangeAvailable = true;
-                    Debug.Log($"EventCoroutineCooldown set to true RANGE = {isRangeAvailable}");
-                    break;
-                default:
-                    Debug.Log("EventCoroutineCooldown DEFAULT");
-                    break;
+                cds[casterID][ability] = true;
             }
+
+            cds[casterID][ability] = false;
+            yield return new WaitForSeconds(Math.Min(cooldownAbility1, cooldownAbility2));
+            cds[casterID][ability] = true;
         }
+        
     }
 }
