@@ -2196,10 +2196,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 400030}
     m_Modifications:
+    - target: {fileID: 6097048839840195214, guid: 9e0e07363e9df7d49840912c95d38ed2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 6097048839852670520, guid: 9e0e07363e9df7d49840912c95d38ed2,
         type: 3}
       propertyPath: m_Name
       value: Rings
+      objectReference: {fileID: 0}
+    - target: {fileID: 6097048839852670520, guid: 9e0e07363e9df7d49840912c95d38ed2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 6097048839852670520, guid: 9e0e07363e9df7d49840912c95d38ed2,
         type: 3}
@@ -2260,6 +2270,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6097048840526662654, guid: 9e0e07363e9df7d49840912c95d38ed2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e0e07363e9df7d49840912c95d38ed2, type: 3}

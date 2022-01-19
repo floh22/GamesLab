@@ -216,35 +216,59 @@ namespace GameUnit
 
                 if(Team.ToString() == "RED")
                 {
+                    // // Set particles color
+                    // hSliderValueR = 174.0F / 255;
+                    // hSliderValueG = 6.0F / 255;
+                    // hSliderValueB = 6.0F / 255;
+                    // hSliderValueA = 255.0F / 255;
+
                     // Set particles color
-                    hSliderValueR = 174.0F / 255;
-                    hSliderValueG = 6.0F / 255;
-                    hSliderValueB = 6.0F / 255;
-                    hSliderValueA = 255.0F / 255;
+                    hSliderValueR = 1;
+                    hSliderValueG = 0;
+                    hSliderValueB = 0;
+                    hSliderValueA = 1;                    
                 }
                 else if (Team.ToString() == "YELLOW")
                 {
+                    // // Set particles color
+                    // hSliderValueR = 171.0F / 255;
+                    // hSliderValueG = 173.0F / 255;
+                    // hSliderValueB = 6.0F / 255;
+                    // hSliderValueA = 255.0F / 255;
+
                     // Set particles color
-                    hSliderValueR = 171.0F / 255;
-                    hSliderValueG = 173.0F / 255;
-                    hSliderValueB = 6.0F / 255;
-                    hSliderValueA = 255.0F / 255;
+                    hSliderValueR = 1;
+                    hSliderValueG = 1;
+                    hSliderValueB = 0;
+                    hSliderValueA = 1;                     
                 }
                 else if (Team.ToString() == "GREEN")
                 {
+                    // // Set particles color
+                    // hSliderValueR = 7.0F / 255;
+                    // hSliderValueG = 173.0F / 255;
+                    // hSliderValueB = 16.0F / 255;
+                    // hSliderValueA = 255.0F / 255;
+
                     // Set particles color
-                    hSliderValueR = 7.0F / 255;
-                    hSliderValueG = 173.0F / 255;
-                    hSliderValueB = 16.0F / 255;
-                    hSliderValueA = 255.0F / 255;
+                    hSliderValueR = 0;
+                    hSliderValueG = 1;
+                    hSliderValueB = 0;
+                    hSliderValueA = 1;                    
                 }
                 else if (Team.ToString() == "BLUE")
                 {
+                    // // Set particles color
+                    // hSliderValueR = 7.0F / 255;
+                    // hSliderValueG = 58.0F / 255;
+                    // hSliderValueB = 173.0F / 255;
+                    // hSliderValueA = 255.0F / 255;
+
                     // Set particles color
-                    hSliderValueR = 7.0F / 255;
-                    hSliderValueG = 58.0F / 255;
-                    hSliderValueB = 173.0F / 255;
-                    hSliderValueA = 255.0F / 255;
+                    hSliderValueR = 0;
+                    hSliderValueG = 1;
+                    hSliderValueB = 1;
+                    hSliderValueA = 1;                      
                 }
 
                 Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);

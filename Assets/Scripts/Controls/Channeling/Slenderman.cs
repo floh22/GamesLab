@@ -137,10 +137,15 @@ namespace Controls.Channeling
 
 
             // Set particles color
-            float hSliderValueR = 209.0F / 255;
-            float hSliderValueG = 25.0F / 255;
-            float hSliderValueB = 191.0F / 255;
-            float hSliderValueA = 255.0F / 255;            
+            // float hSliderValueR = 209.0F / 255;
+            // float hSliderValueG = 25.0F / 255;
+            // float hSliderValueB = 191.0F / 255;
+            // float hSliderValueA = 255.0F / 255;      
+
+            float hSliderValueR = 255.0F / 255;
+            float hSliderValueG = 0.0F / 255;
+            float hSliderValueB = 221.0F / 255;
+            float hSliderValueA = 255.0F / 255;   
 
             Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
 
