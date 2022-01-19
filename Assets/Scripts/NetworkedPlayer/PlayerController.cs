@@ -161,6 +161,7 @@ namespace NetworkedPlayer
 
         [SerializeField]
         public GameObject ChannelParticleSystem;
+        public GameObject RingsParticleSystem;
         
         private bool isChannelingObjective;
         private Vector3 channelingTo = Vector3.positiveInfinity;
@@ -485,6 +486,7 @@ namespace NetworkedPlayer
 
             // Disable the channeling effect
             ChannelParticleSystem.SetActive(false);
+            RingsParticleSystem.SetActive(false);
             Debug.Log($"Player's channeling from team {Team} has been interrupted");
         }
 
@@ -603,6 +605,7 @@ namespace NetworkedPlayer
             isChannelingObjective = false;
             // Disable the channeling effect
             ChannelParticleSystem.SetActive(false);
+            RingsParticleSystem.SetActive(false);
             Debug.Log($"Page has been picked up by player of {Team} team");
         }
         

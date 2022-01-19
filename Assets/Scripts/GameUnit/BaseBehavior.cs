@@ -205,9 +205,7 @@ namespace GameUnit
                 
                 // Set this in the player themselves
                 channeler.ChannelParticleSystem.SetActive(true);
-                
-                
-                ParticleSystem ps = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
+                ParticleSystem channelParticleSystem = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
 
                 // Set particles color
                 float hSliderValueR = 0.0f;
@@ -249,10 +247,45 @@ namespace GameUnit
                     hSliderValueA = 255.0F / 255;
                 }
 
-                ps.startColor = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
+                Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
 
+                channelParticleSystem.startColor = color;
+
+                /* Start of Rings Channeling Effect Stuff */
+                channeler.RingsParticleSystem.SetActive(true);
+
+                ParticleSystem ringsParticleSystem = channeler.RingsParticleSystem.GetComponent<ParticleSystem>();
+                ringsParticleSystem.Play(true);       
+
+                ParticleSystem embers = channeler.RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+                ParticleSystem smoke = channeler.RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+                embers.startColor = color;
+                smoke.startColor = color;
+                
+                Gradient gradient;
+                GradientColorKey[] colorKey;
+                GradientAlphaKey[] alphaKey;
+                gradient = new Gradient();
+                // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+                colorKey = new GradientColorKey[2];
+                colorKey[0].color = color;
+                colorKey[0].time = 0.0f;
+                colorKey[1].color = color;
+                colorKey[1].time = 1.0f;
+                // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
+                alphaKey = new GradientAlphaKey[2];
+                alphaKey[0].alpha = 1.0f;
+                alphaKey[0].time = 0.0f;
+                alphaKey[1].alpha = 0.0f;
+                alphaKey[1].time = 1.0f;
+                gradient.SetKeys(colorKey, alphaKey);       
+
+                ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
+                ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
+                /* End of Rings Channeling Effect Stuff */
+                
                 // Set the force that will change the particles direcion
-                var fo = ps.forceOverLifetime;
+                var fo = channelParticleSystem.forceOverLifetime;
                 fo.enabled = true;
 
                 fo.x = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.x - channeler.transform.position.x);

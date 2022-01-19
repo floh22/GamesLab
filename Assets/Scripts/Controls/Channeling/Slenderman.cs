@@ -137,12 +137,47 @@ namespace Controls.Channeling
 
 
             // Set particles color
-            float hSliderValueR = 209.0F;
-            float hSliderValueG = 25.0F;
-            float hSliderValueB = 191.0F;
-            float hSliderValueA = 255.0F;
+            float hSliderValueR = 209.0F / 255;
+            float hSliderValueG = 25.0F / 255;
+            float hSliderValueB = 191.0F / 255;
+            float hSliderValueA = 255.0F / 255;            
 
-            ps.startColor = new Color(hSliderValueR / 255, hSliderValueG / 255, hSliderValueB / 255, hSliderValueA / 255);
+            Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
+
+            ps.startColor = color;
+
+            /* Start of Rings Channeling Effect Stuff */
+            channeler.RingsParticleSystem.SetActive(true);
+
+            ParticleSystem ringsParticleSystem = channeler.RingsParticleSystem.GetComponent<ParticleSystem>();
+            ringsParticleSystem.Play(true);       
+
+            ParticleSystem embers = channeler.RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem smoke = channeler.RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+            embers.startColor = color;
+            smoke.startColor = color;
+            
+            Gradient gradient;
+            GradientColorKey[] colorKey;
+            GradientAlphaKey[] alphaKey;
+            gradient = new Gradient();
+            // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+            colorKey = new GradientColorKey[2];
+            colorKey[0].color = color;
+            colorKey[0].time = 0.0f;
+            colorKey[1].color = color;
+            colorKey[1].time = 1.0f;
+            // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
+            alphaKey = new GradientAlphaKey[2];
+            alphaKey[0].alpha = 1.0f;
+            alphaKey[0].time = 0.0f;
+            alphaKey[1].alpha = 0.0f;
+            alphaKey[1].time = 1.0f;
+            gradient.SetKeys(colorKey, alphaKey);       
+
+            ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
+            ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
+            /* End of Rings Channeling Effect Stuff */            
 
             //var main = ps.main;
             //main.startColor = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
@@ -199,6 +234,7 @@ namespace Controls.Channeling
             // Disable channeling effects after hiring Slenderman
             innerChannelingParticleSystem.SetActive(false);
             channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
+            channeler.transform.Find("Rings").gameObject.SetActive(false);
 
             channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
             OnChanneled();
