@@ -297,7 +297,7 @@ namespace Controls.Abilities
                     Transform t;
                     direction = (t = transform).TransformPoint(direction);
 
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, caster.AttachtedObjectInstance.transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
+                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, caster.Position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
                         Quaternion.Euler(0, angle, 0));
                     
                     ability2ActiveObject.transform.LookAt(direction);
