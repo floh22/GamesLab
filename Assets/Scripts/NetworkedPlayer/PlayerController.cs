@@ -415,6 +415,7 @@ namespace NetworkedPlayer
             controller.enabled = false;
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(false);
+            UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);
             
             //create dead character
             Vector3 position = transform.position;

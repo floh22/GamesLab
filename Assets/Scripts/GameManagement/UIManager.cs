@@ -30,6 +30,7 @@ namespace GameManagement
         public GameObject IngameUI;
         public GameObject GameOverUI;
         public Image MinionSwitchButtonImage;
+        public GameObject ActionButtonsGroup;
 
         private GameObject PagesContainer;
         private Image[] PagesImages;
@@ -41,8 +42,13 @@ namespace GameManagement
         private bool IsSlenderCooldown;
         private float SlenderCooldownDuration;
 
+        [SerializeField] private Image DeathIndicatorImage; 
+        private bool IsDeathCooldown;
+        private float DeathCooldownDuration;
+
         private Image HealthbarImage;
         [SerializeField] private Image OwnPlayerLevelBackgroundImage; 
+
         
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_1; 
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_2; 
@@ -141,6 +147,17 @@ namespace GameManagement
                 {
                     IsSlenderCooldown = false;
                     SlenderImage.enabled = false;
+                }
+            }
+            
+            if (IsDeathCooldown)
+            {
+                DeathIndicatorImage.fillAmount -= 1 / DeathCooldownDuration * Time.deltaTime;
+                if (DeathIndicatorImage.fillAmount <= 0)
+                {
+                    IsDeathCooldown = false;
+                    DeathIndicatorImage.enabled = false;
+                    ActionButtonsGroup.SetActive(true);
                 }
             }
 
@@ -369,6 +386,15 @@ namespace GameManagement
             IsSlenderCooldown = true;
         }
 
+        public void ShowDeathIndicatorCountdown(float duration)
+        {
+            DeathIndicatorImage.enabled = true;
+            DeathIndicatorImage.fillAmount = 1;
+            DeathCooldownDuration = duration + 0.5f;
+            IsDeathCooldown = true;
+            ActionButtonsGroup.SetActive(false);
+        }
+
         public void UIHELPERMETHODAddExperience(int experience)
         {
             if (_playerController == null || _playerController.Equals(null))
@@ -405,7 +431,8 @@ namespace GameManagement
                     return;
             }
 
-            SetGameOver(66, 66, 66);
+            _playerController.Health -= 200;
+            // SetGameOver(66, 66, 66);
         }
 
         void UpdateScoreboard()

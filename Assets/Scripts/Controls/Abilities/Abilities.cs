@@ -227,8 +227,8 @@ namespace Controls.Abilities
                     
                     GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
                         Quaternion.Euler(0, angle, 0));
-                        
-                    
+
+                    lastPosition = direction;
                     ability2ActiveObject.transform.LookAt(direction);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
                         .Activate(direction, PlayerController.LocalPlayerController,
@@ -286,16 +286,12 @@ namespace Controls.Abilities
                         angle *= -1;
                     }
 
-                    direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
-                    Transform t;
-                    direction = (t = transform).TransformPoint(direction);
-
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, caster.Position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f),
+                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start,
                         Quaternion.Euler(0, angle, 0));
                     
-                    ability2ActiveObject.transform.LookAt(direction);
+                    ability2ActiveObject.transform.LookAt(target);
                     ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                        .ActivateNoDamage(direction, caster);
+                        .ActivateNoDamage(target, caster);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
@@ -321,60 +317,13 @@ namespace Controls.Abilities
                 object[] data = (object[])photonEvent.CustomData;
 
                 int casterID = (int)data[0];
-                if (PlayerController.LocalPlayerController != null && PlayerController.LocalPlayerController.NetworkID == casterID)
-                {
-                    return;
-                }
-                
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
-                
-                Debug.Log($"Event with ability {ability} invocation");
-                if (!IsAbilityAvailable(casterID, ability))
-                {
-                    Debug.Log($"Event with ability {ability} ignored");
-                    return;
-                }
-                StartCoroutine(EventCoroutineCooldown(casterID, ability));
-                Debug.Log($"Event with ability {ability} not ignored");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
             }
         }
 
-        private bool IsAbilityAvailable(int casterID, Ability ability)
-        {
-            var cds = GameStateController.Instance.Cooldowns;
-            if (!cds.ContainsKey(casterID))
-            {
-                cds[casterID] = new Dictionary<Ability, bool>();
-            }
-
-            if (!cds[casterID].ContainsKey(ability))
-            {
-                cds[casterID][ability] = true;
-            }
-
-            return cds[casterID][ability];
-        }
-
-        private IEnumerator EventCoroutineCooldown(int casterID, Ability ability)
-        {
-            var cds = GameStateController.Instance.Cooldowns;
-            if (!cds.ContainsKey(casterID))
-            {
-                cds[casterID] = new Dictionary<Ability, bool>();
-            }
-            if (!cds[casterID].ContainsKey(ability))
-            {
-                cds[casterID][ability] = true;
-            }
-
-            cds[casterID][ability] = false;
-            yield return new WaitForSeconds(Math.Min(cooldownAbility1, cooldownAbility2));
-            cds[casterID][ability] = true;
-        }
-        
     }
 }
