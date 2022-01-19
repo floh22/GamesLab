@@ -332,7 +332,7 @@ namespace GameUnit
             
             OnStartChannel(channeler);
 
-            while (progress <= maxProgress)
+            while (progress < maxProgress)
             {
                 if (!channeler.IsChannelingObjective ||
                     Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
@@ -345,7 +345,16 @@ namespace GameUnit
 
                 progress += maxProgress / secondsToChannel;
                 Debug.Log($"{Team} Base being channeled, {progress} / {maxProgress}");
+
                 yield return new WaitForSeconds(1);
+            }
+
+            if(progress >= maxProgress)
+            {
+                // Disable channeling effects after hiring Slenderman
+                innerChannelingParticleSystem.SetActive(false);
+                channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
+                channeler.transform.Find("Rings").gameObject.SetActive(false);
             }
 
             if (!channeler.IsChannelingObjective)
@@ -391,9 +400,6 @@ namespace GameUnit
                     innerChannelingParticleSystem.SetActive(false);
                 }
             }
-
-            innerChannelingParticleSystem.SetActive(false);
-            channeler.InterruptChanneling();
         }
         
         private IEnumerator Glow()
