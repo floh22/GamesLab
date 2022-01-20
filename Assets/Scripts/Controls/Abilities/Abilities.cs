@@ -230,6 +230,7 @@ namespace Controls.Abilities
                     
                     iceLanceGameObject.transform.LookAt(direction);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
+                    iceLanceAbilityScript.ActivateDaamge();
                     
                     /* End of the Ice Lance stuff*/
 
@@ -271,12 +272,41 @@ namespace Controls.Abilities
                     {
                         return;
                     }
-                    isCooldown2 = true;
 
-                    Vector3 direction = new(target.x, 0, target.y);
+                    Vector3 direction = new Vector3(target.x, 0, target.y);
                     direction *= maxAbilityDistance2;
 
                     float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
+                    if (direction.z <= 0)
+                    {
+                        angle *= -1;
+                    }
+
+                    direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
+                    direction = transform.TransformPoint(direction);
+
+                    /* Start of the Ice Lance stuff */
+
+                    GameObject iceLanceGameObject = Instantiate(ability2ProjectilePrefab, start, Quaternion.identity);
+                    IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
+                    
+                    iceLanceGameObject.transform.LookAt(direction);
+                    iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
+
+                    /* End of the Ice Lance stuff*/
+
+                    break;
+                    
+                    if (isCooldown2)
+                    {
+                        return;
+                    }
+                    isCooldown2 = true;
+
+                    direction = new(target.x, 0, target.y);
+                    direction *= maxAbilityDistance2;
+
+                    angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
                     if (direction.z <= 0)
                     {
                         angle *= -1;
