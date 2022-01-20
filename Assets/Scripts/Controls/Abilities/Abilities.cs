@@ -223,19 +223,15 @@ namespace Controls.Abilities
                     startingPosition = transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f);
                     direction = transform.TransformPoint(direction);
 
+                    /* Start of the Ice Lance stuff */
 
+                    GameObject iceLanceGameObject = Instantiate(ability2ProjectilePrefab, startingPosition, Quaternion.identity);
+                    IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
                     
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, startingPosition,
-                        Quaternion.Euler(0, angle, 0));
-
-                    lastPosition = direction;
-                    ability2ActiveObject.transform.LookAt(direction);
-                    ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                        .Activate(direction, PlayerController.LocalPlayerController,
-                            0f); //Damage Multiplier not needed here but only below
-                    ability2ActiveObject.GetComponent<DamageObject>()
-                        .Activate(PlayerController.LocalPlayerController, 10, 1, false,
-                            PlayerController.LocalPlayerController.DamageMultiplierAbility2);
+                    iceLanceGameObject.transform.LookAt(direction);
+                    iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
+                    
+                    /* End of the Ice Lance stuff*/
 
                     isCooldown2 = true;
                     ability2Image.fillAmount = 0;

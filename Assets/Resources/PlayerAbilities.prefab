@@ -432,7 +432,7 @@ MonoBehaviour:
   arrowIndicatorPivot: {fileID: 6320556504264533232}
   ability1ProjectilePrefab: {fileID: 7467911905582437125, guid: dba9eaef55f13e44ba0ee009e8d3ca3d,
     type: 3}
-  ability2ProjectilePrefab: {fileID: 7467911905582437125, guid: 8d2f4a8936f528e448466e30b49b76c2,
+  ability2ProjectilePrefab: {fileID: 1820680284854294, guid: 39e485c0a32910849b23b2c73607f22c,
     type: 3}
 --- !u!114 &-1291191616859366960
 MonoBehaviour:
