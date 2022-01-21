@@ -7,7 +7,7 @@ namespace Controls.Abilities
     public class IceLanceAbilityScript : MonoBehaviour
     {
         // This sphere is the bound to where the projectiles can go.
-        // This is coupled with the a trigger in the ParticleSystem
+        // This is coupled with the trigger in the ParticleSystem
         // with a sphere in one of the slots and the Exit (from sphere)
         // option set to Kill (the particle).
         // This sphere should also have a SphereCollider component.
@@ -15,7 +15,7 @@ namespace Controls.Abilities
 
         [SerializeField] private Collider damageCollider;
         // This function is used to scale the bounding sphere to a max radius
-        // that there projectiles can go to before getting destroyed.
+        // that projectiles can go to before getting destroyed.
         // Keep in mind that the ParticleSystem automatically destroys the
         // projectiles for us using the sphere.
         public void setMaxRadius(float radius)

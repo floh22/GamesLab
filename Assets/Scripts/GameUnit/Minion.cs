@@ -356,12 +356,16 @@ namespace GameUnit
                 
             }
 
+            // The static Array.Clear() method "sets a range of elements in the Array to zero, to false, or to Nothing, 
+            // depending on the element type". If you want to clear your entire array, you could use this method an 
+            // provide it 0 as start index and myArray.Length as length:
+            Array.Clear(results, 0, results.Length);
+            
             //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            var results2 = new Collider[20];
-            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results2, LayerMask.GetMask("AlliedUnits"));            
+            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("AlliedUnits"));            
             
             //Find viable targets
-            foreach (Collider res in results2.NotNull())
+            foreach (Collider res in results.NotNull())
             {
                 IGameUnit unit = res.GetComponent<IGameUnit>();
 

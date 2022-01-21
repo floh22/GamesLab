@@ -229,6 +229,9 @@ MonoBehaviour:
   - Type: 1
     SynchronizeType: 2
     Name: AttackSpeedMult
+  - Type: 4
+    SynchronizeType: 0
+    Name: DoDie
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
