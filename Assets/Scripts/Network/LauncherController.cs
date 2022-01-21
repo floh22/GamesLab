@@ -39,6 +39,7 @@ namespace Network
         [SerializeField] private TMP_Text connectionStatus;
 
         [SerializeField] private Button forceStart;
+        [SerializeField] private Button leaveRoomButton;
 
         [SerializeField] private PersistentData persistentData;
 
@@ -52,7 +53,6 @@ namespace Network
         [SerializeField] private LobbyCameraController cameraController;
 
         #endregion
-
 
         #region Private Fields
 
@@ -128,6 +128,13 @@ namespace Network
                 // #Critical, we must first and foremost connect to Photon Online Server.
                 Debug.Log($"Is Connected: {PhotonNetwork.IsConnected}, Nickname: {PhotonNetwork.NickName}");
             }
+        }
+
+        public void Leave()
+        {
+            //Somehow I also need to close the room here, don't know how though yet !!!!!!!!!!!!
+            PhotonNetwork.LeaveRoom();
+            HideConnectionInfo();
         }
     
         #region MonoBehaviourPunCallbacks Callbacks
@@ -245,6 +252,7 @@ namespace Network
     
         private void ShowConnectionInfo(string info)
         {
+            leaveRoomButton.gameObject.SetActive(true);
             joinButton.gameObject.SetActive(false);
             forceStart.gameObject.SetActive(true);
             playerNameField.gameObject.SetActive(false);
@@ -255,6 +263,7 @@ namespace Network
 
         private void HideConnectionInfo()
         {
+            leaveRoomButton.gameObject.SetActive(false);
             joinButton.gameObject.SetActive(true);
             forceStart.gameObject.SetActive(false);
             playerNameField.gameObject.SetActive(true);

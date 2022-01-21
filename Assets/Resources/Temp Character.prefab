@@ -536,6 +536,8 @@ MonoBehaviour:
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   ChannelParticleSystem: {fileID: 5515293819083878695}
   RingsParticleSystem: {fileID: 7648267907585782392}
+  PagePrefab: {fileID: 4729148963790719949, guid: 6d3b8bd2cd967ba40ad5f86c275e78f4,
+    type: 3}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2010,7 +2012,7 @@ GameObject:
   - component: {fileID: 7533535786091523599}
   - component: {fileID: 8677582322204590781}
   - component: {fileID: 570022677907127054}
-  - component: {fileID: 5896005381751646019}
+  - component: {fileID: 7573762605933773213}
   m_Layer: 5
   m_Name: Page
   m_TagString: Untagged
@@ -2088,7 +2090,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5896005381751646019
+--- !u!114 &7573762605933773213
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
