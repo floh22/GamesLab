@@ -418,7 +418,8 @@ namespace GameManagement
                     return;
             }
 
-            _playerController.OnReceiveSlendermanBuff();
+            // _playerController.OnReceiveSlendermanBuff();
+            _playerController.Health -= 200;
         }
         
         public void UIHELPERMETHOD3()

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Character;
 using Controls.Channeling;
 using ExitGames.Client.Photon;
+using ExitGames.Client.Photon.StructWrapping;
 using GameManagement;
 using Network;
 using Photon.Pun;
@@ -20,6 +21,7 @@ namespace NetworkedPlayer
 
         public static GameObject LocalPlayerInstance;
         public static PlayerController LocalPlayerController;
+
         #endregion
 
         #region IGameUnit
@@ -29,7 +31,7 @@ namespace NetworkedPlayer
         public int OwnerID => photonView.OwnerActorNr;
 
         //TODO: Probably merge this with LocalPlayerInstance but I didnt want to break anything so I left it as is for now
-        public GameObject AttachtedObjectInstance { get; set; } 
+        public GameObject AttachtedObjectInstance { get; set; }
 
         [field: SerializeField] public GameData.Team Team { get; set; }
 
@@ -46,7 +48,7 @@ namespace NetworkedPlayer
         public bool IsVisible { get; set; }
         [SerializeField] public bool HasSlenderBuff { get; set; }
         [SerializeField] public float SlenderBuffDuration = 45;
-        
+
 
         public IGameUnit CurrentAttackTarget { get; set; }
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
@@ -64,42 +66,30 @@ namespace NetworkedPlayer
         public int GainedExperienceByPlayer { get; set; }
 
         private float _damageMultiplierMinion;
-        [field: SerializeField] public float DamageMultiplierMinion
+
+        [field: SerializeField]
+        public float DamageMultiplierMinion
         {
-            get
-            {
-                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierMinion);
-            }
-            set
-            {
-                _damageMultiplierMinion = value;
-            }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierMinion); }
+            set { _damageMultiplierMinion = value; }
         }
 
         private float _damageMultiplierAbility1;
-        [field: SerializeField] public float DamageMultiplierAbility1 
+
+        [field: SerializeField]
+        public float DamageMultiplierAbility1
         {
-            get
-            {
-                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility1);
-            }
-            set
-            {
-                _damageMultiplierAbility1 = value;
-            }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility1); }
+            set { _damageMultiplierAbility1 = value; }
         }
 
         private float _damageMultiplierAbility2;
-        [field: SerializeField] public float DamageMultiplierAbility2 
+
+        [field: SerializeField]
+        public float DamageMultiplierAbility2
         {
-            get
-            {
-                return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility2);
-            }
-            set
-            {
-                _damageMultiplierAbility2 = value;
-            }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility2); }
+            set { _damageMultiplierAbility2 = value; }
         }
 
         [field: SerializeField] public int UpgradesMinion { get; set; }
@@ -109,7 +99,7 @@ namespace NetworkedPlayer
         [field: SerializeField] public int UnspentLevelUps { get; set; }
 
         #endregion
-        
+
         [field: SerializeField] public float DeathTimerMax { get; set; } = 15;
         [field: SerializeField] public float DeathTimerCurrently { get; set; } = 0;
 
@@ -119,6 +109,7 @@ namespace NetworkedPlayer
 
         [FormerlySerializedAs("DeadPlayer")] [SerializeField]
         public GameObject DeadPlayerPrefab;
+
         [SerializeField] public GameObject SlenderBuffPrefab;
 
         public bool HasPage
@@ -152,7 +143,7 @@ namespace NetworkedPlayer
         #endregion
 
         #region Private Fields
-        
+
         private CameraController cameraController;
 
         [SerializeField] private bool hasPage;
@@ -161,20 +152,21 @@ namespace NetworkedPlayer
 
         private PlayerUI playerUI;
 
-        [SerializeField]
-        public GameObject ChannelParticleSystem;
+        [SerializeField] public GameObject ChannelParticleSystem;
         public GameObject RingsParticleSystem;
-        
+
         private bool isChannelingObjective;
         private Vector3 channelingTo = Vector3.positiveInfinity;
-        
+
         private IGameUnit self;
-        
+
         private bool isAttacking;
-        
+
         private bool isAttacked;
-        
+
         private Page page;
+
+        public GameObject PagePrefab;
 
         #endregion
 
@@ -196,7 +188,7 @@ namespace NetworkedPlayer
 
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
             DontDestroyOnLoad(gameObject);
-            
+
             GameStateController.LocalPlayerSpawnEvent.Invoke();
         }
 
@@ -207,7 +199,7 @@ namespace NetworkedPlayer
         {
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
-           
+
             page = GetComponentInChildren<Page>();
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
@@ -283,7 +275,7 @@ namespace NetworkedPlayer
                 {
                     Die();
                 }
-                
+
                 if (!(CurrentAttackTarget == null || isAttacking))
                 {
                     if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
@@ -301,20 +293,20 @@ namespace NetworkedPlayer
                             break;
                     }
                 }
-
-                
             }
 
             if (HasPage && !page.IsActive)
             {
                 ShowPage();
             }
+
             if (!HasPage && page.IsActive)
             {
                 HidePage();
             }
 
-            if (this.ChannelParticleSystem != null && this.isChannelingObjective != this.ChannelParticleSystem.activeInHierarchy)
+            if (this.ChannelParticleSystem != null &&
+                this.isChannelingObjective != this.ChannelParticleSystem.activeInHierarchy)
             {
                 this.ChannelParticleSystem.SetActive(this.isChannelingObjective);
             }
@@ -358,13 +350,13 @@ namespace NetworkedPlayer
             {
                 return;
             }
-            
+
             var target = other.GetComponent<IGameUnit>();
             if (target == null)
             {
                 return;
             }
-            
+
             if (target == self)
             {
                 return;
@@ -374,7 +366,6 @@ namespace NetworkedPlayer
             {
                 CurrentAttackTarget = null;
             }
-
         }
 
         #endregion
@@ -390,13 +381,16 @@ namespace NetworkedPlayer
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
         }
-        
+
 
         public void Die()
         {
             IsAlive = false;
-            
-            DropPage();
+
+            if (HasPage)
+            {
+                DropPageOnTheGround();
+            }
 
             //remove attackers
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
@@ -417,40 +411,41 @@ namespace NetworkedPlayer
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(false);
             UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);
-            
+
             //create dead character
             Vector3 position = transform.position;
             GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
-            
+
             //follow dead character
             deadCameraController.OnStartFollowing();
 
             transform.position = new Vector3(0, -10, 0);
-            
+
             GetComponent<Rigidbody>().position = new Vector3(0, -10, 0);
 
-            StartCoroutine(Respawn(() => {
+            StartCoroutine(Respawn(() =>
+            {
                 IsAlive = true;
-                
-                
+
+
                 //Get Player spawn point
-                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up ;
+                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
                 transform.position = position;
 
                 //Reset stats
                 this.Health = this.MaxHealth;
-                
+
                 controller.enabled = true;
                 playerUiGo.SetActive(true);
-                
+
                 //Start following player again
                 deadCameraController.OnStopFollowing();
                 cameraController.OnStartFollowing();
-                
+
                 //Destroy dead player
-                Destroy(deadPlayerObject);        }));
-            
+                Destroy(deadPlayerObject);
+            }));
         }
 
         public void OnChannelObjective(Vector3 objectivePosition, int networkId)
@@ -465,25 +460,26 @@ namespace NetworkedPlayer
             OnReceiveSlendermanBuff();
             GameStateController.SendFinishChannelEvent(Team, networkId, 0);
         }
-        
+
         public void OnChannelingFinishedAndPickUpPage(int networkId, int pages)
         {
             PickUpPage();
             GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
-        
+
         public void OnChannelingFinishedAndDropPage(int networkId, int pages)
         {
             DropPage();
             GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
-        
+
         public void InterruptChanneling()
         {
             if (!isChannelingObjective)
             {
                 return;
             }
+
             isChannelingObjective = false;
             channelingTo = Vector3.positiveInfinity;
 
@@ -517,12 +513,12 @@ namespace NetworkedPlayer
             else
             {
                 // Network player, receive data
-                this.NetworkID = (int)stream.ReceiveNext();
+                this.NetworkID = (int) stream.ReceiveNext();
                 this.Health = (float) stream.ReceiveNext();
                 this.Team = (GameData.Team) stream.ReceiveNext();
-                this.Level = (int)stream.ReceiveNext();
-                this.isChannelingObjective = (bool)stream.ReceiveNext();
-                this.channelingTo = (Vector3)stream.ReceiveNext();
+                this.Level = (int) stream.ReceiveNext();
+                this.isChannelingObjective = (bool) stream.ReceiveNext();
+                this.channelingTo = (Vector3) stream.ReceiveNext();
                 this.hasPage = (bool) stream.ReceiveNext();
             }
         }
@@ -533,6 +529,7 @@ namespace NetworkedPlayer
             {
                 return;
             }
+
             Experience += amount;
             if (Experience >= ExperienceToReachNextLevel)
             {
@@ -607,7 +604,7 @@ namespace NetworkedPlayer
         public void OnLoseGame()
         {
         }
-        
+
         public void PickUpPage()
         {
             ShowPage();
@@ -618,7 +615,7 @@ namespace NetworkedPlayer
             RingsParticleSystem.SetActive(false);
             Debug.Log($"Page has been picked up by player of {Team} team");
         }
-        
+
         public void SacrifisePage()
         {
             HidePage();
@@ -634,15 +631,29 @@ namespace NetworkedPlayer
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
 
+        public void DropPageOnTheGround()
+        {
+            Vector3 position = transform.position;
+            position.y = 0.5f;
+            GameObject droppedPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
+            
+            PhotonView droppedPagePhotonView = droppedPage.GetComponent<PhotonView>();
+            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
+            
+            HidePage();
+            hasPage = false;
+            Debug.Log($"Page has been dropped on the ground by player of {Team} team");
+        }
+
         #endregion
 
         #region Utils
-        
+
         private void ShowPage()
         {
             page.TurnOn();
         }
-		
+
         private void HidePage()
         {
             page.TurnOff();
@@ -651,24 +662,25 @@ namespace NetworkedPlayer
         #endregion
 
         #region Coroutines
-        
+
         private IEnumerator Attack(float damage)
         {
             if (isChannelingObjective)
             {
                 yield break;
             }
+
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);
-            ((IGameUnit)this).SendDealDamageEvent(CurrentAttackTarget, damage);
+            ((IGameUnit) this).SendDealDamageEvent(CurrentAttackTarget, damage);
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();
             yield return new WaitForSeconds(pauseInSeconds / 2);
             isAttacking = false;
         }
-        
+
         private IEnumerator Attacked()
         {
             isAttacked = true;
@@ -677,7 +689,7 @@ namespace NetworkedPlayer
             // OnRest();
             isAttacked = false;
         }
-        
+
         public IEnumerator Respawn(Action nextFunc)
         {
             //wait out death timer
@@ -688,7 +700,7 @@ namespace NetworkedPlayer
                 DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
                 yield return new WaitForSeconds(0.1f);
             }
-            
+
             nextFunc.Invoke();
         }
 
