@@ -116,6 +116,7 @@ namespace GameUnit
             if (this.Team.Equals(PersistentData.Team))
             {
                 fogOfWarMesh.gameObject.SetActive(true);
+                this.gameObject.layer = LayerMask.NameToLayer("AlliedUnits");
             }
             
         }
@@ -354,6 +355,30 @@ namespace GameUnit
                 foundUnits.TryAdd(unit, distance);
                 
             }
+
+            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
+            var results2 = new Collider[20];
+            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results2, LayerMask.GetMask("AlliedUnits"));            
+            
+            //Find viable targets
+            foreach (Collider res in results2.NotNull())
+            {
+                IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                //Ignore units without GameUnit component
+                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
+                {
+                    continue;
+                }
+
+                //Get distance between the units.
+                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
+                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
+                
+                
+                foundUnits.TryAdd(unit, distance);
+                
+            }            
             
             return foundUnits;
         }
