@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameManagement;
+using Lobby;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -40,6 +41,15 @@ namespace Network
         [SerializeField] private Button forceStart;
 
         [SerializeField] private PersistentData persistentData;
+
+
+        [Header("Scene Data")] [SerializeField]
+        private List<GameObject> playerLights;
+
+        [SerializeField] private List<GameObject> playerObjects;
+        [SerializeField] private GameObject slenderman;
+
+        [SerializeField] private LobbyCameraController cameraController;
 
         #endregion
 
@@ -150,9 +160,18 @@ namespace Network
 
         public override void OnJoinedRoom()
         {
+            playerObjects.ForEach(o => o.SetActive(true));
+            cameraController?.MoveToWaitingForPlayers(() =>
+            {
+                slenderman?.SetActive(false);
+                UpdatePlayerLights();
+                
+            });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+            
+            
 
             InLobby = true;
             CheckGameStart();
@@ -160,9 +179,18 @@ namespace Network
 
         public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
         {
+            UpdatePlayerLights();
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
 
             CheckGameStart();
+        }
+
+        private void UpdatePlayerLights()
+        {
+            for (var i = 0; i < playerLights.Count; i++)
+            {
+                playerLights[i].SetActive(i < PhotonNetwork.CurrentRoom.PlayerCount);
+            }
         }
 
         private void CheckGameStart()
@@ -221,6 +249,7 @@ namespace Network
             forceStart.gameObject.SetActive(true);
             playerNameField.gameObject.SetActive(false);
             connectionInfo.gameObject.SetActive(true);
+            connectionStatus.gameObject.SetActive(false);
             connectionInfo.SetText(info);
         }
 
@@ -230,6 +259,7 @@ namespace Network
             forceStart.gameObject.SetActive(false);
             playerNameField.gameObject.SetActive(true);
             connectionInfo.gameObject.SetActive(false);
+            connectionStatus.gameObject.SetActive(true);
         }
 
     }

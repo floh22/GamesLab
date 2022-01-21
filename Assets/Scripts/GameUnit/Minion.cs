@@ -446,9 +446,22 @@ namespace GameUnit
             //Check if target is outside of leash range
             if (distanceToPath > Values.MinionLeashRadius)
             {
+                if (!agent.enabled)
+                {
+                    StartCoroutine(EnableAgent(() =>
+                    {
+                        currentMinionState = MinionState.ReturningToPath;
+                        agent.destination = nearestPointOnPath;
+                        nextWayPoint = nearestPointOnPath;
+                    }));
+                    return;
+                }
+
                 currentMinionState = MinionState.ReturningToPath;
                 agent.destination = nearestPointOnPath;
                 nextWayPoint = nearestPointOnPath;
+
+
                 return;
             }
             
@@ -460,9 +473,22 @@ namespace GameUnit
                 //If there are not minions found nearby, we have no target. This will make minions de agro other minions as soon as they are out of agro range... might break stuff?
                 if (!(closest == null || closest.Equals(null) || closest.IsDestroyed()) && closest != CurrentChaseTarget)
                 {
-                    agent.destination = closest.Position;
-                    CurrentChaseTarget = closest;
-                    distanceToTarget = closestDistance;
+                    if (!agent.enabled)
+                    {
+                        StartCoroutine(EnableAgent(() =>
+                        {
+                            agent.destination = closest.Position;
+                            CurrentChaseTarget = closest;
+                            distanceToTarget = closestDistance;
+                        }));
+                    }
+                    else
+                    {
+                        agent.destination = closest.Position;
+                        CurrentChaseTarget = closest;
+                        distanceToTarget = closestDistance;
+                    }
+                    
                     
                 }
             }
