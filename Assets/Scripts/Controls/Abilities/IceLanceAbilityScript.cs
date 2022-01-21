@@ -28,20 +28,23 @@ namespace Controls.Abilities
             IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
             //Ignore units without GameUnit component
-            if (targetIGameUnit != null || !targetIGameUnit.Equals(null) || PlayerController.LocalPlayerController.Team != targetIGameUnit.Team)
+            if (targetIGameUnit != null)
             {
-                float damageMultiplier =
-                    PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
-                        ? PlayerController.LocalPlayerController.DamageMultiplierMinion
-                        : 1);
+                if(PlayerController.LocalPlayerController.Team != targetIGameUnit.Team)
+                {
+                    float damageMultiplier =
+                        PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
+                            ? PlayerController.LocalPlayerController.DamageMultiplierMinion
+                            : 1);
 
-                float abilityDamage = 20 * damageMultiplier;
-            
-                targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, abilityDamage);
-            
-                IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, abilityDamage);
+                    float abilityDamage = 20 * damageMultiplier;
+                
+                    targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, abilityDamage);
+                
+                    IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, abilityDamage);
 
-                Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team}.");
+                    Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team}.");
+                }
             }
         }
 
