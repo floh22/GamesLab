@@ -9729,6 +9729,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boundingSphereTransform: {fileID: 4846699676719904}
   damageCollider: {fileID: 7970800307530162487}
+  ABILITY_DAMAGE: 20
 --- !u!1 &1877868098342330
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,6 +18,9 @@ namespace Controls.Abilities
         // that projectiles can go to before getting destroyed.
         // Keep in mind that the ParticleSystem automatically destroys the
         // projectiles for us using the sphere.
+
+        public float ABILITY_DAMAGE = 20;
+
         public void setMaxRadius(float radius)
         {
             boundingSphereTransform.localScale = new Vector3(radius, radius, radius);
@@ -27,24 +30,22 @@ namespace Controls.Abilities
         {
             IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
-            //Ignore units without GameUnit component
+            // Ignore units without GameUnit component
+            // Units of the same team (in the layer "AlliedUnits") are automatically ignored by the particle system.
             if (targetIGameUnit != null)
             {
-                if(PlayerController.LocalPlayerController.Team != targetIGameUnit.Team)
-                {
-                    float damageMultiplier =
-                        PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
-                            ? PlayerController.LocalPlayerController.DamageMultiplierMinion
-                            : 1);
+                float damageMultiplier =
+                    PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
+                        ? PlayerController.LocalPlayerController.DamageMultiplierMinion
+                        : 1);
 
-                    float abilityDamage = 20 * damageMultiplier;
-                
-                    targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, abilityDamage);
-                
-                    IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, abilityDamage);
+                float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
+            
+                targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
+            
+                IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
 
-                    Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team}.");
-                }
+                Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
             }
         }
 
