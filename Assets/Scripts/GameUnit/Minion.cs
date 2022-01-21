@@ -116,6 +116,7 @@ namespace GameUnit
             if (this.Team.Equals(PersistentData.Team))
             {
                 fogOfWarMesh.gameObject.SetActive(true);
+                this.gameObject.layer = LayerMask.NameToLayer("AlliedUnits");
             }
             
         }
@@ -354,6 +355,34 @@ namespace GameUnit
                 foundUnits.TryAdd(unit, distance);
                 
             }
+
+            // The static Array.Clear() method "sets a range of elements in the Array to zero, to false, or to Nothing, 
+            // depending on the element type". If you want to clear your entire array, you could use this method an 
+            // provide it 0 as start index and myArray.Length as length:
+            Array.Clear(results, 0, results.Length);
+            
+            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
+            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("AlliedUnits"));            
+            
+            //Find viable targets
+            foreach (Collider res in results.NotNull())
+            {
+                IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                //Ignore units without GameUnit component
+                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
+                {
+                    continue;
+                }
+
+                //Get distance between the units.
+                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
+                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
+                
+                
+                foundUnits.TryAdd(unit, distance);
+                
+            }            
             
             return foundUnits;
         }

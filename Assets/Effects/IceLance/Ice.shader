@@ -14,7 +14,7 @@
 		_InnerRamp ("_InnerRamp", 2D) = "white" {}
 	}
 	SubShader {
-		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+		Tags { "IgnoreProjector"="True" "Queue"="Transparent" "RenderType"="Transparent" }
 		LOD 200
 
 
