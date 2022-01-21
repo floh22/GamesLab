@@ -25,60 +25,24 @@ namespace Controls.Abilities
 
         void OnParticleCollision(GameObject gameObj)
         {
-
-            IGameUnit unit = gameObj.GetComponent<IGameUnit>();
-            IGameUnit castFrom = PlayerController.LocalPlayerController;
+            IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
             //Ignore units without GameUnit component
-            if (unit == null || unit.Equals(null) || castFrom.Team == unit.Team)
+            if (targetIGameUnit != null || !targetIGameUnit.Equals(null) || PlayerController.LocalPlayerController.Team != targetIGameUnit.Team)
             {
-                return;
+                float damageMultiplier =
+                    PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
+                        ? PlayerController.LocalPlayerController.DamageMultiplierMinion
+                        : 1);
+
+                float abilityDamage = 20 * damageMultiplier;
+            
+                targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, abilityDamage);
+            
+                IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, abilityDamage);
+
+                Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team}.");
             }
-
-            float damageMultiplier =
-                PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (unit.Type.Equals(GameUnitType.Minion)
-                    ? PlayerController.LocalPlayerController.DamageMultiplierMinion
-                    : 1);
-
-            float abilityDamage = 20 * damageMultiplier;
-        
-            unit.DoDamageVisual(castFrom, abilityDamage);
-        
-            IGameUnit.SendDealDamageEvent(castFrom, unit, abilityDamage);
-
-            return;
-        
-        
-            if (gameObj.name.StartsWith("Minion"))
-            {
-                PlayerController currentPlayer = PlayerController.LocalPlayerController;
-                GameUnit.Minion minionScript = gameObj.GetComponent<GameUnit.Minion>();    
-
-                Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name} of team {minionScript.Team}.");
-
-                minionScript.DoDamageVisual(currentPlayer, 999);
-            }
-
-            if (gameObj.name.StartsWith("Temp Character"))
-            {
-                PlayerController currentPlayer = PlayerController.LocalPlayerController;
-                PlayerController targetPlayerScript = gameObj.GetComponent<PlayerController>();    
-
-                Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetPlayerScript.Team}.");
-
-                targetPlayerScript.DoDamageVisual(currentPlayer, 999);
-            }
-
-            // if (gameObj.name.StartsWith("Slender"))
-            // {
-            //     PlayerController currentPlayer = PlayerController.LocalPlayerController;
-
-            //     if (gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.activeSelf == false)
-            //     {
-            //         Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name}.");
-            //         gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
-            //     }
-            // }
         }
 
         public void ActivateDaamge()
