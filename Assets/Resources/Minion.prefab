@@ -284,6 +284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myRenderer: {fileID: 6714847818302888332}
+  shouldNotAlwaysRender: 0
   threshold: 0.1
 --- !u!1001 &78639473628658344
 PrefabInstance:

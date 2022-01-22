@@ -6,20 +6,20 @@ using UnityEngine;
 
 namespace NetworkedPlayer
 {
-    public class DroppedPage: MonoBehaviour
+    public class DroppedPage : MonoBehaviour
     {
-
         #region Public Fields
 
         public int secondsAlive = 30;
         public int NetworkID { get; set; }
 
         #endregion
-        
+
         #region Private Fields
 
         private RectTransform rectTransform;
         private MeshRenderer meshRenderer;
+        private Collider collider;
         private Coroutine rotation;
         private Coroutine aliveTimer;
 
@@ -32,7 +32,7 @@ namespace NetworkedPlayer
             meshRenderer.enabled = true;
             rotation = StartCoroutine(Rotate());
         }
-        
+
 
         public void TurnOff()
         {
@@ -43,6 +43,8 @@ namespace NetworkedPlayer
             meshRenderer.enabled = false;
             PhotonNetwork.Destroy(this.gameObject);
         }
+        
+
 
         #endregion
 
@@ -53,10 +55,12 @@ namespace NetworkedPlayer
             NetworkID = gameObject.GetInstanceID();
             rectTransform = GetComponent<RectTransform>();
             meshRenderer = GetComponent<MeshRenderer>();
+            collider = GetComponent<Collider>();
+            collider.enabled = false;
             TurnOn();
             aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
         }
-        
+
         void OnTriggerEnter(Collider collider)
         {
             GameObject colliderObject = collider.gameObject;
@@ -71,13 +75,30 @@ namespace NetworkedPlayer
             }
         }
 
+
+
         #endregion
 
         #region Coroutines
 
+        public IEnumerator Drop()
+        {
+            Debug.Log("here?????");
+            transform.parent = null;
+            PhotonView droppedPagePhotonView = gameObject.GetComponent<PhotonView>();
+            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
+
+            var transformPosition = transform.position;
+            transformPosition.y = 0.5f;
+            transform.position = transformPosition;
+            yield return new WaitForSeconds(1f);
+            // collider.enabled = true;
+        }
+        
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);
+
             TurnOff();
         }
 
@@ -89,11 +110,7 @@ namespace NetworkedPlayer
                 yield return new WaitForSeconds(0.01f);
             }
         }
-        
-        #endregion 
 
-
-
-
+        #endregion
     }
 }

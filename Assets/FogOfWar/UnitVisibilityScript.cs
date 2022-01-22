@@ -3,6 +3,7 @@ using UnityEngine;
 public class UnitVisibilityScript : MonoBehaviour
 {
     public Renderer myRenderer; // reference to the render you want toggled based on the position of this transform
+    public bool shouldNotAlwaysRender = false;
     [Range(0f, 1f)] public float threshold = 0.1f; //the threshold for when this script considers myRenderer should render
 
     private Camera _camera; //The Camera using the masked render texture
