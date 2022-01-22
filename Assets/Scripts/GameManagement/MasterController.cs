@@ -43,12 +43,12 @@ namespace GameManagement
         public void StartMinionSpawning(int startDelayInMs = 0)
         {
             Debug.Log($"Spawning Minions in {startDelayInMs}ms");
-            StartCoroutine(SpawnMinions());
+            StartCoroutine(SpawnMinions(startDelayInMs));
         }
 
         private IEnumerator SpawnMinions(int startDelayInMs = 0)
         {
-            yield return new WaitForSeconds(startDelayInMs);
+            yield return new WaitForSeconds(startDelayInMs / 1000);
             
             while (!GameStateController.Instance.IsPaused)
             {
