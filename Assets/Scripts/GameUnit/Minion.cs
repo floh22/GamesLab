@@ -116,9 +116,25 @@ namespace GameUnit
             if (this.Team.Equals(PersistentData.Team))
             {
                 fogOfWarMesh.gameObject.SetActive(true);
-                this.gameObject.layer = LayerMask.NameToLayer("AlliedUnits");
             }
             
+            switch(this.Team.ToString())
+            {
+                case "RED":
+                    this.gameObject.layer = LayerMask.NameToLayer("REDUnits");
+                break;
+                case "BLUE":
+                    this.gameObject.layer = LayerMask.NameToLayer("BLUEUnits");
+                break;
+                case "GREEN":
+                    this.gameObject.layer = LayerMask.NameToLayer("GREENUnits");
+                break;
+                case "YELLOW":
+                    this.gameObject.layer = LayerMask.NameToLayer("YELLOWUnits");
+                break;
+                default:
+                break;
+            }   
         }
 
         public void Init(int networkID, GameData.Team team, GameData.Team target)
@@ -349,61 +365,48 @@ namespace GameUnit
 
         Dictionary<IGameUnit, float> FindUnits()
         {
-            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            var results = new Collider[20];
-            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("GameObject"));
+            String[] layers = new String[5];
 
+            layers[0] = "REDUnits";
+            layers[1] = "BLUEUnits";
+            layers[2] = "GREENUnits";
+            layers[3] = "YELLOWUnits";
+            layers[4] = "GameObject";
+
+            // Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
+            var results = new Collider[5];
             var foundUnits = new Dictionary<IGameUnit, float>();
-            
-            
-            //Find viable targets
-            foreach (Collider res in results.NotNull())
-            {
-                IGameUnit unit = res.GetComponent<IGameUnit>();
 
-                //Ignore units without GameUnit component
-                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
+            //Find viable targets
+            foreach (String layerName in layers)
+            {
+                Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask(layerName));
+                
+                //Find viable targets
+                foreach (Collider res in results.NotNull())
                 {
-                    continue;
+                    IGameUnit unit = res.GetComponent<IGameUnit>();
+
+                    //Ignore units without GameUnit component
+                    if (unit == null || unit.Equals(null) || unit.IsAlive == false)
+                    {
+                        continue;
+                    }
+
+                    //Get distance between the units.
+                    //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
+                    float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
+                    
+                    foundUnits.TryAdd(unit, distance);
+                    
                 }
 
-                //Get distance between the units.
-                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
-                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
-                
-                
-                foundUnits.TryAdd(unit, distance);
-                
+                // The static Array.Clear() method "sets a range of elements in the Array to zero, to false, or to Nothing, 
+                // depending on the element type". If you want to clear your entire array, you could use this method an 
+                // provide it 0 as start index and myArray.Length as length:
+                Array.Clear(results, 0, results.Length);
             }
 
-            // The static Array.Clear() method "sets a range of elements in the Array to zero, to false, or to Nothing, 
-            // depending on the element type". If you want to clear your entire array, you could use this method an 
-            // provide it 0 as start index and myArray.Length as length:
-            Array.Clear(results, 0, results.Length);
-            
-            //Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask("AlliedUnits"));            
-            
-            //Find viable targets
-            foreach (Collider res in results.NotNull())
-            {
-                IGameUnit unit = res.GetComponent<IGameUnit>();
-
-                //Ignore units without GameUnit component
-                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
-                {
-                    continue;
-                }
-
-                //Get distance between the units.
-                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
-                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
-                
-                
-                foundUnits.TryAdd(unit, distance);
-                
-            }            
-            
             return foundUnits;
         }
 

@@ -35,7 +35,6 @@ namespace Controls.Abilities
             IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
             // Ignore units without GameUnit component
-            // Units of the same team (in the layer "AlliedUnits") are automatically ignored by the particle system.
             if (targetIGameUnit != null)
             {
                 damageMultiplier =
@@ -66,6 +65,24 @@ namespace Controls.Abilities
                 bursts[0].cycleCount = PlayerController.LocalPlayerController.UpgradesAbility2 + 1;
                 emission.SetBursts(bursts, 1);
             }
+        }
+
+        public void determineUnitsToAvoid()
+        {
+            // This is done to make particles collide with everything except units of the same team
+            int layerMask =~ LayerMask.GetMask(PlayerController.LocalPlayerController.Team.ToString() + "Units");
+
+            ParticleSystem ps = this.gameObject.GetComponent<ParticleSystem>();
+            var collision = ps.collision;
+            collision.collidesWith = layerMask;
+        }
+
+        void FixedUpdate()
+        {
+            // This is done to move the particle system with the player without rotating it.
+            // Useful for when multiple shots are fired while moving
+            Vector3 forward = PlayerController.LocalPlayerController.gameObject.transform.forward;
+            this.gameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(forward.x * 0.05f, 2, forward.z * 0.05f);            
         }
 
         public void ActivateDaamge()
