@@ -118,18 +118,6 @@ namespace NetworkedPlayer
         public bool HasPage
         {
             get => hasPage;
-            set
-            {
-                if (hasPage != value)
-                {
-                    if (value)
-                        PickUpPage();
-                    else
-                        DropPage();
-                }
-
-                hasPage = value;
-            }
         }
 
         public bool IsDestroyed()
@@ -291,16 +279,16 @@ namespace NetworkedPlayer
                             break;
                     }
                 }
-            }
+                
+                if (HasPage && CurrentPage == null)
+                {
+                    ShowPage();
+                }
 
-            if (HasPage && CurrentPage == null)
-            {
-                ShowPage();
-            }
-
-            if (!HasPage && CurrentPage != null)
-            {
-                HidePage();
+                if (!HasPage && CurrentPage != null)
+                {
+                    HidePage();
+                }
             }
 
             if (this.ChannelParticleSystem != null &&
@@ -592,7 +580,6 @@ namespace NetworkedPlayer
             Vector3 position = transform.position;
             HasSlenderBuff = true;
             GameObject effect = PhotonNetwork.Instantiate("SlenderBuffVisual", position, Quaternion.identity);
-            // GameObject effect = Instantiate(SlenderBuffPrefab, position, Quaternion.identity);
             AutoObjectParenter.SendParentEvent(gameObject);
             UIManager.Instance.ShowSlenderBuffCountdown(SlenderBuffDuration);
             yield return new WaitForSeconds(SlenderBuffDuration);

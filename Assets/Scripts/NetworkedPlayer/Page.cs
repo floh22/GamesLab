@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace NetworkedPlayer
 {
-    public class Page : MonoBehaviour
+    public class Page : MonoBehaviourPunCallbacks
     {
         #region Public Fields
 
@@ -79,8 +79,8 @@ namespace NetworkedPlayer
 
         public IEnumerator Drop(Vector3 position)
         {
-            PhotonView droppedPagePhotonView = gameObject.GetComponent<PhotonView>();
-            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
+            Debug.Log("Pages has been dropped on the ground.");
+            photonView.TransferOwnership(photonView.OwnerActorNr);
             transform.SetParent(null, false);
 
             //Just does not work with its own position via set parent for some reason
@@ -97,7 +97,6 @@ namespace NetworkedPlayer
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);
-
             TurnOff();
         }
 
