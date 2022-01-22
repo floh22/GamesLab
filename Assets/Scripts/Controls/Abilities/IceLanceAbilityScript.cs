@@ -77,13 +77,13 @@ namespace Controls.Abilities
             collision.collidesWith = layerMask;
         }
 
-        void FixedUpdate()
-        {
-            // This is done to move the particle system with the player without rotating it.
-            // Useful for when multiple shots are fired while moving
-            Vector3 forward = PlayerController.LocalPlayerController.gameObject.transform.forward;
-            this.gameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(forward.x * 0.05f, 2, forward.z * 0.05f);            
-        }
+        // void FixedUpdate()
+        // {
+        //     // This is done to move the particle system with the player without rotating it.
+        //     // Useful for when multiple shots are fired while moving
+        //     Vector3 forward = PlayerController.LocalPlayerController.gameObject.transform.forward;
+        //     this.gameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(forward.x * 0.05f, 2, forward.z * 0.05f);            
+        // }
 
         public void ActivateDaamge()
         {

@@ -229,6 +229,7 @@ namespace Controls.Abilities
                     IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
                     
                     iceLanceGameObject.transform.LookAt(direction);
+                    // iceLanceGameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
                     iceLanceAbilityScript.ActivateDaamge();
                     iceLanceAbilityScript.determineNumberOfShots();
@@ -274,6 +275,7 @@ namespace Controls.Abilities
                     {
                         return;
                     }
+                    isCooldown2 = true;
 
                     Vector3 direction = new Vector3(target.x, 0, target.y);
                     direction *= maxAbilityDistance2;
@@ -294,32 +296,35 @@ namespace Controls.Abilities
                     
                     iceLanceGameObject.transform.LookAt(direction);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
-
+                    iceLanceAbilityScript.ActivateDaamge();
+                    iceLanceAbilityScript.determineNumberOfShots();
+                    iceLanceAbilityScript.determineUnitsToAvoid();
+                    
                     /* End of the Ice Lance stuff*/
 
-                    break;
+                    // break;
                     
-                    if (isCooldown2)
-                    {
-                        return;
-                    }
-                    isCooldown2 = true;
+                    // if (isCooldown2)
+                    // {
+                    //     return;
+                    // }
+                    // isCooldown2 = true;
 
-                    direction = new(target.x, 0, target.y);
-                    direction *= maxAbilityDistance2;
+                    // direction = new(target.x, 0, target.y);
+                    // direction *= maxAbilityDistance2;
 
-                    angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
-                    if (direction.z <= 0)
-                    {
-                        angle *= -1;
-                    }
+                    // angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
+                    // if (direction.z <= 0)
+                    // {
+                    //     angle *= -1;
+                    // }
 
-                    GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start,
-                        Quaternion.Euler(0, angle, 0));
+                    // GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start,
+                    //     Quaternion.Euler(0, angle, 0));
                     
-                    ability2ActiveObject.transform.LookAt(target);
-                    ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                        .ActivateNoDamage(target, caster);
+                    // ability2ActiveObject.transform.LookAt(target);
+                    // ability2ActiveObject.GetComponent<AbilityProjectile2>()
+                    //     .ActivateNoDamage(target, caster);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
