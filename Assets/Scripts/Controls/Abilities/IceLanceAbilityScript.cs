@@ -69,12 +69,20 @@ namespace Controls.Abilities
 
         public void determineUnitsToAvoid()
         {
-            // All layers except the current team layer.
+            // This is done to make particles collide with everything except units of the same team
             int layerMask =~ LayerMask.GetMask(PlayerController.LocalPlayerController.Team.ToString() + "Units");
 
             ParticleSystem ps = this.gameObject.GetComponent<ParticleSystem>();
             var collision = ps.collision;
             collision.collidesWith = layerMask;
+        }
+
+        void FixedUpdate()
+        {
+            // This is done to move the particle system with the player without rotating it.
+            // Useful for when multiple shots are fired while moving
+            Vector3 forward = PlayerController.LocalPlayerController.gameObject.transform.forward;
+            this.gameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(forward.x * 0.05f, 2, forward.z * 0.05f);            
         }
 
         public void ActivateDaamge()
