@@ -1,69 +1,109 @@
 using System;
 using System.Collections;
+using Photon.Pun;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace NetworkedPlayer
 {
-    public class Page: MonoBehaviour
+    public class Page : MonoBehaviour
     {
+        #region Public Fields
+
+        public int secondsAlive = 30;
+
+        #endregion
 
         #region Private Fields
 
         private RectTransform rectTransform;
         private MeshRenderer meshRenderer;
-        private bool isActive;
+        private Collider collider;
         private Coroutine rotation;
+        private Coroutine aliveTimer;
 
         #endregion
 
         #region Public API
 
-        public bool IsActive => isActive;
-
         public void TurnOn()
         {
-            if (isActive)
-            {
-                return;
-            }
-            
-            isActive = true;
             meshRenderer.enabled = true;
             rotation = StartCoroutine(Rotate());
         }
 
+
         public void TurnOff()
         {
-            if (!isActive)
-            {
-                return;
-            }
-
+            StopCoroutine(aliveTimer);
             StopCoroutine(rotation);
             rotation = null;
-            isActive = false;
+            aliveTimer = null;
             meshRenderer.enabled = false;
+            if (GetComponent<PhotonView>().IsMine)
+            {
+                PhotonNetwork.Destroy(this.gameObject);
+            }
         }
 
         #endregion
 
         #region Unity API
 
-        private void Start()
+        void Start()
         {
-            isActive = false;
             rectTransform = GetComponent<RectTransform>();
             meshRenderer = GetComponent<MeshRenderer>();
-            meshRenderer.enabled = false;
+            collider = GetComponent<Collider>();
+            collider.enabled = false;
+            TurnOn();
+        }
+
+        void OnTriggerEnter(Collider collider)
+        {
+            GameObject colliderObject = collider.gameObject;
+            if (colliderObject.tag == "Player")
+            {
+                PlayerController player = colliderObject.GetComponent<PlayerController>();
+                if (!player.HasPage)
+                {
+                    player.PickUpPage();
+                    TurnOff();
+                }
+            }
         }
 
         #endregion
 
         #region Coroutines
 
-        private IEnumerator Rotate()
+        public IEnumerator Drop(Vector3 position)
         {
-            while (isActive)
+            PhotonView droppedPagePhotonView = gameObject.GetComponent<PhotonView>();
+            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
+            transform.SetParent(null, false);
+
+            //Just does not work with its own position via set parent for some reason
+            Vector3 transformPosition = position;
+            transformPosition.y = 0.5f;
+            transform.position = transformPosition;
+
+            //Wait so that page cannot collide with same player on drop
+            yield return new WaitForSeconds(0.1f);
+            collider.enabled = true;
+            aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
+        }
+
+        IEnumerator DespawnAfterTimeAlive()
+        {
+            yield return new WaitForSeconds(secondsAlive);
+
+            TurnOff();
+        }
+
+        IEnumerator Rotate()
+        {
+            while (true)
             {
                 rectTransform.Rotate(0f, 3f, 0f);
                 yield return new WaitForSeconds(0.01f);
@@ -71,6 +111,5 @@ namespace NetworkedPlayer
         }
 
         #endregion
-
     }
 }

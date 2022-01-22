@@ -167,8 +167,6 @@ namespace NetworkedPlayer
 
         private bool isAttacked;
 
-        private Page page;
-
         #endregion
 
         #region MonoBehaviour CallBacks
@@ -200,8 +198,6 @@ namespace NetworkedPlayer
         {
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
-
-            page = GetComponentInChildren<Page>();
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
@@ -429,7 +425,7 @@ namespace NetworkedPlayer
             StartCoroutine(Respawn(() =>
             {
                 IsAlive = true;
-
+                hasPage = false;
 
                 //Get Player spawn point
                 position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
@@ -633,13 +629,13 @@ namespace NetworkedPlayer
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
 
-        public void DropPageOnTheGround()
+        public void  DropPageOnTheGround()
         {
             if (CurrentPage != null)
             {
-                CurrentPage.GetComponent<DroppedPage>().Drop();
+                StartCoroutine(CurrentPage.GetComponent<Page>().Drop(transform.position));
+                CurrentPage = null;
 
-                hasPage = false;
                 Debug.Log($"Page has been dropped on the ground by player of {Team} team");
             }
         }
@@ -651,9 +647,9 @@ namespace NetworkedPlayer
         private void ShowPage()
         {
             Vector3 position = transform.position;
-            position.y = 2.5f;
+            position.y = 3.5f;
             CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-            CurrentPage.transform.parent = this.gameObject.transform;
+            CurrentPage.transform.SetParent(this.gameObject.transform, true);
         }
 
         private void HidePage()
