@@ -7,7 +7,7 @@ namespace Controls.Abilities
     public class IceLanceAbilityScript : MonoBehaviour
     {
         // This sphere is the bound to where the projectiles can go.
-        // This is coupled with the a trigger in the ParticleSystem
+        // This is coupled with the trigger in the ParticleSystem
         // with a sphere in one of the slots and the Exit (from sphere)
         // option set to Kill (the particle).
         // This sphere should also have a SphereCollider component.
@@ -15,9 +15,16 @@ namespace Controls.Abilities
 
         [SerializeField] private Collider damageCollider;
         // This function is used to scale the bounding sphere to a max radius
-        // that there projectiles can go to before getting destroyed.
+        // that projectiles can go to before getting destroyed.
         // Keep in mind that the ParticleSystem automatically destroys the
         // projectiles for us using the sphere.
+
+        public float ABILITY_DAMAGE = 20;
+
+        private float damageMultiplier;
+
+        private int i = 0;
+
         public void setMaxRadius(float radius)
         {
             boundingSphereTransform.localScale = new Vector3(radius, radius, radius);
@@ -25,60 +32,40 @@ namespace Controls.Abilities
 
         void OnParticleCollision(GameObject gameObj)
         {
+            IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
-            IGameUnit unit = gameObj.GetComponent<IGameUnit>();
-            IGameUnit castFrom = PlayerController.LocalPlayerController;
-
-            //Ignore units without GameUnit component
-            if (unit == null || unit.Equals(null) || castFrom.Team == unit.Team)
+            // Ignore units without GameUnit component
+            // Units of the same team (in the layer "AlliedUnits") are automatically ignored by the particle system.
+            if (targetIGameUnit != null)
             {
-                return;
+                damageMultiplier =
+                    PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
+                        ? PlayerController.LocalPlayerController.DamageMultiplierMinion
+                        : 1);
+
+                float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
+            
+                targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
+            
+                IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
+
+                Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
             }
+        }
 
-            float damageMultiplier =
-                PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (unit.Type.Equals(GameUnitType.Minion)
-                    ? PlayerController.LocalPlayerController.DamageMultiplierMinion
-                    : 1);
+        public void determineNumberOfShots()
+        {
+            // Increase the number of ice lance abilities fired depending on skill "level"
+            ParticleSystem ps = this.gameObject.GetComponent<ParticleSystem>();
+            var emission = ps.emission;
+            ParticleSystem.Burst[] bursts = new ParticleSystem.Burst[emission.burstCount];
+            emission.GetBursts(bursts);
 
-            float abilityDamage = 20 * damageMultiplier;
-        
-            unit.DoDamageVisual(castFrom, abilityDamage);
-        
-            IGameUnit.SendDealDamageEvent(castFrom, unit, abilityDamage);
-
-            return;
-        
-        
-            if (gameObj.name.StartsWith("Minion"))
+            if(PlayerController.LocalPlayerController.UpgradesAbility2+1 > bursts[0].cycleCount)
             {
-                PlayerController currentPlayer = PlayerController.LocalPlayerController;
-                GameUnit.Minion minionScript = gameObj.GetComponent<GameUnit.Minion>();    
-
-                Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name} of team {minionScript.Team}.");
-
-                minionScript.DoDamageVisual(currentPlayer, 999);
+                bursts[0].cycleCount = PlayerController.LocalPlayerController.UpgradesAbility2 + 1;
+                emission.SetBursts(bursts, 1);
             }
-
-            if (gameObj.name.StartsWith("Temp Character"))
-            {
-                PlayerController currentPlayer = PlayerController.LocalPlayerController;
-                PlayerController targetPlayerScript = gameObj.GetComponent<PlayerController>();    
-
-                Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetPlayerScript.Team}.");
-
-                targetPlayerScript.DoDamageVisual(currentPlayer, 999);
-            }
-
-            // if (gameObj.name.StartsWith("Slender"))
-            // {
-            //     PlayerController currentPlayer = PlayerController.LocalPlayerController;
-
-            //     if (gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.activeSelf == false)
-            //     {
-            //         Debug.Log($"Player {currentPlayer.gameObject.name} of team {currentPlayer.Team} threw {this.gameObject.name} on {gameObj.name}.");
-            //         gameObj.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(true);
-            //     }
-            // }
         }
 
         public void ActivateDaamge()

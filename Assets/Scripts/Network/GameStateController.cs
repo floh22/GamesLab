@@ -233,7 +233,7 @@ namespace Network
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
                 controller.SpawnSlenderman();
                 controller.SpawnBases();
-                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs / 1000);
+                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
             }
             catch (Exception e)
             {

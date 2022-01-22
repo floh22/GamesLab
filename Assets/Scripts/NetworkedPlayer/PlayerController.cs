@@ -111,6 +111,9 @@ namespace NetworkedPlayer
         public GameObject DeadPlayerPrefab;
 
         [SerializeField] public GameObject SlenderBuffPrefab;
+        [SerializeField] public GameObject PagePrefab;
+        private GameObject CurrentPage;
+
 
         public bool HasPage
         {
@@ -165,8 +168,6 @@ namespace NetworkedPlayer
         private bool isAttacked;
 
         private Page page;
-
-        public GameObject PagePrefab;
 
         #endregion
 
@@ -276,7 +277,8 @@ namespace NetworkedPlayer
                     Die();
                 }
 
-                if (!(CurrentAttackTarget == null || isAttacking))
+                //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
+                if (!(CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || isAttacking))
                 {
                     if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
                     {
@@ -295,12 +297,12 @@ namespace NetworkedPlayer
                 }
             }
 
-            if (HasPage && !page.IsActive)
+            if (HasPage && CurrentPage == null)
             {
                 ShowPage();
             }
 
-            if (!HasPage && page.IsActive)
+            if (!HasPage && CurrentPage != null)
             {
                 HidePage();
             }
@@ -633,16 +635,13 @@ namespace NetworkedPlayer
 
         public void DropPageOnTheGround()
         {
-            Vector3 position = transform.position;
-            position.y = 0.5f;
-            GameObject droppedPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-            
-            PhotonView droppedPagePhotonView = droppedPage.GetComponent<PhotonView>();
-            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
-            
-            HidePage();
-            hasPage = false;
-            Debug.Log($"Page has been dropped on the ground by player of {Team} team");
+            if (CurrentPage != null)
+            {
+                CurrentPage.GetComponent<DroppedPage>().Drop();
+
+                hasPage = false;
+                Debug.Log($"Page has been dropped on the ground by player of {Team} team");
+            }
         }
 
         #endregion
@@ -651,12 +650,15 @@ namespace NetworkedPlayer
 
         private void ShowPage()
         {
-            page.TurnOn();
+            Vector3 position = transform.position;
+            position.y = 2.5f;
+            CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
+            CurrentPage.transform.parent = this.gameObject.transform;
         }
 
         private void HidePage()
         {
-            page.TurnOff();
+            PhotonNetwork.Destroy(CurrentPage);
         }
 
         #endregion

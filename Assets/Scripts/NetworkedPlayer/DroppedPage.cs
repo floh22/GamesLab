@@ -19,6 +19,7 @@ namespace NetworkedPlayer
 
         private RectTransform rectTransform;
         private MeshRenderer meshRenderer;
+        private Collider collider;
         private Coroutine rotation;
         private Coroutine aliveTimer;
 
@@ -42,6 +43,8 @@ namespace NetworkedPlayer
             meshRenderer.enabled = false;
             PhotonNetwork.Destroy(this.gameObject);
         }
+        
+
 
         #endregion
 
@@ -52,6 +55,8 @@ namespace NetworkedPlayer
             NetworkID = gameObject.GetInstanceID();
             rectTransform = GetComponent<RectTransform>();
             meshRenderer = GetComponent<MeshRenderer>();
+            collider = GetComponent<Collider>();
+            collider.enabled = false;
             TurnOn();
             aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
         }
@@ -70,10 +75,26 @@ namespace NetworkedPlayer
             }
         }
 
+
+
         #endregion
 
         #region Coroutines
 
+        public IEnumerator Drop()
+        {
+            Debug.Log("here?????");
+            transform.parent = null;
+            PhotonView droppedPagePhotonView = gameObject.GetComponent<PhotonView>();
+            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
+
+            var transformPosition = transform.position;
+            transformPosition.y = 0.5f;
+            transform.position = transformPosition;
+            yield return new WaitForSeconds(1f);
+            // collider.enabled = true;
+        }
+        
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);

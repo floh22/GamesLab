@@ -5850,7 +5850,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.01
+      repeatInterval: 0.5
       probability: 1
   SizeModule:
     enabled: 0
@@ -8616,7 +8616,7 @@ ParticleSystem:
     m_EnergyLossOnCollision:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.8
+      scalar: 0.9
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -8671,7 +8671,7 @@ ParticleSystem:
     radiusScale: 0.2
     collidesWith:
       serializedVersion: 2
-      m_Bits: 4294967295
+      m_Bits: 4095
     maxCollisionShapes: 256
     quality: 0
     voxelSize: 0.5
@@ -9729,6 +9729,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boundingSphereTransform: {fileID: 4846699676719904}
   damageCollider: {fileID: 7970800307530162487}
+  ABILITY_DAMAGE: 20
 --- !u!1 &1877868098342330
 GameObject:
   m_ObjectHideFlags: 0
