@@ -229,7 +229,7 @@ namespace Network
             Debug.Log($"{RoomList.Count} rooms available");
             if (JoinWhenReady)
             {
-                CreateRoom();
+                Connect();
                 JoinWhenReady = false;
             }
         }
@@ -252,7 +252,7 @@ namespace Network
     
         private void ShowConnectionInfo(string info)
         {
-            leaveRoomButton.gameObject.SetActive(true);
+            //leaveRoomButton.gameObject.SetActive(true);
             joinButton.gameObject.SetActive(false);
             forceStart.gameObject.SetActive(true);
             playerNameField.gameObject.SetActive(false);
@@ -263,7 +263,7 @@ namespace Network
 
         private void HideConnectionInfo()
         {
-            leaveRoomButton.gameObject.SetActive(false);
+            //leaveRoomButton.gameObject.SetActive(false);
             joinButton.gameObject.SetActive(true);
             forceStart.gameObject.SetActive(false);
             playerNameField.gameObject.SetActive(true);

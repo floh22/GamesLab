@@ -223,6 +223,23 @@ namespace GameUnit
                 case MinionState.Attacking:
                     if (CurrentAttackTarget != null && !CurrentAttackTarget.Equals(null))
                     {
+                        
+                        if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
+                        {
+                            currentMinionState = MinionState.LookingForPath;
+                            break;
+                        }
+            
+                        if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) > Values.MinionAttackRange)
+                        {
+                            CurrentAttackTarget.RemoveAttacker(this);
+                            CurrentChaseTarget = CurrentAttackTarget;
+                            currentMinionState = MinionState.ChasingTarget;
+                            CurrentAttackTarget = null;
+                            attackCycle = null;
+                            break;
+                        }
+                        
                         FaceTarget(CurrentAttackTarget.Position);
 
                         if (attackCycle == null || attackCycle.Equals(null))
@@ -263,7 +280,10 @@ namespace GameUnit
                 currentMinionState = MinionState.Idle;
             }
             
-            nextWayPoint = currentPath.MoveAlongSpline(ref mNormalizedT, MoveSpeed);
+            //only get a next waypoint if we are close to our current one
+            //should reduce the number of instances where minions walk past each other
+            if(Vector3.Distance(transform.position, nextWayPoint) < 2)
+                nextWayPoint = currentPath.MoveAlongSpline(ref mNormalizedT, MoveSpeed);
 
             if (!agent.enabled)
             {
@@ -305,7 +325,7 @@ namespace GameUnit
                     StartCoroutine(EnableAgent( 
                         () =>
                         {
-                            currentMinionState = MinionState.Walking;
+                            currentMinionState = MinionState.ChasingTarget;
                             agent.destination = closest.Position;
                             CurrentChaseTarget = closest;
                         })
@@ -464,7 +484,8 @@ namespace GameUnit
             if (CurrentChaseTarget == null|| CurrentChaseTarget.Equals(null) || CurrentChaseTarget.IsDestroyed() )
             {
                 currentMinionState = MinionState.Walking;
-                agent.destination = nearestPointOnPath;
+                if(agent.enabled)
+                    agent.destination = nearestPointOnPath;
                 nextWayPoint = nearestPointOnPath;
                 return;
             }
@@ -473,20 +494,23 @@ namespace GameUnit
             float distanceToPath = Vector3.Distance(Position, nearestPointOnPath);
 
             //Check if target is outside of leash range
-            if (distanceToPath > Values.MinionLeashRadius)
+            if (distanceToPath > Values.MinionLeashRadius || distanceToTarget > Values.MinionLeashRadius)
             {
+                CurrentAttackTarget = null;
+                CurrentChaseTarget = null;
+                
                 if (!agent.enabled)
                 {
                     StartCoroutine(EnableAgent(() =>
                     {
-                        currentMinionState = MinionState.ReturningToPath;
+                        currentMinionState = MinionState.Walking;
                         agent.destination = nearestPointOnPath;
                         nextWayPoint = nearestPointOnPath;
                     }));
                     return;
                 }
 
-                currentMinionState = MinionState.ReturningToPath;
+                currentMinionState = MinionState.Walking;
                 agent.destination = nearestPointOnPath;
                 nextWayPoint = nearestPointOnPath;
 
@@ -533,22 +557,6 @@ namespace GameUnit
 
         IEnumerator AttackLogic()
         {
-            if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null))
-            {
-                currentMinionState = MinionState.LookingForPath;
-                yield break;
-            }
-            
-            if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) > Values.MinionAttackRange)
-            {
-                CurrentAttackTarget.RemoveAttacker(this);
-                CurrentChaseTarget = CurrentAttackTarget;
-                currentMinionState = MinionState.ChasingTarget;
-                CurrentAttackTarget = null;
-                attackCycle = null;
-                yield break;
-            }
-            
             yield return DisableAgent();
             
             //quick n dirty
@@ -583,14 +591,14 @@ namespace GameUnit
                 return;
             if (CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || CurrentAttackTarget.IsAlive == false)
             {
-                currentMinionState = MinionState.ReturningToPath;
+                currentMinionState = MinionState.Walking;
                 anim.SetBool(AnimAutoAttack, false);
                 return;
             }
             
             if (CurrentAttackTarget.Team != this.Team)
             {
-                ((IGameUnit)this).SendDealDamageEvent(CurrentAttackTarget, Values.MinionAttackDamage);
+                IGameUnit.SendDealDamageEvent(this, CurrentAttackTarget, Values.MinionAttackDamage);
             }
         }
 
@@ -716,6 +724,9 @@ namespace GameUnit
             targetTeam = team;
             currentPath = pathHolder.Find(targetTeam.ToString()).GetComponent<BezierSpline>();
             
+            
+            //Don't think any of this is needed honestly
+            return;
             Vector3 dest = currentPath.FindNearestPointTo(Position);
             nextWayPoint = dest;
 

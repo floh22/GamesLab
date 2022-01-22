@@ -276,7 +276,8 @@ namespace NetworkedPlayer
                     Die();
                 }
 
-                if (!(CurrentAttackTarget == null || isAttacking))
+                //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
+                if (!(CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || isAttacking))
                 {
                     if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
                     {
