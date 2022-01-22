@@ -6,16 +6,15 @@ using UnityEngine;
 
 namespace NetworkedPlayer
 {
-    public class DroppedPage: MonoBehaviour
+    public class DroppedPage : MonoBehaviour
     {
-
         #region Public Fields
 
         public int secondsAlive = 30;
         public int NetworkID { get; set; }
 
         #endregion
-        
+
         #region Private Fields
 
         private RectTransform rectTransform;
@@ -32,7 +31,7 @@ namespace NetworkedPlayer
             meshRenderer.enabled = true;
             rotation = StartCoroutine(Rotate());
         }
-        
+
 
         public void TurnOff()
         {
@@ -56,7 +55,7 @@ namespace NetworkedPlayer
             TurnOn();
             aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
         }
-        
+
         void OnTriggerEnter(Collider collider)
         {
             GameObject colliderObject = collider.gameObject;
@@ -78,6 +77,7 @@ namespace NetworkedPlayer
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);
+
             TurnOff();
         }
 
@@ -89,11 +89,7 @@ namespace NetworkedPlayer
                 yield return new WaitForSeconds(0.01f);
             }
         }
-        
-        #endregion 
 
-
-
-
+        #endregion
     }
 }
