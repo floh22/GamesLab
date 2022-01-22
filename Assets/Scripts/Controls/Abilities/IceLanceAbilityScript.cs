@@ -21,6 +21,10 @@ namespace Controls.Abilities
 
         public float ABILITY_DAMAGE = 20;
 
+        private float damageMultiplier;
+
+        private int i = 0;
+
         public void setMaxRadius(float radius)
         {
             boundingSphereTransform.localScale = new Vector3(radius, radius, radius);
@@ -34,7 +38,7 @@ namespace Controls.Abilities
             // Units of the same team (in the layer "AlliedUnits") are automatically ignored by the particle system.
             if (targetIGameUnit != null)
             {
-                float damageMultiplier =
+                damageMultiplier =
                     PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
                         ? PlayerController.LocalPlayerController.DamageMultiplierMinion
                         : 1);
@@ -46,6 +50,21 @@ namespace Controls.Abilities
                 IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
 
                 Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
+            }
+        }
+
+        public void determineNumberOfShots()
+        {
+            // Increase the number of ice lance abilities fired depending on skill "level"
+            ParticleSystem ps = this.gameObject.GetComponent<ParticleSystem>();
+            var emission = ps.emission;
+            ParticleSystem.Burst[] bursts = new ParticleSystem.Burst[emission.burstCount];
+            emission.GetBursts(bursts);
+
+            if(PlayerController.LocalPlayerController.UpgradesAbility2+1 > bursts[0].cycleCount)
+            {
+                bursts[0].cycleCount = PlayerController.LocalPlayerController.UpgradesAbility2 + 1;
+                emission.SetBursts(bursts, 1);
             }
         }
 

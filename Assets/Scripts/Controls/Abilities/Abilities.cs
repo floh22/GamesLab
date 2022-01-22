@@ -231,6 +231,7 @@ namespace Controls.Abilities
                     iceLanceGameObject.transform.LookAt(direction);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
                     iceLanceAbilityScript.ActivateDaamge();
+                    iceLanceAbilityScript.determineNumberOfShots();
                     
                     /* End of the Ice Lance stuff*/
 
