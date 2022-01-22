@@ -21,7 +21,7 @@ namespace Network
         /// </summary>
         [Tooltip("The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created")]
         [SerializeField]
-        private byte maxPlayersPerRoom = 2;
+        private byte maxPlayersPerRoom = 4;
     
         /// <summary>
         /// This client's version number. Users are separated from each other by gameVersion, allows breaking changes
@@ -132,9 +132,20 @@ namespace Network
 
         public void Leave()
         {
-            //Somehow I also need to close the room here, don't know how though yet !!!!!!!!!!!!
-            PhotonNetwork.LeaveRoom();
-            HideConnectionInfo();
+            if (!PhotonNetwork.InRoom)
+                return;
+            PhotonNetwork.LeaveRoom(false);
+            PhotonNetwork.JoinLobby();
+            
+            
+            slenderman?.SetActive(true);
+
+            cameraController?.MoveToMainMenu(() =>
+            {
+                playerObjects.ForEach(p => p.SetActive(false));
+                UpdatePlayerLights();
+                HideConnectionInfo();
+            });
         }
     
         #region MonoBehaviourPunCallbacks Callbacks
@@ -163,6 +174,11 @@ namespace Network
             HideConnectionInfo();
             // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
             CreateRoom();
+        }
+
+        public override void OnPlayerLeftRoom(Player otherPlayer)
+        {
+            UpdatePlayerLights();
         }
 
         public override void OnJoinedRoom()
@@ -196,7 +212,7 @@ namespace Network
         {
             for (var i = 0; i < playerLights.Count; i++)
             {
-                playerLights[i].SetActive(i < PhotonNetwork.CurrentRoom.PlayerCount);
+                playerLights[i].SetActive(i < (PhotonNetwork.CurrentRoom == null ? Mathf.Infinity : PhotonNetwork.CurrentRoom.PlayerCount));
             }
         }
 
@@ -224,7 +240,7 @@ namespace Network
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
             base.OnRoomListUpdate(roomList);
-            RoomList = roomList;
+            RoomList = roomList.Where(r => r.RemovedFromList == false && r.PlayerCount > 0).ToList();
             IsReady = true;
             Debug.Log($"{RoomList.Count} rooms available");
             if (JoinWhenReady)
@@ -244,7 +260,7 @@ namespace Network
 
         private void CreateRoom()
         {
-            PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom, IsOpen = true, IsVisible = true}, TypedLobby.Default);
+            PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom, IsOpen = true, IsVisible = true, PlayerTtl = 0, EmptyRoomTtl = 0}, TypedLobby.Default);
         
             ShowConnectionInfo("Joining Game");
         }
