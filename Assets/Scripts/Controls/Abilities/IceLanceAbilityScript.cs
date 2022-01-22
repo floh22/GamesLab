@@ -35,7 +35,6 @@ namespace Controls.Abilities
             IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
             // Ignore units without GameUnit component
-            // Units of the same team (in the layer "AlliedUnits") are automatically ignored by the particle system.
             if (targetIGameUnit != null)
             {
                 damageMultiplier =
@@ -66,6 +65,16 @@ namespace Controls.Abilities
                 bursts[0].cycleCount = PlayerController.LocalPlayerController.UpgradesAbility2 + 1;
                 emission.SetBursts(bursts, 1);
             }
+        }
+
+        public void determineUnitsToAvoid()
+        {
+            // All layers except the current team layer.
+            int layerMask =~ LayerMask.GetMask(PlayerController.LocalPlayerController.Team.ToString() + "Units");
+
+            ParticleSystem ps = this.gameObject.GetComponent<ParticleSystem>();
+            var collision = ps.collision;
+            collision.collidesWith = layerMask;
         }
 
         public void ActivateDaamge()
