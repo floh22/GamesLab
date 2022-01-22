@@ -15,7 +15,7 @@ namespace Lobby
 
         [SerializeField] private float moveDuration;
 
-        private bool isMoving;
+        public bool isMoving;
 
         private Transform mainCamera;
         
