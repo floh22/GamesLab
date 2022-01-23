@@ -303,6 +303,28 @@ namespace NetworkedPlayer
             {
                 return;
             }
+            
+            
+            //page code
+
+            if (!HasPage && other.CompareTag("Page"))
+            {
+                other.gameObject.GetPhotonView().TransferOwnership(PhotonNetwork.LocalPlayer);
+                Page page = other.GetComponent<Page>();
+
+                page.Follow(transform);
+                
+                
+                HasPage = true;
+                CurrentPage = page;
+                isChannelingObjective = false;
+                // Disable the channeling effect
+                ChannelParticleSystem.SetActive(false);
+                RingsParticleSystem.SetActive(false);
+                Debug.Log($"Page has been picked up by player of {Team} team");
+            }
+            
+            
 
             if (other.gameObject == gameObject)
                 return;
@@ -587,17 +609,7 @@ namespace NetworkedPlayer
         public void OnLoseGame()
         {
         }
-
-        public void PickUpPage(Page page)
-        {
-            HasPage = true;
-            CurrentPage = page;
-            isChannelingObjective = false;
-            // Disable the channeling effect
-            ChannelParticleSystem.SetActive(false);
-            RingsParticleSystem.SetActive(false);
-            Debug.Log($"Page has been picked up by player of {Team} team");
-        }
+        
 
         public void SacrificePage()
         {

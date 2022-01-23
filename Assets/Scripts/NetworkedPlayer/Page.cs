@@ -10,7 +10,7 @@ namespace NetworkedPlayer
     {
         #region Public Fields
 
-        public int secondsAlive = 30;
+        public int secondsAlive = 5;
         [SerializeField] public CapsuleCollider capsuleCollider;
 
         #endregion
@@ -33,19 +33,30 @@ namespace NetworkedPlayer
         public void Drop()
         {
             if (!photonView.IsMine) return;
-            photonView.TransferOwnership(PhotonNetwork.MasterClient);
+            
 
             capsuleCollider.enabled = true;
-            aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
             following = null;
             isFollowing = false;
             rectTransform.position -= FollowingOffset;
+            
+            if (aliveTimer != null)
+            {
+                StopCoroutine(aliveTimer);
+            }
+
+            aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
         }
 
         public void Follow(Transform target)
         {
             isFollowing = true;
             following = target;
+            
+            if (aliveTimer != null)
+            {
+                StopCoroutine(aliveTimer);
+            }
         }
 
         #endregion
@@ -59,34 +70,31 @@ namespace NetworkedPlayer
             
             meshRenderer.enabled = true;
             rotation = StartCoroutine(Rotate());
-        }
-
-        void OnTriggerEnter(Collider collider)
-        {
-            GameObject colliderObject = collider.gameObject;
-            if (!colliderObject.CompareTag("Player")) return;
             
-            PlayerController player = colliderObject.GetComponent<PlayerController>();
-            if (player.HasPage) return;
-
-            photonView.TransferOwnership(player.photonView.Owner);
-            following = colliderObject.transform;
-            isFollowing = true;
-            
-            if (aliveTimer != null)
-            {
-                StopCoroutine(aliveTimer);
-            }
-            
-            player.PickUpPage(this);
-            
+            DontDestroyOnLoad(this);
         }
 
         private void Update()
         {
-            if (following)
-            {
+            if (!photonView.IsMine) return;
+            
+            if(following)
                 rectTransform.position = following.position + FollowingOffset;
+            else
+                aliveTimer ??= StartCoroutine(DespawnAfterTimeAlive());
+        }
+        
+        
+        
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                stream.SendNext(this.isFollowing);
+            }
+            else
+            {
+                this.isFollowing = (bool) stream.ReceiveNext();
             }
         }
 
@@ -98,10 +106,13 @@ namespace NetworkedPlayer
 
         IEnumerator DespawnAfterTimeAlive()
         {
+            Debug.Log($"Page despawning in {secondsAlive}");
             yield return new WaitForSeconds(secondsAlive);
             //if for some reason this goes through and we are following a player, dont destroy
-            if (isFollowing)
+            if (isFollowing || !photonView.IsMine)
                 yield break;
+            
+            Debug.Log("Page despawned!");
             PhotonNetwork.Destroy(this.gameObject);
         }
 
