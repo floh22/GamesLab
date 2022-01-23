@@ -6,11 +6,12 @@ using UnityEngine;
 
 namespace NetworkedPlayer
 {
-    public class Page : MonoBehaviour
+    public class Page : MonoBehaviourPunCallbacks
     {
         #region Public Fields
 
         public int secondsAlive = 30;
+        [SerializeField] public CapsuleCollider capsuleCollider;
 
         #endregion
 
@@ -18,7 +19,6 @@ namespace NetworkedPlayer
 
         private RectTransform rectTransform;
         private MeshRenderer meshRenderer;
-        private Collider collider;
         private Coroutine rotation;
         private Coroutine aliveTimer;
 
@@ -35,15 +35,15 @@ namespace NetworkedPlayer
 
         public void TurnOff()
         {
-            StopCoroutine(aliveTimer);
+            if (aliveTimer != null)
+            {
+                StopCoroutine(aliveTimer);
+            }
+
             StopCoroutine(rotation);
             rotation = null;
             aliveTimer = null;
             meshRenderer.enabled = false;
-            if (GetComponent<PhotonView>().IsMine)
-            {
-                PhotonNetwork.Destroy(this.gameObject);
-            }
         }
 
         #endregion
@@ -54,8 +54,7 @@ namespace NetworkedPlayer
         {
             rectTransform = GetComponent<RectTransform>();
             meshRenderer = GetComponent<MeshRenderer>();
-            collider = GetComponent<Collider>();
-            collider.enabled = false;
+            // capsuleCollider.enabled = false;
             TurnOn();
         }
 
@@ -69,6 +68,10 @@ namespace NetworkedPlayer
                 {
                     player.PickUpPage();
                     TurnOff();
+                    if (photonView.IsMine)
+                    {
+                        PhotonNetwork.Destroy(gameObject);
+                    }
                 }
             }
         }
@@ -77,27 +80,26 @@ namespace NetworkedPlayer
 
         #region Coroutines
 
-        public IEnumerator Drop(Vector3 position)
+        public void Drop()
         {
-            PhotonView droppedPagePhotonView = gameObject.GetComponent<PhotonView>();
-            droppedPagePhotonView.TransferOwnership(droppedPagePhotonView.ViewID);
-            transform.SetParent(null, false);
+            if (photonView.IsMine)
+            {
+                Debug.Log("Pages has been dropped on the ground.");
+                photonView.TransferOwnership(photonView.OwnerActorNr);
 
-            //Just does not work with its own position via set parent for some reason
-            Vector3 transformPosition = position;
-            transformPosition.y = 0.5f;
-            transform.position = transformPosition;
+                capsuleCollider.enabled = true;
+                aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
+            }
+        }
 
-            //Wait so that page cannot collide with same player on drop
-            yield return new WaitForSeconds(0.1f);
-            collider.enabled = true;
-            aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
+        public void Parent(Transform t)
+        {
+            transform.SetParent(t, true);
         }
 
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);
-
             TurnOff();
         }
 

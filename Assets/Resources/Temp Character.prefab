@@ -534,7 +534,6 @@ MonoBehaviour:
     type: 3}
   PagePrefab: {fileID: 4729148963790719949, guid: 6d3b8bd2cd967ba40ad5f86c275e78f4,
     type: 3}
-  hasPage: 0
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   ChannelParticleSystem: {fileID: 5515293819083878695}
   RingsParticleSystem: {fileID: 7648267907585782392}
