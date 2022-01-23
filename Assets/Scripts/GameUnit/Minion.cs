@@ -99,11 +99,17 @@ namespace GameUnit
         public IEnumerator attackCycle;
         #endregion
 
+        #region Private Fields
+
+        [SerializeField] private GameObject minionUiPrefab;
         [SerializeField] private GameObject fogOfWarMesh;
         [SerializeField] private GameObject damageText;
-        
-        
+    
         private float updateTimer;
+        private MinionUI minionUI;
+
+        #endregion
+        
 
         public bool ShowTarget = false;
 
@@ -134,7 +140,19 @@ namespace GameUnit
                 break;
                 default:
                 break;
-            }   
+            }
+
+            // Create UI
+            if (minionUiPrefab != null)
+            {
+                GameObject uiGo = Instantiate(minionUiPrefab);
+                minionUI = uiGo.GetComponent<MinionUI>();
+                minionUI.SetTarget(this);
+            }
+            else
+            {
+                Debug.LogWarning("<Color=Red><b>Missing</b></Color> MinionUiPrefab reference on minion Prefab.", this);
+            }
         }
 
         public void Init(int networkID, GameData.Team team, GameData.Team target)
@@ -623,6 +641,9 @@ namespace GameUnit
         void Die()
         {
             IsAlive = false;
+            GameObject minionUiGo = minionUI.gameObject;
+            minionUiGo.SetActive(false);
+            Destroy(minionUiGo);
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
             {
                 if (gameUnit.Type == GameUnitType.Player && Vector3.Distance(gameUnit.Position, Position) < IGameUnit.DistanceForExperienceOnDeath)
