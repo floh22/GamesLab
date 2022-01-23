@@ -430,7 +430,7 @@ MonoBehaviour:
   rangeIndicatorCircle1: {fileID: 6058295653944057387}
   rangeIndicatorCircle2: {fileID: 624119069236450511}
   arrowIndicatorPivot: {fileID: 6320556504264533232}
-  ability1ProjectilePrefab: {fileID: 7467911905582437125, guid: dba9eaef55f13e44ba0ee009e8d3ca3d,
+  ability1ProjectilePrefab: {fileID: 1329845292236604, guid: 50b2ac8228161034f9ba7b9f351f43a7,
     type: 3}
   ability2ProjectilePrefab: {fileID: 1820680284854294, guid: 39e485c0a32910849b23b2c73607f22c,
     type: 3}

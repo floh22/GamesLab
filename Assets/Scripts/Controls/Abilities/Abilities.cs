@@ -190,14 +190,14 @@ namespace Controls.Abilities
 
                     startingPosition = transform.position + new Vector3(0, 2, 0);
 
-                    
-                    GameObject ability1ActiveObject = Instantiate(ability1ProjectilePrefab, startingPosition,
-                        Quaternion.identity) as GameObject;
+                    /* Start of the Energy Explosion stuff */
 
+                    GameObject energyExplosionGameObject = Instantiate(ability1ProjectilePrefab, startingPosition, Quaternion.identity);
+                    EnergyExplosionAbilityScript energyExplosionAbilityScript = energyExplosionGameObject.GetComponent<EnergyExplosionAbilityScript>();
 
-                    ability1ActiveObject.GetComponent<AbilityProjectile1>().Activate(targetCircle.transform.position,
-                        PlayerController.LocalPlayerController,
-                        PlayerController.LocalPlayerController.DamageMultiplierAbility1);
+                    energyExplosionAbilityScript.setTargetPosition(targetCircle.transform.position);
+
+                    /* End of the Energy Explosion stuff*/
                     
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
@@ -229,9 +229,7 @@ namespace Controls.Abilities
                     IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
                     
                     iceLanceGameObject.transform.LookAt(direction);
-                    // iceLanceGameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
-                    iceLanceAbilityScript.ActivateDaamge();
                     iceLanceAbilityScript.determineNumberOfShots();
                     iceLanceAbilityScript.determineUnitsToAvoid();
                     
@@ -260,27 +258,38 @@ namespace Controls.Abilities
                 case Ability.NORMAL:
                     break;
                 case Ability.RANGE:
+
                     if (isCooldown1)
                     {
                         return;
                     }
 
                     isCooldown1 = true;
-                    Instantiate(ability1ProjectilePrefab, start + new Vector3(0, 2, 0),
-                        Quaternion.identity).GetComponent<AbilityProjectile1>().ActivateNoDamage(target, caster);
+
+                    /* Start of the Energy Explosion stuff */
+
+                    GameObject energyExplosionGameObject = Instantiate(ability1ProjectilePrefab, start, Quaternion.identity);
+                    EnergyExplosionAbilityScript energyExplosionAbilityScript = energyExplosionGameObject.GetComponent<EnergyExplosionAbilityScript>();
+
+                    energyExplosionAbilityScript.setTargetPosition(targetCircle.transform.position);
+
+                    /* End of the Energy Explosion stuff*/
 
                     break;
                 case Ability.LINE:
+
                     if (isCooldown2)
                     {
                         return;
                     }
+
                     isCooldown2 = true;
 
                     Vector3 direction = new Vector3(target.x, 0, target.y);
                     direction *= maxAbilityDistance2;
 
                     float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
+
                     if (direction.z <= 0)
                     {
                         angle *= -1;
@@ -296,35 +305,11 @@ namespace Controls.Abilities
                     
                     iceLanceGameObject.transform.LookAt(direction);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
-                    iceLanceAbilityScript.ActivateDaamge();
                     iceLanceAbilityScript.determineNumberOfShots();
                     iceLanceAbilityScript.determineUnitsToAvoid();
                     
                     /* End of the Ice Lance stuff*/
-
-                    // break;
                     
-                    // if (isCooldown2)
-                    // {
-                    //     return;
-                    // }
-                    // isCooldown2 = true;
-
-                    // direction = new(target.x, 0, target.y);
-                    // direction *= maxAbilityDistance2;
-
-                    // angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
-                    // if (direction.z <= 0)
-                    // {
-                    //     angle *= -1;
-                    // }
-
-                    // GameObject ability2ActiveObject = Instantiate(ability2ProjectilePrefab, start,
-                    //     Quaternion.Euler(0, angle, 0));
-                    
-                    // ability2ActiveObject.transform.LookAt(target);
-                    // ability2ActiveObject.GetComponent<AbilityProjectile2>()
-                    //     .ActivateNoDamage(target, caster);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
