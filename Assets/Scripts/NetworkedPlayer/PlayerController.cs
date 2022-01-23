@@ -115,10 +115,7 @@ namespace NetworkedPlayer
         private GameObject CurrentPage;
 
 
-        public bool HasPage
-        {
-            get => hasPage;
-        }
+        [SerializeField] public bool HasPage { get; set; }
 
         public bool IsDestroyed()
         {
@@ -136,8 +133,6 @@ namespace NetworkedPlayer
         #region Private Fields
 
         private CameraController cameraController;
-
-        [SerializeField] private bool hasPage;
 
         [SerializeField] private GameObject playerUiPrefab;
 
@@ -282,7 +277,7 @@ namespace NetworkedPlayer
 
                 if (HasPage && CurrentPage == null)
                 {
-                    ShowPage();
+                    ShowPage(false);
                 }
 
                 if (!HasPage && CurrentPage != null)
@@ -413,7 +408,7 @@ namespace NetworkedPlayer
             StartCoroutine(Respawn(() =>
             {
                 IsAlive = true;
-                hasPage = false;
+                HasPage = false;
 
                 //Get Player spawn point
                 position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
@@ -494,7 +489,7 @@ namespace NetworkedPlayer
                 stream.SendNext(this.Level);
                 stream.SendNext(this.isChannelingObjective);
                 stream.SendNext(this.channelingTo);
-                stream.SendNext(this.hasPage);
+                stream.SendNext(this.HasPage);
             }
             else
             {
@@ -505,7 +500,7 @@ namespace NetworkedPlayer
                 this.Level = (int) stream.ReceiveNext();
                 this.isChannelingObjective = (bool) stream.ReceiveNext();
                 this.channelingTo = (Vector3) stream.ReceiveNext();
-                this.hasPage = (bool) stream.ReceiveNext();
+                this.HasPage = (bool) stream.ReceiveNext();
             }
         }
 
@@ -592,8 +587,8 @@ namespace NetworkedPlayer
 
         public void PickUpPage()
         {
-            ShowPage();
-            hasPage = true;
+            ShowPage(false);
+            HasPage = true;
             isChannelingObjective = false;
             // Disable the channeling effect
             ChannelParticleSystem.SetActive(false);
@@ -604,7 +599,7 @@ namespace NetworkedPlayer
         public void SacrifisePage()
         {
             HidePage();
-            hasPage = false;
+            HasPage = false;
             isChannelingObjective = false;
             Debug.Log($"Page has been sacrifised by player of {Team} team");
         }
@@ -612,7 +607,7 @@ namespace NetworkedPlayer
         public void DropPage()
         {
             HidePage();
-            hasPage = false;
+            HasPage = false;
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
 
@@ -620,9 +615,9 @@ namespace NetworkedPlayer
         {
             if (CurrentPage != null)
             {
-                CurrentPage.GetComponent<Page>().Drop(transform.position);
-                CurrentPage = null;
-
+                CurrentPage.GetComponent<Page>().TurnOff();
+                PhotonNetwork.Destroy(CurrentPage);
+                ShowPage(true);
                 Debug.Log($"Page has been dropped on the ground by player of {Team} team");
             }
         }
@@ -631,16 +626,31 @@ namespace NetworkedPlayer
 
         #region Utils
 
-        private void ShowPage()
+        private void ShowPage(bool dropped)
         {
+            Debug.Log("Show page"+dropped);
             Vector3 position = transform.position;
-            position.y = 3.5f;
-            CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-            AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
+            if (dropped)
+            {
+                position.y = 0.5f;
+                CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
+                AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, null);
+                CurrentPage.GetComponent<Page>().Drop();
+                CurrentPage = null;
+                HasPage = false;
+            }
+            else
+            {
+                position.y = 3.5f;
+                CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
+                AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
+                HasPage = true;
+            }
         }
 
         private void HidePage()
         {
+            Debug.Log("hier???"+CurrentPage);
             PhotonNetwork.Destroy(CurrentPage);
         }
 

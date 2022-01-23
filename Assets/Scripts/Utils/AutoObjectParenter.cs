@@ -14,10 +14,12 @@ public class AutoObjectParenter : MonoBehaviourPunCallbacks, IOnEventCallback
     public ParentEventTarget parentEventTarget;
     private const byte ParentToObjectEventCode = 9;
     private Transform _parent = null;
+    private bool CanParentChangeAgain = true;
 
     public static void SendParentEvent(ParentEventTarget objectsWhichToParent, GameObject objectToParent)
     {
-        object[] content = {(int)objectsWhichToParent, objectToParent.GetComponent<PhotonView>().ViewID};
+        int id = objectToParent == null ? -1 : objectToParent.GetComponent<PhotonView>().ViewID;
+        object[] content = {(int) objectsWhichToParent, id};
         RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
         PhotonNetwork.RaiseEvent(ParentToObjectEventCode, content, raiseEventOptions, SendOptions.SendReliable);
     }
@@ -40,11 +42,21 @@ public class AutoObjectParenter : MonoBehaviourPunCallbacks, IOnEventCallback
         if (eventCode == ParentToObjectEventCode && _parent == null)
         {
             object[] data = (object[]) photonEvent.CustomData;
-            if ((int)parentEventTarget == (int) data[0])
+            if ((int) parentEventTarget == (int) data[0] && CanParentChangeAgain)
             {
-                _parent = PhotonView.Find((int) data[1]).gameObject.transform;
-                gameObject.transform.parent = _parent;
+                if ((int) data[1] == -1)
+                {
+                    _parent = null;
+                    gameObject.transform.parent = _parent;
+                    CanParentChangeAgain = false;
+                }
+                else
+                {
+                    _parent = PhotonView.Find((int) data[1]).gameObject.transform;
+                    gameObject.transform.parent = _parent;
+                    CanParentChangeAgain = false;
+                }
             }
-        } 
+        }
     }
 }
