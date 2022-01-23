@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8f325177bd543c2bf39521072871336, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  screenOffset: {x: 0, y: 0, z: 0}
+  screenOffset: {x: 10, y: 30, z: 0}
   minionText: {fileID: 4980774645657012845}
   minionHealthSlider: {fileID: 4980774645657072377}
 --- !u!1 &4980774645646290501

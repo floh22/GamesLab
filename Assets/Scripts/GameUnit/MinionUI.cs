@@ -1,8 +1,10 @@
+using System.Numerics;
 using GameManagement;
 using NetworkedPlayer;
 using Photon.Pun.Demo.PunBasics;
 using UnityEngine;
 using UnityEngine.UI;
+using Vector3 = UnityEngine.Vector3;
 
 namespace GameUnit
 {
@@ -12,7 +14,7 @@ namespace GameUnit
 
 		[Tooltip("Pixel offset from the minion target")]
 		[SerializeField]
-		private Vector3 screenOffset = new(30f, 0f, 0f);
+		private Vector3 screenOffset = new(0f, 30f, 0f);
 
 		[Tooltip("UI Text to display Minion's text")]
 		[SerializeField]
@@ -72,12 +74,6 @@ namespace GameUnit
 
 		private void LateUpdate ()
 		{
-			var localPlayer = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
-			if (team != localPlayer.Team)
-			{
-				return;
-			}
-
 			// Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the minion itself.
 			if (targetRenderer!=null)
 			{
@@ -87,21 +83,10 @@ namespace GameUnit
 			// #Critical
 			// Follow the Target GameObject on screen.
 			if (minion == null) return;
-			targetPosition = copy(minion.Position);// localPlayerUITransform.position;// targetTransform.position;
-			targetPosition.y += minionHeight;
 
-			this.transform.position = Camera.main!.WorldToScreenPoint(targetPosition) + screenOffset;
-			Debug.Log($"Minion Position = {minion.Position}");
-			Debug.Log($"Minion target position = {targetPosition}");
-			Debug.Log($"Minion UI transform.position = {transform.position}");
+			this.transform.localPosition = Camera.main!.WorldToScreenPoint(minion.transform.position) + screenOffset;
 
 		}
-
-		private Vector3 copy(Vector3 vector3)
-		{
-			return new Vector3(vector3.x, vector3.y, vector3.z);
-		}
-
 
 		#endregion
 
