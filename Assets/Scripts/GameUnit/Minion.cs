@@ -58,7 +58,6 @@ namespace GameUnit
         public float AttackRange { get; set; }
         public bool IsAlive { get; set; } = true;
         public bool IsVisible { get; set; }
-        public float Height { get; set; }
 
         #endregion
         
@@ -143,8 +142,6 @@ namespace GameUnit
                 break;
             }
 
-            Height = GetComponent<CapsuleCollider>().height;
-            
             // Create UI
             if (minionUiPrefab != null)
             {

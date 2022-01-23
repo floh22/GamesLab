@@ -14,7 +14,7 @@ namespace GameUnit
 
 		[Tooltip("Pixel offset from the minion target")]
 		[SerializeField]
-		private Vector3 screenOffset = new(0f, 30f, 0f);
+		private Vector3 screenOffset = new(0f, 0f, 0f);
 
 		[Tooltip("UI Text to display Minion's text")]
 		[SerializeField]
@@ -26,17 +26,9 @@ namespace GameUnit
 
 		private Minion target;
 
-		private float minionHeight;
-
 		private Minion minion;
 
-		private Renderer targetRenderer;
-
-		private CanvasGroup canvasGroup;
-
 		private Vector3 targetPosition;
-
-		private GameData.Team team; // TODO remove
 
 		#endregion
 
@@ -45,8 +37,6 @@ namespace GameUnit
 		private void Awake()
 		{
 
-			canvasGroup = this.GetComponent<CanvasGroup>();
-			
 			this.transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
 			
 		}
@@ -74,17 +64,11 @@ namespace GameUnit
 
 		private void LateUpdate ()
 		{
-			// Do not show the UI if we are not visible to the camera, thus avoid potential bugs with seeing the UI, but not the minion itself.
-			if (targetRenderer!=null)
-			{
-				this.canvasGroup.alpha = targetRenderer.isVisible ? 1f : 0f;
-			}
-			
 			// #Critical
 			// Follow the Target GameObject on screen.
 			if (minion == null) return;
 
-			this.transform.localPosition = Camera.main!.WorldToScreenPoint(minion.transform.position) + screenOffset;
+			this.transform.position = Camera.main!.WorldToScreenPoint(minion.transform.position) + screenOffset;
 
 		}
 
@@ -101,20 +85,11 @@ namespace GameUnit
 
 			// Cache references for efficiency because we are going to reuse them.
 			this.target = toTarget;
-			targetRenderer = this.target.GetComponentInChildren<Renderer>();
-
 
 			minion = this.target.GetComponent<Minion>();
 
-			// Get data from the Minion that won't change during the lifetime of this Component
-			if (minion != null)
-			{
-				minionHeight = minion.Height;
-			}
-
 			if (minionText != null)
 			{
-				team = minion.Team; // TODO remove
 				minionText.text = minion.Team.ToString();
 			}
 		}
