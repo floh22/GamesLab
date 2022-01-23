@@ -243,7 +243,7 @@ namespace Controls.Channeling
                 yield break;
             }
             
-            channeler.SacrifisePage();
+            channeler.SacrificePage();
 
             channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
             OnChanneled();

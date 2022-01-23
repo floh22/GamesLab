@@ -51,6 +51,7 @@ namespace Network
         [SerializeField] private GameObject slenderman;
 
         [SerializeField] private LobbyCameraController cameraController;
+        [SerializeField] private ExitLobbySignBehavior lobbyExitSign;
 
         #endregion
 
@@ -142,8 +143,12 @@ namespace Network
 
             cameraController?.MoveToMainMenu(() =>
             {
+                lobbyExitSign.Disable();
                 playerObjects.ForEach(p => p.SetActive(false));
-                UpdatePlayerLights();
+                foreach (GameObject t in playerLights)
+                {
+                    t.SetActive(false);
+                }
                 HideConnectionInfo();
             });
         }
@@ -187,6 +192,7 @@ namespace Network
             cameraController?.MoveToWaitingForPlayers(() =>
             {
                 slenderman?.SetActive(false);
+                lobbyExitSign.Enable();
                 UpdatePlayerLights();
                 
             });

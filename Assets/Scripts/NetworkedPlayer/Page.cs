@@ -22,28 +22,30 @@ namespace NetworkedPlayer
         private Coroutine rotation;
         private Coroutine aliveTimer;
 
+        private bool isFollowing;
+        private Transform following;
+        private static readonly Vector3 FollowingOffset = new Vector3(0, 3.5f, 0);
+
         #endregion
 
         #region Public API
-
-        public void TurnOn()
+        
+        public void Drop()
         {
-            meshRenderer.enabled = true;
-            rotation = StartCoroutine(Rotate());
+            if (!photonView.IsMine) return;
+            photonView.TransferOwnership(PhotonNetwork.MasterClient);
+
+            capsuleCollider.enabled = true;
+            aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
+            following = null;
+            isFollowing = false;
+            rectTransform.position -= FollowingOffset;
         }
 
-
-        public void TurnOff()
+        public void Follow(Transform target)
         {
-            if (aliveTimer != null)
-            {
-                StopCoroutine(aliveTimer);
-            }
-
-            StopCoroutine(rotation);
-            rotation = null;
-            aliveTimer = null;
-            meshRenderer.enabled = false;
+            isFollowing = true;
+            following = target;
         }
 
         #endregion
@@ -54,53 +56,53 @@ namespace NetworkedPlayer
         {
             rectTransform = GetComponent<RectTransform>();
             meshRenderer = GetComponent<MeshRenderer>();
-            // capsuleCollider.enabled = false;
-            TurnOn();
+            
+            meshRenderer.enabled = true;
+            rotation = StartCoroutine(Rotate());
         }
 
         void OnTriggerEnter(Collider collider)
         {
             GameObject colliderObject = collider.gameObject;
-            if (colliderObject.tag == "Player")
+            if (!colliderObject.CompareTag("Player")) return;
+            
+            PlayerController player = colliderObject.GetComponent<PlayerController>();
+            if (player.HasPage) return;
+
+            photonView.TransferOwnership(player.photonView.Owner);
+            following = colliderObject.transform;
+            isFollowing = true;
+            
+            if (aliveTimer != null)
             {
-                PlayerController player = colliderObject.GetComponent<PlayerController>();
-                if (!player.HasPage)
-                {
-                    player.PickUpPage();
-                    TurnOff();
-                    if (photonView.IsMine)
-                    {
-                        PhotonNetwork.Destroy(gameObject);
-                    }
-                }
+                StopCoroutine(aliveTimer);
+            }
+            
+            player.PickUpPage(this);
+            
+        }
+
+        private void Update()
+        {
+            if (following)
+            {
+                rectTransform.position = following.position + FollowingOffset;
             }
         }
 
         #endregion
 
         #region Coroutines
-
-        public void Drop()
-        {
-            if (photonView.IsMine)
-            {
-                Debug.Log("Pages has been dropped on the ground.");
-                photonView.TransferOwnership(photonView.OwnerActorNr);
-
-                capsuleCollider.enabled = true;
-                aliveTimer = StartCoroutine(DespawnAfterTimeAlive());
-            }
-        }
-
-        public void Parent(Transform t)
-        {
-            transform.SetParent(t, true);
-        }
+        
+        
 
         IEnumerator DespawnAfterTimeAlive()
         {
             yield return new WaitForSeconds(secondsAlive);
-            TurnOff();
+            //if for some reason this goes through and we are following a player, dont destroy
+            if (isFollowing)
+                yield break;
+            PhotonNetwork.Destroy(this.gameObject);
         }
 
         IEnumerator Rotate()

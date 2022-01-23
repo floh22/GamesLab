@@ -112,7 +112,7 @@ namespace NetworkedPlayer
 
         [SerializeField] public GameObject SlenderBuffPrefab;
         [SerializeField] public GameObject PagePrefab;
-        private GameObject CurrentPage;
+        private Page CurrentPage;
 
 
         [SerializeField] public bool HasPage { get; set; }
@@ -275,15 +275,18 @@ namespace NetworkedPlayer
                     }
                 }
 
+                //This should in theory not be needed anymore since pages are now fully networked
+                /*
                 if (HasPage && CurrentPage == null)
                 {
-                    ShowPage(false);
+                    SpawnPage();
                 }
 
                 if (!HasPage && CurrentPage != null)
                 {
-                    HidePage();
+                    DestroyPage();
                 }
+                */
             }
 
             if (this.ChannelParticleSystem != null &&
@@ -371,7 +374,10 @@ namespace NetworkedPlayer
             if (HasPage)
             {
                 DropPageOnTheGround();
+                HasPage = false;
             }
+            
+            
 
             //remove attackers
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
@@ -408,7 +414,6 @@ namespace NetworkedPlayer
             StartCoroutine(Respawn(() =>
             {
                 IsAlive = true;
-                HasPage = false;
 
                 //Get Player spawn point
                 position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
@@ -444,13 +449,13 @@ namespace NetworkedPlayer
 
         public void OnChannelingFinishedAndPickUpPage(int networkId, int pages)
         {
-            PickUpPage();
+            SpawnPage();
             GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
 
         public void OnChannelingFinishedAndDropPage(int networkId, int pages)
         {
-            DropPage();
+            DestroyPage();
             GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
 
@@ -512,19 +517,17 @@ namespace NetworkedPlayer
             }
 
             Experience += amount;
-            if (Experience >= ExperienceToReachNextLevel)
-            {
-                Level++;
-                UnspentLevelUps++;
-                Experience -= ExperienceToReachNextLevel;
-                ExperienceToReachNextLevel += ExperienceBetweenLevels;
-                StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
-            }
+            if (Experience < ExperienceToReachNextLevel) return;
+            
+            Level++;
+            UnspentLevelUps++;
+            Experience -= ExperienceToReachNextLevel;
+            ExperienceToReachNextLevel += ExperienceBetweenLevels;
+            StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
         }
 
         public void AddExperienceBySource(bool byMinion)
         {
-            Debug.Log(byMinion);
             AddExperience(byMinion ? GainedExperienceByMinion : GainedExperienceByPlayer);
         }
 
@@ -585,10 +588,10 @@ namespace NetworkedPlayer
         {
         }
 
-        public void PickUpPage()
+        public void PickUpPage(Page page)
         {
-            ShowPage(false);
             HasPage = true;
+            CurrentPage = page;
             isChannelingObjective = false;
             // Disable the channeling effect
             ChannelParticleSystem.SetActive(false);
@@ -596,62 +599,40 @@ namespace NetworkedPlayer
             Debug.Log($"Page has been picked up by player of {Team} team");
         }
 
-        public void SacrifisePage()
+        public void SacrificePage()
         {
-            HidePage();
+            DestroyPage();
             HasPage = false;
             isChannelingObjective = false;
             Debug.Log($"Page has been sacrifised by player of {Team} team");
         }
 
-        public void DropPage()
+        private void DropPageOnTheGround()
         {
-            HidePage();
-            HasPage = false;
-            Debug.Log($"Page has been dropped by player of {Team} team");
-        }
-
-        public void DropPageOnTheGround()
-        {
-            if (CurrentPage != null)
-            {
-                CurrentPage.GetComponent<Page>().TurnOff();
-                PhotonNetwork.Destroy(CurrentPage);
-                ShowPage(true);
-                Debug.Log($"Page has been dropped on the ground by player of {Team} team");
-            }
+            //Cant drop a page that doesnt exist
+            if (CurrentPage == null) return;
+            
+            CurrentPage.Drop();
+            Debug.Log($"Page has been dropped on the ground by player of {Team} team");
         }
 
         #endregion
 
         #region Utils
 
-        private void ShowPage(bool dropped)
+        private void SpawnPage()
         {
-            Debug.Log("Show page"+dropped);
             Vector3 position = transform.position;
-            if (dropped)
-            {
-                position.y = 0.5f;
-                CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-                AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, null);
-                CurrentPage.GetComponent<Page>().Drop();
-                CurrentPage = null;
-                HasPage = false;
-            }
-            else
-            {
-                position.y = 3.5f;
-                CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-                AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
-                HasPage = true;
-            }
+            GameObject pageObject = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
+            CurrentPage = pageObject.GetComponent<Page>();
+            CurrentPage.Follow(this.transform);
+            //AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
+            HasPage = true;
         }
 
-        private void HidePage()
+        private void DestroyPage()
         {
-            Debug.Log("hier???"+CurrentPage);
-            PhotonNetwork.Destroy(CurrentPage);
+            PhotonNetwork.Destroy(CurrentPage.gameObject);
         }
 
         #endregion
