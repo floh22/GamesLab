@@ -146,9 +146,9 @@ namespace NetworkedPlayer
 
         private IGameUnit self;
 
-        private bool isAttacking;
+        private bool isAutoattackOn;
 
-        private bool isAttacked;
+        private bool isAttacking;
 
         #endregion
 
@@ -184,6 +184,7 @@ namespace NetworkedPlayer
 
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
+            isAutoattackOn = true;
             //TODO temp
             MaxHealth = PlayerValues.MaxHealth;
             Health = MaxHealth;
@@ -377,6 +378,16 @@ namespace NetworkedPlayer
         #endregion
 
         #region Public API
+
+        public void AutoAttackOn()
+        {
+            isAutoattackOn = true;
+        }
+
+        public void AutoAttackOff()
+        {
+            isAutoattackOn = false;
+        }
 
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
@@ -653,7 +664,7 @@ namespace NetworkedPlayer
 
         private IEnumerator Attack(float damage)
         {
-            if (isChannelingObjective)
+            if (isChannelingObjective || !isAutoattackOn)
             {
                 yield break;
             }
@@ -667,15 +678,6 @@ namespace NetworkedPlayer
             // OnRest();
             yield return new WaitForSeconds(pauseInSeconds / 2);
             isAttacking = false;
-        }
-
-        private IEnumerator Attacked()
-        {
-            isAttacked = true;
-            // OnAttacked();
-            yield return new WaitForSeconds(GameConstants.AttackedAnimationDuration);
-            // OnRest();
-            isAttacked = false;
         }
 
         public IEnumerator Respawn(Action nextFunc)
