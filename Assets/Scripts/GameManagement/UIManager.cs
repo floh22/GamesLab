@@ -214,11 +214,19 @@ namespace GameManagement
             GameData.Instance.AutoAttack = state;
             if (state)
             {
+                if (PlayerController.LocalPlayerController != null)
+                {
+                    PlayerController.LocalPlayerController.AutoAttackOn();
+                }
                 AutoAttackOnImage.SetActive(true);
                 AutoAttackOffImage.SetActive(false);
             }
             else
             {
+                if (PlayerController.LocalPlayerController != null)
+                {
+                    PlayerController.LocalPlayerController.AutoAttackOff();
+                }
                 AutoAttackOnImage.SetActive(false);
                 AutoAttackOffImage.SetActive(true);
             }
