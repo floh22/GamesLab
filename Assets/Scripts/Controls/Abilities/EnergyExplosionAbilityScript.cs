@@ -16,15 +16,25 @@ namespace Controls.Abilities
         {    
             // This is done to move the explosion to the target location
             if (Vector3.Distance(this.gameObject.transform.position, targetPosition) < 0.5f && explosion != null)
-            {
+            {       
                 explosion.SetActive(true);
-                // Destroy the target circle when explosion starts
-                Destroy(targetCircle);
+                
+                if(explosion.transform.Find("BoundingSphere") != null)
+                    Destroy(explosion.transform.Find("BoundingSphere").gameObject);
+                
+                if(targetCircle != null)
+                    Destroy(targetCircle);               
             }
             else
             {
                 this.gameObject.transform.position = MathParabola.Parabola(this.gameObject.transform.position, targetPosition, 0.3f, animationProgress);
                 animationProgress += Time.deltaTime;
+
+                if(explosion == null)
+                {
+                    // Destroy the whole object and the target circle when the explosion is done
+                    Destroy(this.gameObject);
+                }
             }
         }
 
