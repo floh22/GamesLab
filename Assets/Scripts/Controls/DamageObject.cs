@@ -61,7 +61,7 @@ public class DamageObject : MonoBehaviour
         
         IGameUnit unit = collider.GetComponent<IGameUnit>();
 
-        //Ignore units without GameUnit component
+        //Ignore units without GameUnit component 
         if (unit == null || unit.Equals(null) || _castFrom.Team == unit.Team)
         {
             return;

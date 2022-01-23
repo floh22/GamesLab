@@ -279,7 +279,7 @@ namespace NetworkedPlayer
                             break;
                     }
                 }
-                
+
                 if (HasPage && CurrentPage == null)
                 {
                     ShowPage();
@@ -580,7 +580,7 @@ namespace NetworkedPlayer
             Vector3 position = transform.position;
             HasSlenderBuff = true;
             GameObject effect = PhotonNetwork.Instantiate("SlenderBuffVisual", position, Quaternion.identity);
-            AutoObjectParenter.SendParentEvent(gameObject);
+            AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.SLENDERMAN, gameObject);
             UIManager.Instance.ShowSlenderBuffCountdown(SlenderBuffDuration);
             yield return new WaitForSeconds(SlenderBuffDuration);
             PhotonNetwork.Destroy(effect);
@@ -616,11 +616,11 @@ namespace NetworkedPlayer
             Debug.Log($"Page has been dropped by player of {Team} team");
         }
 
-        public void  DropPageOnTheGround()
+        public void DropPageOnTheGround()
         {
             if (CurrentPage != null)
             {
-                StartCoroutine(CurrentPage.GetComponent<Page>().Drop(transform.position));
+                CurrentPage.GetComponent<Page>().Drop(transform.position);
                 CurrentPage = null;
 
                 Debug.Log($"Page has been dropped on the ground by player of {Team} team");
@@ -636,7 +636,7 @@ namespace NetworkedPlayer
             Vector3 position = transform.position;
             position.y = 3.5f;
             CurrentPage = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-            CurrentPage.transform.SetParent(this.gameObject.transform, true);
+            AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
         }
 
         private void HidePage()
