@@ -196,6 +196,7 @@ namespace Controls.Abilities
                     EnergyExplosionAbilityScript energyExplosionAbilityScript = energyExplosionGameObject.GetComponent<EnergyExplosionAbilityScript>();
 
                     energyExplosionAbilityScript.setTargetPosition(targetCircle.transform.position);
+                    energyExplosionAbilityScript.activateDamage();
 
                     /* End of the Energy Explosion stuff*/
                     
@@ -232,7 +233,8 @@ namespace Controls.Abilities
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
                     iceLanceAbilityScript.determineNumberOfShots();
                     iceLanceAbilityScript.determineUnitsToAvoid();
-                    
+                    iceLanceAbilityScript.activateDamage();
+
                     /* End of the Ice Lance stuff*/
 
                     isCooldown2 = true;
