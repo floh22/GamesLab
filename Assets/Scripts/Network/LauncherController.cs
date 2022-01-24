@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utils;
+using Random = System.Random;
 
 namespace Network
 {
@@ -70,6 +71,9 @@ namespace Network
 
 
         private AsyncOperation loadOperation;
+        private static readonly int Offset = Animator.StringToHash("Offset");
+        private static readonly int Speed = Animator.StringToHash("Speed");
+
         #endregion
         
         private void Awake()
@@ -82,6 +86,13 @@ namespace Network
         {
             PhotonNetwork.ConnectUsingSettings();
             PhotonNetwork.GameVersion = GameVersion.ToString();
+            
+            foreach (GameObject playerObject in playerObjects)
+            {
+                playerObject.GetComponent<Animator>().SetFloat(Offset, UnityEngine.Random.Range(0, 2f));
+                playerObject.GetComponent<Animator>().SetFloat(Speed, UnityEngine.Random.Range(0.85f, 1.15f));
+                Debug.Log("test");
+            }
         }
 
         /// <summary>
