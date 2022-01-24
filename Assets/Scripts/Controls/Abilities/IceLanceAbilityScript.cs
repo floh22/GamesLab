@@ -14,6 +14,8 @@ namespace Controls.Abilities
         public Transform boundingSphereTransform;
         public float ABILITY_DAMAGE = 20;
 
+        private bool damageIsActivated = false;        
+
         // This function is used to scale the bounding sphere to a max radius
         // that projectiles can go to before getting destroyed.
         // Keep in mind that the ParticleSystem automatically destroys the
@@ -25,23 +27,26 @@ namespace Controls.Abilities
 
         void OnParticleCollision(GameObject gameObj)
         {
-            IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
-
-            // Ignore units without GameUnit component
-            if (targetIGameUnit != null)
+            if (damageIsActivated)
             {
-                float damageMultiplier =
-                    PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
-                        ? PlayerController.LocalPlayerController.DamageMultiplierMinion
-                        : 1);
+                IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
-                float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
-            
-                targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
-            
-                IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
+                // Ignore units without GameUnit component
+                if (targetIGameUnit != null)
+                {
+                    float damageMultiplier =
+                        PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
+                            ? PlayerController.LocalPlayerController.DamageMultiplierMinion
+                            : 1);
 
-                Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
+                    float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
+                
+                    targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
+                
+                    IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
+
+                    Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
+                }
             }
         }
 
@@ -77,5 +82,10 @@ namespace Controls.Abilities
         //     Vector3 forward = PlayerController.LocalPlayerController.gameObject.transform.forward;
         //     this.gameObject.transform.position = PlayerController.LocalPlayerController.gameObject.transform.position + new Vector3(forward.x * 0.05f, 2, forward.z * 0.05f);            
         // }
+
+        public void activateDamage()
+        {
+            damageIsActivated = true;
+        }
     }
 }

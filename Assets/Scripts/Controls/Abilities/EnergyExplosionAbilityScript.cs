@@ -44,5 +44,10 @@ namespace Controls.Abilities
             // Create a targetCircle at the target location
             targetCircle = Instantiate(targetCirclePrefab, targetPosition, Quaternion.Euler(90, 0, 0));
         }
-    }
+
+        public void activateDamage()
+        {
+            explosion.transform.Find("BoundingSphere").gameObject.GetComponent<EnergyExplosionBoundingSphereScript>().activateDamage();
+        }  
+    }  
 }
