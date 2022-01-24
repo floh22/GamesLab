@@ -1,6 +1,7 @@
 using Character;
 using NetworkedPlayer;
 using UnityEngine;
+using GameUnit;
 
 namespace Controls.Abilities
 {
@@ -16,7 +17,7 @@ namespace Controls.Abilities
 
             // Ignore units without GameUnit component
             // and of the same team
-            if (targetIGameUnit != null && targetIGameUnit.Team != PlayerController.LocalPlayerController.Team)
+            if (targetIGameUnit != null && targetIGameUnit.Team != PlayerController.LocalPlayerController.Team && !(targetIGameUnit is BaseBehavior))
             {
                 float damageMultiplier =
                     PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)

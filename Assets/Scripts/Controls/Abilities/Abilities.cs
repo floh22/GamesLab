@@ -271,7 +271,7 @@ namespace Controls.Abilities
                     GameObject energyExplosionGameObject = Instantiate(ability1ProjectilePrefab, start, Quaternion.identity);
                     EnergyExplosionAbilityScript energyExplosionAbilityScript = energyExplosionGameObject.GetComponent<EnergyExplosionAbilityScript>();
 
-                    energyExplosionAbilityScript.setTargetPosition(targetCircle.transform.position);
+                    energyExplosionAbilityScript.setTargetPosition(target);
 
                     /* End of the Energy Explosion stuff*/
 

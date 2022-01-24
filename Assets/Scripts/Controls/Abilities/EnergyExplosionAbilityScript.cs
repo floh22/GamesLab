@@ -32,7 +32,7 @@ namespace Controls.Abilities
 
                 if(explosion == null)
                 {
-                    // Destroy the whole object and the target circle when the explosion is done
+                    // Destroy the whole object
                     Destroy(this.gameObject);
                 }
             }
