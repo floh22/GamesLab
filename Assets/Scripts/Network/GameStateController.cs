@@ -307,6 +307,8 @@ namespace Network
             if(Slenderman != null && !Slenderman.Equals(null))
                 Debug.Log("Slenderman found");
             
+            LoadingScreenController.SendGameStartingEvent();
+            
         }
 
         public void QuitApplication()

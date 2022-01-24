@@ -1,12 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using ExitGames.Client.Photon;
 using GameManagement;
 using Lobby;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utils;
 
@@ -63,9 +67,11 @@ namespace Network
         private bool InLobby;
         private bool IsReady;
         private bool JoinWhenReady;
+
+
+        private AsyncOperation loadOperation;
         #endregion
-
-
+        
         private void Awake()
         {
             PhotonNetwork.AutomaticallySyncScene = true;
@@ -78,12 +84,6 @@ namespace Network
             PhotonNetwork.GameVersion = GameVersion.ToString();
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
-    
         /// <summary>
         /// Start the connection process.
         /// - If already connected, we attempt joining a random room
@@ -194,7 +194,6 @@ namespace Network
                 slenderman?.SetActive(false);
                 lobbyExitSign.Enable();
                 UpdatePlayerLights();
-                
             });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
@@ -240,7 +239,16 @@ namespace Network
             }
             PhotonNetwork.CurrentRoom.IsVisible = false;
             PhotonNetwork.CurrentRoom.IsOpen = false;
-            PhotonNetwork.LoadLevel(1);
+            
+            
+            LoadingScreenController.SendGameLoadingEvent();
+            StartCoroutine(LoadMainLevel());
+        }
+
+        private IEnumerator LoadMainLevel()
+        {
+            yield return new WaitForSeconds(2);
+            PhotonNetwork.LoadLevel(1); 
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -292,6 +300,5 @@ namespace Network
             connectionInfo.gameObject.SetActive(false);
             connectionStatus.gameObject.SetActive(true);
         }
-
     }
 }
