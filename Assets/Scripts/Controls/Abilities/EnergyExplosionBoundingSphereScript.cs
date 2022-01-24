@@ -20,7 +20,7 @@ namespace Controls.Abilities
 
                 // Ignore units without GameUnit component
                 // and of the same team
-                if (targetIGameUnit != null && !(targetIGameUnit is BaseBehavior))
+                if (targetIGameUnit != null && targetIGameUnit.Team != PlayerController.LocalPlayerController.Team && !(targetIGameUnit is BaseBehavior))
                 {
                     float damageMultiplier =
                         PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
@@ -28,8 +28,6 @@ namespace Controls.Abilities
                             : 1);
 
                     float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
-                
-                    targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
                 
                     IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
 
