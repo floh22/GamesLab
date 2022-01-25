@@ -41,8 +41,6 @@ namespace Controls.Abilities
 
                     float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
                 
-                    targetIGameUnit.DoDamageVisual(PlayerController.LocalPlayerController, totalAbilityDamage);
-                
                     IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
 
                     Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");

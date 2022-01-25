@@ -266,7 +266,7 @@ namespace Network
         private IEnumerator InitSyncedGameObjects()
         {
             //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(10);
 
             Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
             {
