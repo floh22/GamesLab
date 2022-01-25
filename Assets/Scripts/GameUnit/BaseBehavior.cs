@@ -335,7 +335,7 @@ namespace GameUnit
             while (progress < maxProgress)
             {
                 if (!channeler.IsChannelingObjective ||
-                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
+                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
                 {
                     // Disable channeling effects if player moves
                     innerChannelingParticleSystem.SetActive(false);
@@ -362,7 +362,7 @@ namespace GameUnit
                 yield break;
             }
 
-            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
+            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
             {
                 // Disable channeling effects if player moves
                 innerChannelingParticleSystem.SetActive(false);

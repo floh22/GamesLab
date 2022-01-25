@@ -489,6 +489,7 @@ namespace NetworkedPlayer
         public void OnChannelingFinishedAndDropPage(int networkId, int pages)
         {
             DestroyPage();
+            HasPage = false;
             GameStateController.SendFinishChannelEvent(Team, networkId, pages);
         }
 
