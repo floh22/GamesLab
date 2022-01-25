@@ -67,30 +67,30 @@ namespace GameManagement
             GameStateController.Instance.GameTime += updateTimer;
             updateTimer = 0;
             
-            GameStateController.SendGameTimeEvent(GameStateController.Instance.GameTime);
+            GameStateController.SendGameTimeEvent(GameStateController.Instance.GameTime, UIManager.Instance.gameTimer.timeRemainingInSeconds);
             
             if (UIManager.Instance == null)
             {
                 return;
             }
 
-            if (UIManager.Instance.GameTimer == null)
+            if (UIManager.Instance.gameTimer == null)
             {
                 return;
             }
 
-            if (UIManager.Instance.GameTimer.timeRemainingComponent == null)
+            if (UIManager.Instance.gameTimer.timeRemainingComponent == null)
             {
                 return;
             }
-            if (UIManager.Instance.GameTimer.timeRemainingInSeconds == 0)
+            if (UIManager.Instance.gameTimer.timeRemainingInSeconds == 0)
             {
                 foreach (var kvp in GameStateController.Instance.Bases)
                 {
                     kvp.Value.Pages--;
                 }
 
-                UIManager.Instance.GameTimer.timeRemainingInSeconds = GameData.SecondsPerRound;
+                UIManager.Instance.gameTimer.timeRemainingInSeconds = GameData.SecondsPerRound;
             }
         }
 
@@ -116,14 +116,12 @@ namespace GameManagement
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
                 Vector3 spawnPoint = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
-                
-                Debug.Log($"Spawning Minion at {spawnPoint}");
 
                 GameObject go = PhotonNetwork.Instantiate(GameStateController.Instance.minionPrefab.name, spawnPoint,
                     Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
 
                 Minion behavior = go.GetComponent<Minion>();
-                behavior.Init(go.GetInstanceID(), team, GameStateController.Instance.Targets[team]);
+                behavior.Init(go.GetPhotonView().InstantiationId, team, GameStateController.Instance.Targets[team]);
                 GameStateController.Instance.Minions[team].Add(behavior);
                 
 

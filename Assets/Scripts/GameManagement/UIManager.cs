@@ -9,6 +9,7 @@ using Network;
 using NetworkedPlayer;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace GameManagement
@@ -69,7 +70,7 @@ namespace GameManagement
         #endregion
 
 
-        public Timer GameTimer;
+        [FormerlySerializedAs("GameTimer")] public Timer gameTimer;
         private bool isGameOver = false;
 
         #region Scoreboard

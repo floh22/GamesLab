@@ -20,8 +20,8 @@ namespace GameManagement
         void Update()
         {
             if (timeRemainingInSeconds <= 0) return;
-            
-            timeRemainingInSeconds -= Mathf.Max(0, Time.deltaTime);
+            if(PhotonNetwork.IsMasterClient)
+                timeRemainingInSeconds -= Mathf.Max(0, Time.deltaTime);
             
             minutes = Mathf.FloorToInt(timeRemainingInSeconds / 60F);
             seconds = Mathf.FloorToInt(timeRemainingInSeconds - minutes * 60);

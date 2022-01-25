@@ -39,7 +39,7 @@ namespace Network
         public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
         {
             object[] content = {team, target};
-            RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.Others};
+            RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
             PhotonNetwork.RaiseEvent(ChangeMinionTargetEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
         
@@ -50,9 +50,9 @@ namespace Network
             PhotonNetwork.RaiseEvent(LoseGameEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
-        public static void SendGameTimeEvent(float gameTime)
+        public static void SendGameTimeEvent(float gameTime, float currentTimer)
         {
-            object[] content = { gameTime}; 
+            object[] content = { gameTime, currentTimer}; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(GameTimeEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
@@ -233,7 +233,6 @@ namespace Network
                 controller = gameObject.AddComponent<MasterController>() ?? throw new NullReferenceException();
                 controller.SpawnSlenderman();
                 controller.SpawnBases();
-                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
             }
             catch (Exception e)
             {
@@ -308,7 +307,10 @@ namespace Network
                 Debug.Log("Slenderman found");
             
             LoadingScreenController.SendGameStartingEvent();
-            
+            if(PhotonNetwork.IsMasterClient && controller != null && !controller.Equals(null))
+            {
+                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
+            }
         }
 
         public void QuitApplication()
@@ -387,6 +389,7 @@ namespace Network
             {
                 object[] data = (object[])photonEvent.CustomData;
                 GameTime = (float)data[0];
+                UIManager.Instance.gameTimer.timeRemainingInSeconds = (float)data[1];
             }
 
             if (eventCode == StartChannelEventCode)
@@ -478,7 +481,9 @@ namespace Network
         void SetMinionTarget(GameData.Team team, GameData.Team target)
         {
             Targets[team] = target;
+            Debug.Log($"Switching {team} minion target to {target}");
 
+            return;
             if (!PhotonNetwork.IsMasterClient) return;
 
             //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?

@@ -39,7 +39,19 @@ namespace GameUnit
         
         #region GameUnit
         public int NetworkID { get; set; }
-        public int OwnerID => photonView.OwnerActorNr;
+
+        public int OwnerID
+        {
+            get
+            {
+                if (!photonView.IsDestroyed())
+                {
+                    return photonView.OwnerActorNr;
+                }
+
+                return -1;
+            }
+        }
         [field: SerializeField] public GameData.Team Team { get; set; }
         public GameUnitType Type => GameUnitType.Minion;
         public GameObject AttachtedObjectInstance { get; set; }
@@ -725,7 +737,7 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damageTaken)
         {
             //Cant take damage from a null object
-            if (unit == null || unit.Equals(null))
+            if (unit == null || unit.Equals(null) || this == null || this.Equals(null))
                 return;
             
             
