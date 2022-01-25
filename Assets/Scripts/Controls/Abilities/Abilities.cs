@@ -21,9 +21,9 @@ namespace Controls.Abilities
 
         [SerializeField] private GameObject abilityCanvas;
 
-        public static void SendCastAbilityEvent(int gameUnitID, Ability ability, Vector3 start, Vector3 target)
+        public static void SendCastAbilityEvent(int gameUnitID, Ability ability, Vector3 start, Vector3 target, Vector3 direction)
         {
-            object[] content = { gameUnitID, ability, start, target }; 
+            object[] content = { gameUnitID, ability, start, target, direction }; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(CastAbilityEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
@@ -176,19 +176,27 @@ namespace Controls.Abilities
             }
         }
 
-        public void CastAbility(Ability ability, Vector3 lastPosition)
+        public void CastAbility(Ability ability, Vector3 joystickPosition)
         {
             Vector3 startingPosition = new Vector3();
+            Vector3 targetPosition = new Vector3();
+            Vector3 direction = new Vector3();
 
             switch (ability)
             {
                 case Ability.RANGE:
+
+                    // We need to keep track of the cooldown of the caster.
+                    // It's not important for others to keep track of it,
+                    // in other words it's not necessary in the networked
+                    // version of this function.                
                     if (isCooldown1)
                     {
                         return;
                     }
 
                     startingPosition = transform.position + new Vector3(0, 2, 0);
+                    targetPosition = targetCircle.transform.position;
 
                     /* Start of the Energy Explosion stuff */
 
@@ -196,49 +204,56 @@ namespace Controls.Abilities
                     EnergyExplosionAbilityScript energyExplosionAbilityScript = energyExplosionGameObject.GetComponent<EnergyExplosionAbilityScript>();
 
                     energyExplosionAbilityScript.setTargetPosition(targetCircle.transform.position);
-                    energyExplosionAbilityScript.activateDamage();
+                    energyExplosionAbilityScript.activateDamage(); // Activate damage for the caster (he main client).
 
                     /* End of the Energy Explosion stuff*/
                     
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
-                    lastPosition = targetCircle.transform.position;
+
                     break;
 
                 case Ability.LINE:
+
+                    // We need to keep track of the cooldown of the caster.
+                    // It's not important for others to keep track of it,
+                    // in other words it's not necessary in the networked
+                    // version of this function.
                     if (isCooldown2)
                     {
                         return;
                     }
 
-                    Vector3 direction = new Vector3(lastPosition.x, 0, lastPosition.y);
-                    direction *= maxAbilityDistance2;
+                    startingPosition = transform.position + new Vector3(0, 2, 0);
 
+                    direction = new Vector3(joystickPosition.x, 0, joystickPosition.y);
+                    direction *= maxAbilityDistance2;
                     float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
                     if (direction.z <= 0)
                     {
                         angle *= -1;
                     }
-
                     direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
-                    startingPosition = transform.position + new Vector3(direction.x * 0.05f, 2, direction.z * 0.05f);
-                    direction = transform.TransformPoint(direction);
+
+                    targetPosition = transform.TransformPoint(direction);
 
                     /* Start of the Ice Lance stuff */
 
                     GameObject iceLanceGameObject = Instantiate(ability2ProjectilePrefab, startingPosition, Quaternion.identity);
                     IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
                     
-                    iceLanceGameObject.transform.LookAt(direction);
-                    iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
+                    iceLanceGameObject.transform.LookAt(targetPosition);
+                    iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2*2);
                     iceLanceAbilityScript.determineNumberOfShots();
                     iceLanceAbilityScript.determineUnitsToAvoid();
-                    iceLanceAbilityScript.activateDamage();
+                    iceLanceAbilityScript.activateDamage();  // Activate damage for the caster (he main client).
+                    // iceLanceAbilityScript.setTargetPosition(direction, startingPosition); // Used for debugging.
 
                     /* End of the Ice Lance stuff*/
 
                     isCooldown2 = true;
                     ability2Image.fillAmount = 0;
+
                     break;
                 case Ability.NORMAL:
                     break;
@@ -247,26 +262,19 @@ namespace Controls.Abilities
             }
 
             //Send ability cast to other players
-            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, lastPosition);
+            SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, targetPosition, direction);
             
             HideAbilityInterface(ability);
         }
 
 
-        private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability)
+        private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability, Vector3 direction)
         {
             switch (ability)
             {
                 case Ability.NORMAL:
                     break;
                 case Ability.RANGE:
-
-                    if (isCooldown1)
-                    {
-                        return;
-                    }
-
-                    isCooldown1 = true;
 
                     /* Start of the Energy Explosion stuff */
 
@@ -280,35 +288,16 @@ namespace Controls.Abilities
                     break;
                 case Ability.LINE:
 
-                    if (isCooldown2)
-                    {
-                        return;
-                    }
-
-                    isCooldown2 = true;
-
-                    Vector3 direction = new Vector3(target.x, 0, target.y);
-                    direction *= maxAbilityDistance2;
-
-                    float angle = Vector3.Angle(direction, new Vector3(1, 0, 0));
-
-                    if (direction.z <= 0)
-                    {
-                        angle *= -1;
-                    }
-
-                    direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
-                    direction = transform.TransformPoint(direction);
-
                     /* Start of the Ice Lance stuff */
 
                     GameObject iceLanceGameObject = Instantiate(ability2ProjectilePrefab, start, Quaternion.identity);
                     IceLanceAbilityScript iceLanceAbilityScript = iceLanceGameObject.GetComponent<IceLanceAbilityScript>();
                     
-                    iceLanceGameObject.transform.LookAt(direction);
+                    iceLanceGameObject.transform.LookAt(target);
                     iceLanceAbilityScript.setMaxRadius(maxAbilityDistance2);
                     iceLanceAbilityScript.determineNumberOfShots();
                     iceLanceAbilityScript.determineUnitsToAvoid();
+                    // iceLanceAbilityScript.setTargetPosition(direction, start); // Used for debugging.
                     
                     /* End of the Ice Lance stuff*/
                     
@@ -340,8 +329,9 @@ namespace Controls.Abilities
                 Ability ability = (Ability)data[1];
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
+                Vector3 direction = (Vector3)data[4];
                 
-                CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability);
+                CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability, direction);
             }
         }
 
