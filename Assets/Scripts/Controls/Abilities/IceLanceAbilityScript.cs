@@ -1,6 +1,7 @@
 using Character;
 using NetworkedPlayer;
 using UnityEngine;
+using GameUnit;
 
 namespace Controls.Abilities
 {
@@ -14,7 +15,16 @@ namespace Controls.Abilities
         public Transform boundingSphereTransform;
         public float ABILITY_DAMAGE = 20;
 
-        private bool damageIsActivated = false;        
+        private bool damageIsActivated = false;
+
+
+        /* Start of Debug stuff
+        public GameObject targetCirclePrefab;
+        private GameObject targetCircle;        
+        private Vector3 targetPosition;   
+        public GameObject targetArrowPrefab;
+        private GameObject targetArrow;
+        End of Debug stuff */         
 
         // This function is used to scale the bounding sphere to a max radius
         // that projectiles can go to before getting destroyed.
@@ -32,7 +42,7 @@ namespace Controls.Abilities
                 IGameUnit targetIGameUnit = gameObj.GetComponent<IGameUnit>();
 
                 // Ignore units without GameUnit component
-                if (targetIGameUnit != null)
+                if (targetIGameUnit != null && !(targetIGameUnit is BaseBehavior))
                 {
                     float damageMultiplier =
                         PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
@@ -85,5 +95,20 @@ namespace Controls.Abilities
         {
             damageIsActivated = true;
         }
+
+        /* Start of Debug stuff
+        public void setTargetPosition(Vector3 targetPosition_p, Vector3 sourcePosition_p)
+        {
+            Vector3 sourcePosition = new Vector3(sourcePosition_p.x, 0.1f, sourcePosition_p.z);
+            targetPosition = new Vector3(targetPosition_p.x, 0.1f, targetPosition_p.z);
+
+            // Create a targetCircle at the target location
+            targetCircle = Instantiate(targetCirclePrefab, targetPosition, Quaternion.Euler(90, 0, 0));
+            targetArrow = Instantiate(targetArrowPrefab, sourcePosition, Quaternion.Euler(0, 0, 0));
+
+            targetArrow.transform.LookAt(targetPosition);
+            targetArrow.transform.Rotate(90.0f, 0.0f, 0.0f);
+        }     
+        End of Debug stuff */       
     }
 }
