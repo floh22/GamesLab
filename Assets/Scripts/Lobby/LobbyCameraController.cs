@@ -17,7 +17,8 @@ namespace Lobby
 
         public bool isMoving;
 
-        private Transform mainCamera;
+        [SerializeField] private Transform mainCamera;
+        [SerializeField] private Transform lobbyCamera;
         
         private Vector3 posVelocity = Vector3.zero;
         private Quaternion derivVelocity = Quaternion.identity;
@@ -25,7 +26,11 @@ namespace Lobby
         // Start is called before the first frame update
         void Start()
         {
-            mainCamera = Camera.main.transform;
+            menuPosition = mainCamera.position;
+            menuRotation = mainCamera.rotation;
+
+            lobbyPosition = lobbyCamera.position;
+            lobbyRotation = lobbyCamera.rotation;
         }
 
         // Update is called once per frame
@@ -59,8 +64,7 @@ namespace Lobby
                     ref derivVelocity, moveDuration - 0.1f);
                 yield return null;
             }
-
-            Debug.Log("arrived");
+            
             isMoving = false;
             onArrive?.Invoke();
         }

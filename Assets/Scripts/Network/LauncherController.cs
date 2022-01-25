@@ -49,14 +49,19 @@ namespace Network
         [SerializeField] private PersistentData persistentData;
 
 
-        [Header("Scene Data")] [SerializeField]
-        private List<GameObject> playerLights;
-
+        [Header("Scene Data")] 
+        [SerializeField] private List<GameObject> playerLights;
         [SerializeField] private List<GameObject> playerObjects;
         [SerializeField] private GameObject slenderman;
 
         [SerializeField] private LobbyCameraController cameraController;
         [SerializeField] private ExitLobbySignBehavior lobbyExitSign;
+
+        [Header("Lobby UI Data")] 
+        [SerializeField] private GameObject playerNameDisplayCanvasObject;
+        [SerializeField] private TMP_Text[] playerNameDisplays;
+        [SerializeField] private int[] paddingValuesPerPlayer;
+        [SerializeField] private RectMask2D playerNameMask;
 
         #endregion
 
@@ -69,8 +74,9 @@ namespace Network
         private bool IsReady;
         private bool JoinWhenReady;
 
-
-        private AsyncOperation loadOperation;
+        private Coroutine playerNameDisplayRoutine;
+        private float displayRoutineVelocity;
+        
         private static readonly int Offset = Animator.StringToHash("Offset");
         private static readonly int Speed = Animator.StringToHash("Speed");
 
@@ -91,7 +97,6 @@ namespace Network
             {
                 playerObject.GetComponent<Animator>().SetFloat(Offset, UnityEngine.Random.Range(0, 2f));
                 playerObject.GetComponent<Animator>().SetFloat(Speed, UnityEngine.Random.Range(0.85f, 1.15f));
-                Debug.Log("test");
             }
         }
 
@@ -110,7 +115,7 @@ namespace Network
                     JoinWhenReady = true;
                     return;
                 }
-                
+
                 if (RoomList.Count == 0)
                 {
                     CreateRoom();
@@ -151,6 +156,8 @@ namespace Network
             
             
             slenderman?.SetActive(true);
+            playerNameDisplayCanvasObject.SetActive(false);
+            playerNameMask.padding = new Vector4(0, 0, 1920, 0);
 
             cameraController?.MoveToMainMenu(() =>
             {
@@ -162,6 +169,28 @@ namespace Network
                 }
                 HideConnectionInfo();
             });
+        }
+
+
+        private IEnumerator MovePlayerNameMask()
+        {
+            float smoothTime = 0.3f;
+            float smoothTimeChange = 0.0025f;
+            while (Math.Abs(playerNameMask.padding.z - paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount]) > 0.01f)
+            {
+                
+                //float newPadding = (playerNameMask.padding.z > paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount]? 1: -1);
+
+                float newPadding = Mathf.SmoothDamp(playerNameMask.padding.z,
+                    paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount], ref displayRoutineVelocity, smoothTime);
+
+                smoothTime -= smoothTimeChange;
+                
+                playerNameMask.padding = new Vector4(0, 0,  newPadding, 0);
+
+                yield return null;
+            }
+            
         }
     
         #region MonoBehaviourPunCallbacks Callbacks
@@ -195,20 +224,40 @@ namespace Network
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             UpdatePlayerLights();
+            if(playerNameDisplayRoutine != null)
+                StopCoroutine(playerNameDisplayRoutine);
+            playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
+
         }
 
         public override void OnJoinedRoom()
         {
-            playerObjects.ForEach(o => o.SetActive(true));
+            foreach (GameObject playerObject in playerObjects)
+            {
+                playerObject.SetActive(true);
+                playerObject.GetComponent<Animator>().SetFloat(Offset, UnityEngine.Random.Range(0, 2f));
+                playerObject.GetComponent<Animator>().SetFloat(Speed, UnityEngine.Random.Range(0.85f, 1.15f));
+                
+            }
             cameraController?.MoveToWaitingForPlayers(() =>
             {
                 slenderman?.SetActive(false);
                 lobbyExitSign.Enable();
+                playerNameDisplayCanvasObject.SetActive(true);
                 UpdatePlayerLights();
+                
+                if(playerNameDisplayRoutine != null)
+                    StopCoroutine(playerNameDisplayRoutine);
+                playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
             });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+            
+            for (int playerPos = 0; playerPos < PhotonNetwork.CurrentRoom.PlayerCount; playerPos++)
+            {
+                playerNameDisplays[playerPos].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[playerPos].NickName;
+            }
             
             
 
@@ -218,8 +267,18 @@ namespace Network
 
         public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
         {
+            if (Equals(newPlayer, PhotonNetwork.LocalPlayer))
+                return;
             UpdatePlayerLights();
+            if(playerNameDisplayRoutine != null)
+                StopCoroutine(playerNameDisplayRoutine);
+            playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
+
+            for (int playerPos = 0; playerPos < PhotonNetwork.CurrentRoom.PlayerCount; playerPos++)
+            {
+                playerNameDisplays[playerPos].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[playerPos].NickName;
+            }
 
             CheckGameStart();
         }

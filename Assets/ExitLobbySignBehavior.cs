@@ -28,7 +28,8 @@ public class ExitLobbySignBehavior : MonoBehaviour
 
         if (inCameraPos.x < 0)
         {
-            transform.position = backupPosition;
+            
+            //transform.position = backupPosition;
         }
 
         lobbyCamera.enabled = false;
