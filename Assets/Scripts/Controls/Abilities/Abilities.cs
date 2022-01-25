@@ -222,9 +222,7 @@ namespace Controls.Abilities
                     if (isCooldown2)
                     {
                         return;
-                    }
-
-                    startingPosition = transform.position + new Vector3(0, 2, 0);
+                    }                    
 
                     direction = new Vector3(joystickPosition.x, 0, joystickPosition.y);
                     direction *= maxAbilityDistance2;
@@ -234,6 +232,8 @@ namespace Controls.Abilities
                         angle *= -1;
                     }
                     direction = Quaternion.Euler(0, angle, 0) * new Vector3(0, 1, maxAbilityDistance2);
+
+                    startingPosition = transform.position + new Vector3(direction.x * 0.1f, 1, direction.z * 0.1f);
 
                     targetPosition = transform.TransformPoint(direction);
 

@@ -238,6 +238,9 @@ namespace NetworkedPlayer
             {
                 NetworkID = gameObject.GetInstanceID();
             }
+
+            // Asssign Layer to player depending on team
+            this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units"); 
         }
 
 

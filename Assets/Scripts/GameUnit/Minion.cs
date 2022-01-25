@@ -389,10 +389,9 @@ namespace GameUnit
             layers[1] = "BLUEUnits";
             layers[2] = "GREENUnits";
             layers[3] = "YELLOWUnits";
-            layers[4] = "GameObject";
 
             // Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            var results = new Collider[5];
+            var results = new Collider[6];
             var foundUnits = new Dictionary<IGameUnit, float>();
 
             //Find viable targets
