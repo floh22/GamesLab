@@ -136,7 +136,8 @@ namespace GameUnit
                 return;
             }
 
-            channeler.OnChannelObjective(transform.position, NetworkID);
+            channeler.OnChannelObjective(innerChannelingParticleSystem.transform.position, NetworkID);
+            channeler.OnStartBaseChannel();
             StartCoroutine(Channel(channeler));
         }
         
@@ -196,128 +197,6 @@ namespace GameUnit
                 --Pages;
         }
 
-        public void OnStartChannel(PlayerController channeler)
-        {
-            // Enable channeling effects when channeling Slenderman on the channeler.
-                // The channeling effect on Slenderman will be activated in the OnCollision.cs script
-                // when the particles from the channeler hit Slenderman.
-                
-                
-                // Set this in the player themselves
-                channeler.ChannelParticleSystem.SetActive(true);
-                ParticleSystem channelParticleSystem = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
-
-                // Set particles color
-                float hSliderValueR = 0.0f;
-                float hSliderValueG = 0.0f;
-                float hSliderValueB = 0.0f;
-                float hSliderValueA = 1.0f;
-
-
-                if(Team.ToString() == "RED")
-                {
-                    // // Set particles color
-                    // hSliderValueR = 174.0F / 255;
-                    // hSliderValueG = 6.0F / 255;
-                    // hSliderValueB = 6.0F / 255;
-                    // hSliderValueA = 255.0F / 255;
-
-                    // Set particles color
-                    hSliderValueR = 1;
-                    hSliderValueG = 0;
-                    hSliderValueB = 0;
-                    hSliderValueA = 1;                    
-                }
-                else if (Team.ToString() == "YELLOW")
-                {
-                    // // Set particles color
-                    // hSliderValueR = 171.0F / 255;
-                    // hSliderValueG = 173.0F / 255;
-                    // hSliderValueB = 6.0F / 255;
-                    // hSliderValueA = 255.0F / 255;
-
-                    // Set particles color
-                    hSliderValueR = 1;
-                    hSliderValueG = 1;
-                    hSliderValueB = 0;
-                    hSliderValueA = 1;                     
-                }
-                else if (Team.ToString() == "GREEN")
-                {
-                    // // Set particles color
-                    // hSliderValueR = 7.0F / 255;
-                    // hSliderValueG = 173.0F / 255;
-                    // hSliderValueB = 16.0F / 255;
-                    // hSliderValueA = 255.0F / 255;
-
-                    // Set particles color
-                    hSliderValueR = 0;
-                    hSliderValueG = 1;
-                    hSliderValueB = 0;
-                    hSliderValueA = 1;                    
-                }
-                else if (Team.ToString() == "BLUE")
-                {
-                    // // Set particles color
-                    // hSliderValueR = 7.0F / 255;
-                    // hSliderValueG = 58.0F / 255;
-                    // hSliderValueB = 173.0F / 255;
-                    // hSliderValueA = 255.0F / 255;
-
-                    // Set particles color
-                    hSliderValueR = 0;
-                    hSliderValueG = 1;
-                    hSliderValueB = 1;
-                    hSliderValueA = 1;                      
-                }
-
-                Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
-
-                channelParticleSystem.startColor = color;
-
-                /* Start of Rings Channeling Effect Stuff */
-                channeler.RingsParticleSystem.SetActive(true);
-
-                ParticleSystem ringsParticleSystem = channeler.RingsParticleSystem.GetComponent<ParticleSystem>();
-                ringsParticleSystem.Play(true);       
-
-                ParticleSystem embers = channeler.RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
-                ParticleSystem smoke = channeler.RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
-                embers.startColor = color;
-                smoke.startColor = color;
-                
-                Gradient gradient;
-                GradientColorKey[] colorKey;
-                GradientAlphaKey[] alphaKey;
-                gradient = new Gradient();
-                // Populate the color keys at the relative time 0 and 1 (0 and 100%)
-                colorKey = new GradientColorKey[2];
-                colorKey[0].color = color;
-                colorKey[0].time = 0.0f;
-                colorKey[1].color = color;
-                colorKey[1].time = 1.0f;
-                // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
-                alphaKey = new GradientAlphaKey[2];
-                alphaKey[0].alpha = 1.0f;
-                alphaKey[0].time = 0.0f;
-                alphaKey[1].alpha = 0.0f;
-                alphaKey[1].time = 1.0f;
-                gradient.SetKeys(colorKey, alphaKey);       
-
-                ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
-                ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
-                /* End of Rings Channeling Effect Stuff */
-                
-                // Set the force that will change the particles direcion
-                var fo = channelParticleSystem.forceOverLifetime;
-                fo.enabled = true;
-
-                fo.x = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.x - channeler.transform.position.x);
-                fo.y = new ParticleSystem.MinMaxCurve(-innerChannelingParticleSystem.transform.position.y + channeler.transform.position.y);
-                fo.z = new ParticleSystem.MinMaxCurve(innerChannelingParticleSystem.transform.position.z - channeler.transform.position.z);
-        }
-        
-
         public void DisableChannelEffects()
         {
             innerChannelingParticleSystem.SetActive(false);
@@ -327,78 +206,79 @@ namespace GameUnit
         {
             hasBeenChanneledOnce = true;
             float progress = 0;
-            float maxProgress = 100;
+            const float MAX_CHANNELING_PROGRESS = 100;
             float secondsToChannel = SecondsToChannelPage;
-            
-            OnStartChannel(channeler);
 
-            while (progress < maxProgress)
+            while (progress < MAX_CHANNELING_PROGRESS)
             {
-                if (!channeler.IsChannelingObjective ||
-                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
-                {
-                    // Disable channeling effects if player moves
-                    innerChannelingParticleSystem.SetActive(false);
-                    channeler.InterruptChanneling();
+                /* Assumption: Stopping is not the same as interrupting. */
+
+                // Stop channeling effects if player is not channeling.
+                // Could be due to external reasons like another player
+                // interrupting the the channeling player.
+                if (!channeler.IsChannelingObjective)
+                {                    
+                    DisableChannelEffects();
+                    channeler.DisableChannelEffects();
+                    channeler.DisableChannelEffectsNetworked(NetworkID);
                     yield break;
                 }
 
-                progress += maxProgress / secondsToChannel;
-                Debug.Log($"{Team} Base being channeled, {progress} / {maxProgress}");
+                // Interrupt channeling effects if player is out of range with a base.
+                if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
+                {                    
+                    DisableChannelEffects();
+                    channeler.InterruptChanneling();
+                    channeler.DisableChannelEffectsNetworked(NetworkID);
+                    yield break;
+                }
+
+                progress += MAX_CHANNELING_PROGRESS / secondsToChannel;
+                Debug.Log($"{Team} Base being channeled, {progress} / {MAX_CHANNELING_PROGRESS}");
+
+                if(progress >= MAX_CHANNELING_PROGRESS)
+                {
+                    // Stop channeling effects after successfuly channeling a base
+                    // It's not an interruption but rather a stop to the channeling effects
+                    DisableChannelEffects();
+                    channeler.DisableChannelEffects();
+                    channeler.DisableChannelEffectsNetworked(NetworkID);
+
+                    /* Start of page stuff */
+
+                    if (channeler.Team != Team) // Different team
+                    {
+                        if (channeler.HasPage) // No page if already has a page
+                        {
+                            yield break;
+                        }
+
+                        if (Pages > 0)
+                        {
+                            --Pages;
+                            channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
+                        }
+                    }
+                    else // Same team
+                    {
+                        if (channeler.HasPage) // Return page back
+                        {
+                            ++Pages;
+                            channeler.OnChannelingFinishedAndDropPage(NetworkID, Pages);
+                        }
+                        else if (Pages > 0) // Take a page
+                        {
+                            --Pages;
+                            channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
+                        }
+                    }
+
+                    /* End of page stuff */
+
+                    yield break;
+                }                
 
                 yield return new WaitForSeconds(1);
-            }
-
-            if(progress >= maxProgress)
-            {
-                // Disable channeling effects after hiring Slenderman
-                innerChannelingParticleSystem.SetActive(false);
-                channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
-                channeler.transform.Find("Rings").gameObject.SetActive(false);
-            }
-
-            if (!channeler.IsChannelingObjective)
-            {
-                yield break;
-            }
-
-            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
-            {
-                // Disable channeling effects if player moves
-                innerChannelingParticleSystem.SetActive(false);
-                channeler.InterruptChanneling();
-                yield break;
-            }
-
-            if (channeler.Team != Team) // Different team
-            {
-                if (channeler.HasPage) // No page if already has a page
-                {
-                    innerChannelingParticleSystem.SetActive(false);
-                    channeler.InterruptChanneling();
-                    yield break;
-                }
-
-                if (Pages > 0)
-                {
-                    --Pages;
-                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
-                    innerChannelingParticleSystem.SetActive(false);
-                }
-            }
-            else // Same team
-            {
-                if (channeler.HasPage) // Return page back
-                {
-                    ++Pages;
-                    channeler.OnChannelingFinishedAndDropPage(NetworkID, Pages);
-                }
-                else if (Pages > 0) // Take a page
-                {
-                    --Pages;
-                    channeler.OnChannelingFinishedAndPickUpPage(NetworkID, Pages);
-                    innerChannelingParticleSystem.SetActive(false);
-                }
             }
         }
         
