@@ -391,7 +391,6 @@ namespace Network
             {
                 object[] data = (object[])photonEvent.CustomData;
                 
-                
                 GameData.Team team = (GameData.Team) data[0];
                 int targetNetworkID = (int)data[1];
                 PlayerController source = Players[team];
@@ -401,14 +400,16 @@ namespace Network
                 if (targetNetworkID == Slenderman.NetworkID)
                 {
                     //Channeled slenderman
-                    Slenderman.OnStartChannel(source);
+                    source.setChannelingTo(Slenderman.gameObject.transform.position);
+                    source.OnStartSlendermanChannel(Slenderman.gameObject.GetComponent<BoxCollider>().bounds.size);
                     return;
                 }
                 
                 foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
                 {
                     //channeled a base
-                    baseStructure.OnStartChannel(source);
+                    source.setChannelingTo(baseStructure.innerChannelingParticleSystem.transform.position);
+                    source.OnStartBaseChannel();
                     return;
                 }
             }
@@ -421,6 +422,7 @@ namespace Network
                 GameData.Team team = (GameData.Team) data[0];
                 int targetNetworkID = (int)data[1];
                 int value = (int)data[2];
+                PlayerController source = Players[team];
                 
                 Debug.Log($"{team} finished channeling {targetNetworkID}");
 
@@ -428,19 +430,34 @@ namespace Network
                 {
                     //Channeled slenderman
                     Slenderman.DisableChannelEffects();
+                    source.DisableChannelEffects();
+
                     if (!PhotonNetwork.IsMasterClient)
                         return;
-                    Slenderman.OnChanneled();
+
+                    // The 999 is used in the DisableChannelEffectsNetworked function.
+                    // It serves to indicate that we only want to disable channeling
+                    // effects and nothing more
+                    if(value != 999)
+                        Slenderman.OnChanneled();
+
                     return;
                 }
                 
                 foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
                 {
                     baseStructure.DisableChannelEffects();
+                    source.DisableChannelEffects();
+
                     if (!PhotonNetwork.IsMasterClient)
                         return;
-                    //channeled a base
-                    baseStructure.Pages = value;
+                        
+                    // The 999 is used in the DisableChannelEffectsNetworked function.
+                    // It serves to indicate that we only want to disable channeling
+                    // effects and nothing more
+                    if(value != 999)
+                        baseStructure.Pages = value;
+
                     return;
                 }
             }

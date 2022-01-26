@@ -79,11 +79,6 @@ namespace Controls.Channeling
         
         public void OnMouseDown()
         {
-            if (hasBeenAcquired)
-            {
-                return;
-            }
-
             PlayerController channeler = PlayerController.LocalPlayerController;
 
             if (!channeler.HasPage)
@@ -92,18 +87,9 @@ namespace Controls.Channeling
             }
 
             Debug.Log("Slenderman has been clicked by player from team " + channeler.Team);
-            
-            if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
-            {
-                return;
-            }
-
-            if (channeler.IsChannelingObjective)
-            {
-                return;
-            }
 
             channeler.OnChannelObjective(transform.position, NetworkID);
+            channeler.OnStartSlendermanChannel(GetComponent<BoxCollider>().bounds.size);
             StartCoroutine(Channel(channeler));
         }
 
@@ -123,130 +109,55 @@ namespace Controls.Channeling
             }
         }
 
-        public void OnStartChannel(PlayerController channeler)
-        {
-            // Enable channeling effects when channeling Slenderman on the channeler.
-            // The channeling effect on Slenderman will be activated in the OnCollision.cs script
-            // when the particles from the channeler hit Slenderman.
-            
-            
-            
-            //Set this in the player themselves
-            //channeler.ChannelParticleSystem.SetActive(true);
-            ParticleSystem ps = channeler.ChannelParticleSystem.GetComponent<ParticleSystem>();
-
-
-            // Set particles color
-            // float hSliderValueR = 209.0F / 255;
-            // float hSliderValueG = 25.0F / 255;
-            // float hSliderValueB = 191.0F / 255;
-            // float hSliderValueA = 255.0F / 255;      
-
-            float hSliderValueR = 255.0F / 255;
-            float hSliderValueG = 0.0F / 255;
-            float hSliderValueB = 221.0F / 255;
-            float hSliderValueA = 255.0F / 255;   
-
-            Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
-
-            ps.startColor = color;
-
-            /* Start of Rings Channeling Effect Stuff */
-            channeler.RingsParticleSystem.SetActive(true);
-
-            ParticleSystem ringsParticleSystem = channeler.RingsParticleSystem.GetComponent<ParticleSystem>();
-            ringsParticleSystem.Play(true);       
-
-            ParticleSystem embers = channeler.RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
-            ParticleSystem smoke = channeler.RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
-            embers.startColor = color;
-            smoke.startColor = color;
-            
-            Gradient gradient;
-            GradientColorKey[] colorKey;
-            GradientAlphaKey[] alphaKey;
-            gradient = new Gradient();
-            // Populate the color keys at the relative time 0 and 1 (0 and 100%)
-            colorKey = new GradientColorKey[2];
-            colorKey[0].color = color;
-            colorKey[0].time = 0.0f;
-            colorKey[1].color = color;
-            colorKey[1].time = 1.0f;
-            // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
-            alphaKey = new GradientAlphaKey[2];
-            alphaKey[0].alpha = 1.0f;
-            alphaKey[0].time = 0.0f;
-            alphaKey[1].alpha = 0.0f;
-            alphaKey[1].time = 1.0f;
-            gradient.SetKeys(colorKey, alphaKey);       
-
-            ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
-            ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
-            /* End of Rings Channeling Effect Stuff */            
-
-            //var main = ps.main;
-            //main.startColor = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
-
-            // Set the force that will change the particles direcion
-            var fo = ps.forceOverLifetime;
-            fo.enabled = true;
-
-            fo.x = new ParticleSystem.MinMaxCurve(transform.position.x - channeler.transform.position.x);
-            fo.y = new ParticleSystem.MinMaxCurve(-transform.position.y + channeler.transform.position.y + (GetComponent<BoxCollider>().bounds.size.y / 2));
-            fo.z = new ParticleSystem.MinMaxCurve(transform.position.z - channeler.transform.position.z);
-        }
-
-        private IEnumerator Channel(PlayerController channeler)
+        public IEnumerator Channel(PlayerController channeler)
         {
             hasBeenChanneledOnce = true;
             float progress = 0;
-            float maxProgress = 100;
+            const float MAX_CHANNELING_PROGRESS = 100;
             float secondsToChannel = PlayerValues.SecondsToChannelSlenderman;
-            
-            OnStartChannel(channeler);
 
-            while (progress < maxProgress)
+            while (progress < MAX_CHANNELING_PROGRESS)
             {
-                if (!channeler.IsChannelingObjective ||
-                    Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
-                {
-                    // Disable channeling effects if player moves
-                    innerChannelingParticleSystem.SetActive(false);
-                    channeler.InterruptChanneling();
+                /* Assumption: Stopping is not the same as interrupting. */
+
+                // Stop channeling effects if player is not channeling.
+                // Could be due to external reasons like another player
+                // interrupting the the channeling player.
+                if (!channeler.IsChannelingObjective)
+                {                    
+                    DisableChannelEffects();
+                    channeler.DisableChannelEffects();
+                    channeler.DisableChannelEffectsNetworked(NetworkID);
                     yield break;
                 }
 
-                progress += maxProgress / secondsToChannel;
-                Debug.Log($"Slenderman being channeled, {progress} / {maxProgress}");
+                // Interrupt channeling effects if player is out of range with Slenderman.
+                if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
+                {                    
+                    DisableChannelEffects();
+                    channeler.InterruptChanneling();
+                    channeler.DisableChannelEffectsNetworked(NetworkID);
+                    yield break;
+                }
+
+                progress += MAX_CHANNELING_PROGRESS / secondsToChannel;
+                Debug.Log($"Slenderman being channeled, {progress} / {MAX_CHANNELING_PROGRESS}");
+
+                if(progress >= MAX_CHANNELING_PROGRESS || hasBeenAcquired)
+                {
+                    // Stop channeling effects after hiring Slenderman
+                    // It's not an interruption but rather a stop to the channeling effects
+                    DisableChannelEffects();
+                    channeler.DisableChannelEffects();
+
+                    channeler.SacrificePage();
+                    channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
+                    OnChanneled();
+                    yield break;
+                }                
 
                 yield return new WaitForSeconds(1);
-            }
-
-            if(progress >= maxProgress)
-            {
-                // Disable channeling effects after hiring Slenderman
-                innerChannelingParticleSystem.SetActive(false);
-                channeler.transform.Find("InnerChannelingParticleSystem").gameObject.SetActive(false);
-                channeler.transform.Find("Rings").gameObject.SetActive(false);
-            }
-
-            if (!channeler.IsChannelingObjective)
-            {
-                yield break;
-            }
-
-            if (hasBeenAcquired || Vector3.Distance(transform.position, channeler.Position) > PlayerValues.SlendermanChannelRange)
-            {
-                // Disable channeling effects if player moves
-                innerChannelingParticleSystem.SetActive(false);
-                channeler.InterruptChanneling();                
-                yield break;
-            }
-            
-            channeler.SacrificePage();
-
-            channeler.OnChannelingFinishedAndReceiveSlendermanBuff(NetworkID);
-            OnChanneled();
+            }     
         }
 
         public void DisableChannelEffects()

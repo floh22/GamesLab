@@ -292,12 +292,6 @@ namespace NetworkedPlayer
                 }
                 */
             }
-
-            if (this.ChannelParticleSystem != null &&
-                this.isChannelingObjective != this.ChannelParticleSystem.activeInHierarchy)
-            {
-                this.ChannelParticleSystem.SetActive(this.isChannelingObjective);
-            }
         }
 
         public void OnTriggerEnter(Collider other)
@@ -470,11 +464,209 @@ namespace NetworkedPlayer
             }));
         }
 
+        public void OnStartSlendermanChannel(Vector3 slendermanSize)
+        {
+            // Enable channeling effects when channeling Slenderman on the channeler.
+            // The channeling effect on Slenderman will be activated in the OnCollision.cs script
+            // when the particles from the channeler hit Slenderman.
+
+            ChannelParticleSystem.SetActive(true);
+
+            float hSliderValueR = 255.0F / 255;
+            float hSliderValueG = 0.0F / 255;
+            float hSliderValueB = 221.0F / 255;
+            float hSliderValueA = 255.0F / 255;   
+            Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
+
+            ParticleSystem channelParticleSystem = ChannelParticleSystem.GetComponent<ParticleSystem>();
+            channelParticleSystem.startColor = color;
+
+            // Set the force that will change the particles direcion
+            var fo = channelParticleSystem.forceOverLifetime;
+            fo.enabled = true;
+
+            fo.x = new ParticleSystem.MinMaxCurve(channelingTo.x - transform.position.x);
+            fo.y = new ParticleSystem.MinMaxCurve(-channelingTo.y + transform.position.y + (slendermanSize.y / 2));
+            fo.z = new ParticleSystem.MinMaxCurve(channelingTo.z - transform.position.z);            
+
+            /* Start of Rings Channeling Effect Stuff */
+            RingsParticleSystem.SetActive(true);
+            ParticleSystem ringsParticleSystem = RingsParticleSystem.GetComponent<ParticleSystem>();
+            ringsParticleSystem.Play(true);       
+
+            ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+            embers.startColor = color;
+            smoke.startColor = color;
+            
+            Gradient gradient;
+            GradientColorKey[] colorKey;
+            GradientAlphaKey[] alphaKey;
+            gradient = new Gradient();
+            // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+            colorKey = new GradientColorKey[2];
+            colorKey[0].color = color;
+            colorKey[0].time = 0.0f;
+            colorKey[1].color = color;
+            colorKey[1].time = 1.0f;
+            // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
+            alphaKey = new GradientAlphaKey[2];
+            alphaKey[0].alpha = 1.0f;
+            alphaKey[0].time = 0.0f;
+            alphaKey[1].alpha = 0.0f;
+            alphaKey[1].time = 1.0f;
+            gradient.SetKeys(colorKey, alphaKey);       
+
+            ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
+            ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
+            /* End of Rings Channeling Effect Stuff */
+        }        
+
+        public void OnStartBaseChannel()
+        {
+            // Enable channeling effects on the channeler when channeling a base.
+            // The channeling effect the base will be activated in the OnCollision.cs script
+            // when the particles from the channeler hit it.
+
+            ChannelParticleSystem.SetActive(true);
+            
+            // Set this in the player themselves
+            ParticleSystem channelParticleSystem = ChannelParticleSystem.GetComponent<ParticleSystem>();
+
+            // Set the force that will change the particles direcion
+            var fo = channelParticleSystem.forceOverLifetime;
+            fo.enabled = true;
+
+            fo.x = new ParticleSystem.MinMaxCurve(channelingTo.x - transform.position.x);
+            fo.y = new ParticleSystem.MinMaxCurve(-channelingTo.y + transform.position.y);
+            fo.z = new ParticleSystem.MinMaxCurve(channelingTo.z - transform.position.z);
+
+            // Set particles color
+            float hSliderValueR = 0.0f;
+            float hSliderValueG = 0.0f;
+            float hSliderValueB = 0.0f;
+            float hSliderValueA = 1.0f;
+
+
+            if(Team.ToString() == "RED")
+            {
+                // // Set particles color
+                // hSliderValueR = 174.0F / 255;
+                // hSliderValueG = 6.0F / 255;
+                // hSliderValueB = 6.0F / 255;
+                // hSliderValueA = 255.0F / 255;
+
+                // Set particles color
+                hSliderValueR = 1;
+                hSliderValueG = 0;
+                hSliderValueB = 0;
+                hSliderValueA = 1;                    
+            }
+            else if (Team.ToString() == "YELLOW")
+            {
+                // // Set particles color
+                // hSliderValueR = 171.0F / 255;
+                // hSliderValueG = 173.0F / 255;
+                // hSliderValueB = 6.0F / 255;
+                // hSliderValueA = 255.0F / 255;
+
+                // Set particles color
+                hSliderValueR = 1;
+                hSliderValueG = 1;
+                hSliderValueB = 0;
+                hSliderValueA = 1;                     
+            }
+            else if (Team.ToString() == "GREEN")
+            {
+                // // Set particles color
+                // hSliderValueR = 7.0F / 255;
+                // hSliderValueG = 173.0F / 255;
+                // hSliderValueB = 16.0F / 255;
+                // hSliderValueA = 255.0F / 255;
+
+                // Set particles color
+                hSliderValueR = 0;
+                hSliderValueG = 1;
+                hSliderValueB = 0;
+                hSliderValueA = 1;                    
+            }
+            else if (Team.ToString() == "BLUE")
+            {
+                // // Set particles color
+                // hSliderValueR = 7.0F / 255;
+                // hSliderValueG = 58.0F / 255;
+                // hSliderValueB = 173.0F / 255;
+                // hSliderValueA = 255.0F / 255;
+
+                // Set particles color
+                hSliderValueR = 0;
+                hSliderValueG = 1;
+                hSliderValueB = 1;
+                hSliderValueA = 1;                      
+            }
+
+            Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
+            channelParticleSystem.startColor = color;
+
+            /* Start of Rings Channeling Effect Stuff */
+            RingsParticleSystem.SetActive(true);
+
+            ParticleSystem ringsParticleSystem = RingsParticleSystem.GetComponent<ParticleSystem>();
+            ringsParticleSystem.Play(true);       
+
+            ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+            embers.startColor = color;
+            smoke.startColor = color;
+            
+            Gradient gradient;
+            GradientColorKey[] colorKey;
+            GradientAlphaKey[] alphaKey;
+            gradient = new Gradient();
+            // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+            colorKey = new GradientColorKey[2];
+            colorKey[0].color = color;
+            colorKey[0].time = 0.0f;
+            colorKey[1].color = color;
+            colorKey[1].time = 1.0f;
+            // Populate the alpha  keys at relative time 0 and 1  (0 and 100%)
+            alphaKey = new GradientAlphaKey[2];
+            alphaKey[0].alpha = 1.0f;
+            alphaKey[0].time = 0.0f;
+            alphaKey[1].alpha = 0.0f;
+            alphaKey[1].time = 1.0f;
+            gradient.SetKeys(colorKey, alphaKey);       
+
+            ParticleSystem.MainModule ringsParticleSystemMain = ringsParticleSystem.main;
+            ringsParticleSystemMain.startColor = new ParticleSystem.MinMaxGradient(gradient);
+            /* End of Rings Channeling Effect Stuff */
+        }
+
+        public void setChannelingTo(Vector3 channelingTo_p)
+        {
+            channelingTo = channelingTo_p;
+        }
+
+        public void DisableChannelEffects()
+        {
+            ChannelParticleSystem.SetActive(false);
+            RingsParticleSystem.SetActive(false);
+            isChannelingObjective = false;
+        }
+        
         public void OnChannelObjective(Vector3 objectivePosition, int networkId)
         {
             isChannelingObjective = true;
             channelingTo = objectivePosition;
             GameStateController.SendStartChannelEvent(Team, networkId);
+        }
+
+        // This function disables channeling effects for other players (so not the local player)
+        // and does nothing more than that. The 999 indicates that we only want to disable channeling
+        // effects and nothing more.
+        public void DisableChannelEffectsNetworked(int networkId)
+        {
+            GameStateController.SendFinishChannelEvent(Team, networkId, 999);
         }
 
         public void OnChannelingFinishedAndReceiveSlendermanBuff(int networkId)
@@ -659,6 +851,7 @@ namespace NetworkedPlayer
         private void DestroyPage()
         {
             PhotonNetwork.Destroy(CurrentPage.gameObject);
+            HasPage = false;
         }
 
         #endregion
