@@ -355,6 +355,13 @@ namespace Network
                         break;
                 }
 
+                // String sourceString = source == null ? "null" : source.ToString();
+                // String targetString = target == null ? "null" : target.ToString();
+
+                // Debug.Log($"source = {sourceString}");
+                // Debug.Log($"target = {targetString}");
+                // Debug.Log($"damage = {damage}");
+
                 if (target == null || source == null)
                 {
                     Debug.Log(

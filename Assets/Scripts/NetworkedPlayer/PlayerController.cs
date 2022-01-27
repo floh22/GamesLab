@@ -870,7 +870,7 @@ namespace NetworkedPlayer
             PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
             ellenPlayerInput.DoAttack();
 
-            /* Start of Ellen's Attack Animation stuff */
+            /* End of Ellen's Attack Animation stuff */
 
             isAttacking = true;
             // OnAttacking();
