@@ -125,5 +125,10 @@ public class PlayerInput : MonoBehaviour
         m_AttackWaitCoroutine = StartCoroutine(AttackWait());
     }
 
+    public void DoMove(float x, float y)
+    {
+        m_Movement.Set(x, y);
+    }    
+
     /* End of non-official code */
 }

@@ -74,7 +74,7 @@ namespace Network
 
         [Header("Player Data")]
         [SerializeField]
-        private GameObject playerPrefab;
+        private GameObject[] playerVariantPrefabs;
 
         [SerializeField] private GameObject abilityPrefab;
 
@@ -180,6 +180,24 @@ namespace Network
             Targets = new Dictionary<GameData.Team, GameData.Team>();
             GameUnits = new HashSet<IGameUnit>();
 
+            GameObject playerPrefab = null;
+
+            switch(PersistentData.Team.ToString())
+            {
+                case "RED":
+                    playerPrefab = playerVariantPrefabs[0];
+                break;
+                case "GREEN":
+                    playerPrefab = playerVariantPrefabs[1];
+                break;
+                case "BLUE":
+                    playerPrefab = playerVariantPrefabs[2];
+                break;
+                case "YELLOW":
+                    playerPrefab = playerVariantPrefabs[3];
+                break;                                                
+            }
+
             if (playerPrefab == null)
             {
                 // #Tip Never assume public properties of Components are filled up properly, always check and inform the developer of it.
@@ -195,7 +213,7 @@ namespace Network
                     Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
 
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    GameObject pl = PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
+                    GameObject pl = PhotonNetwork.Instantiate(playerPrefab.name, pos, Quaternion.identity, 0);
 
                     pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
 
