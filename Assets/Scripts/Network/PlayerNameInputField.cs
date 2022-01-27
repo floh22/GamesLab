@@ -17,23 +17,20 @@ namespace Network
         // Store the PlayerPref Key to avoid typos
         private const string PlayerNamePrefKey = "PlayerName";
 
-
         #endregion
 
 
         #region MonoBehaviour CallBacks
 
-
         /// <summary>
         /// MonoBehaviour method called on GameObject by Unity during initialization phase.
         /// </summary>
-        private void Start () {
-
-
+        private void Start()
+        {
             string defaultName = string.Empty;
             TMP_InputField inputField = GetComponent<TMP_InputField>();
-            
-            if (inputField!=null)
+
+            if (inputField != null)
             {
                 if (PlayerPrefs.HasKey(PlayerNamePrefKey))
                 {
@@ -43,9 +40,8 @@ namespace Network
             }
 
 
-            PhotonNetwork.NickName =  defaultName;
+            PhotonNetwork.NickName = defaultName;
         }
-
 
         #endregion
 

@@ -19,6 +19,9 @@ namespace Network
 {
     public class LauncherController : MonoBehaviourPunCallbacks
     {
+
+        public static LauncherController Instance;
+        
         #region Private Serializable Fields
 
         /// <summary>
@@ -57,12 +60,6 @@ namespace Network
         [SerializeField] private LobbyCameraController cameraController;
         [SerializeField] private ExitLobbySignBehavior lobbyExitSign;
 
-        [Header("Lobby UI Data")] 
-        [SerializeField] private GameObject playerNameDisplayCanvasObject;
-        [SerializeField] private TMP_Text[] playerNameDisplays;
-        [SerializeField] private int[] paddingValuesPerPlayer;
-        [SerializeField] private RectMask2D playerNameMask;
-
         #endregion
 
         #region Private Fields
@@ -90,6 +87,9 @@ namespace Network
         // Start is called before the first frame update
         void Start()
         {
+            if(Instance != null)
+                Destroy(this);
+            Instance = this;
             PhotonNetwork.ConnectUsingSettings();
             PhotonNetwork.GameVersion = GameVersion.ToString();
             
@@ -156,8 +156,7 @@ namespace Network
             
             
             slenderman?.SetActive(true);
-            playerNameDisplayCanvasObject.SetActive(false);
-            playerNameMask.padding = new Vector4(0, 0, 1920, 0);
+            LobbyUIController.Instance.IsActive = false;
 
             cameraController?.MoveToMainMenu(() =>
             {
@@ -168,30 +167,10 @@ namespace Network
                     t.SetActive(false);
                 }
                 HideConnectionInfo();
+                MenuUIController.Instance.ShowUI();
             });
         }
-
-
-        private IEnumerator MovePlayerNameMask()
-        {
-            float smoothTime = 0.3f;
-            float smoothTimeChange = 0.0025f;
-            while (Math.Abs(playerNameMask.padding.z - paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount]) > 0.01f)
-            {
-                
-                //float newPadding = (playerNameMask.padding.z > paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount]? 1: -1);
-
-                float newPadding = Mathf.SmoothDamp(playerNameMask.padding.z,
-                    paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount], ref displayRoutineVelocity, smoothTime);
-
-                smoothTime -= smoothTimeChange;
-                
-                playerNameMask.padding = new Vector4(0, 0,  newPadding, 0);
-
-                yield return null;
-            }
-            
-        }
+        
     
         #region MonoBehaviourPunCallbacks Callbacks
 
@@ -224,9 +203,7 @@ namespace Network
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             UpdatePlayerLights();
-            if(playerNameDisplayRoutine != null)
-                StopCoroutine(playerNameDisplayRoutine);
-            playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
+            LobbyUIController.Instance.UpdatePlayerNames();
 
         }
 
@@ -243,24 +220,12 @@ namespace Network
             {
                 slenderman?.SetActive(false);
                 lobbyExitSign.Enable();
-                playerNameDisplayCanvasObject.SetActive(true);
+                LobbyUIController.Instance.IsActive = true;
                 UpdatePlayerLights();
-                
-                if(playerNameDisplayRoutine != null)
-                    StopCoroutine(playerNameDisplayRoutine);
-                playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
             });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
-            
-            for (int playerPos = 0; playerPos < PhotonNetwork.CurrentRoom.PlayerCount; playerPos++)
-            {
-                playerNameDisplays[playerPos].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[playerPos].NickName;
-            }
-            
-            
-
             InLobby = true;
             CheckGameStart();
         }
@@ -270,16 +235,8 @@ namespace Network
             if (Equals(newPlayer, PhotonNetwork.LocalPlayer))
                 return;
             UpdatePlayerLights();
-            if(playerNameDisplayRoutine != null)
-                StopCoroutine(playerNameDisplayRoutine);
-            playerNameDisplayRoutine = StartCoroutine(MovePlayerNameMask());
+            LobbyUIController.Instance.UpdatePlayerNames();
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
-
-            for (int playerPos = 0; playerPos < PhotonNetwork.CurrentRoom.PlayerCount; playerPos++)
-            {
-                playerNameDisplays[playerPos].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[playerPos].NickName;
-            }
-
             CheckGameStart();
         }
 
