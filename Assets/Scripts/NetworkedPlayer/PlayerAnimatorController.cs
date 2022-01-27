@@ -90,12 +90,12 @@ namespace NetworkedPlayer
             float heading = Mathf.Atan2(h, v);
             transform.rotation = Quaternion.Euler(0, heading * Mathf.Rad2Deg, 0);
 
-            /* Start of Ellen's  Attack Animation stuff */
+            /* Start of Ellen's Move Animation stuff */
 
             PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
             ellenPlayerInput.DoMove(h, v);
 
-            /* End of Ellen's Attack Animation stuff */
+            /* End of Ellen's Move Animation stuff */
         }
 
         #endregion

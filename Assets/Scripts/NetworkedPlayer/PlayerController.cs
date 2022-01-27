@@ -865,7 +865,7 @@ namespace NetworkedPlayer
                 yield break;
             }
 
-            /* Start of Ellen's  Attack Animation stuff */
+            /* Start of Ellen's Attack Animation stuff */
 
             PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
             ellenPlayerInput.DoAttack();

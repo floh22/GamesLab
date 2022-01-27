@@ -189,7 +189,7 @@ namespace Controls.Abilities
             Vector3 direction = new Vector3();
             /* Start of Ellen's  Attack Animation stuff */
             PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
-            /* Start of Ellen's Attack Animation stuff */
+            /* End of Ellen's Attack Animation stuff */
 
             switch (ability)
             {
@@ -199,7 +199,7 @@ namespace Controls.Abilities
 
                 ellenPlayerInput.DoAttack();
 
-                /* Start of Ellen's Attack Animation stuff */
+                /* End of Ellen's Attack Animation stuff */
                 break;
                 case Ability.RANGE:
 
@@ -232,7 +232,7 @@ namespace Controls.Abilities
 
                     ellenPlayerInput.DoAttack();
 
-                    /* Start of Ellen's Attack Animation stuff */
+                    /* End of Ellen's Attack Animation stuff */
 
                     break;
 
@@ -281,7 +281,7 @@ namespace Controls.Abilities
 
                     ellenPlayerInput.DoAttack();
 
-                    /* Start of Ellen's Attack Animation stuff */
+                    /* End of Ellen's Attack Animation stuff */
 
                     break;
                 default:
@@ -299,7 +299,7 @@ namespace Controls.Abilities
         {
             /* Start of Ellen's  Attack Animation stuff */
             PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
-            /* Start of Ellen's Attack Animation stuff */
+            /* End of Ellen's Attack Animation stuff */
 
             switch (ability)
             {
@@ -309,7 +309,7 @@ namespace Controls.Abilities
 
                 ellenPlayerInput.DoAttack();
 
-                /* Start of Ellen's Attack Animation stuff */
+                /* End of Ellen's Attack Animation stuff */
 
                 break;
                 case Ability.RANGE:
@@ -327,7 +327,7 @@ namespace Controls.Abilities
 
                     ellenPlayerInput.DoAttack();
 
-                    /* Start of Ellen's Attack Animation stuff */
+                    /* End of Ellen's Attack Animation stuff */
 
                     break;
                 case Ability.LINE:
@@ -349,7 +349,7 @@ namespace Controls.Abilities
 
                     ellenPlayerInput.DoAttack();
 
-                    /* Start of Ellen's Attack Animation stuff */
+                    /* End of Ellen's Attack Animation stuff */
                     
                     break;
                 default:
