@@ -13,7 +13,7 @@ namespace NetworkedPlayer
         private PlayerController player;
 
         Animator animator;
-        private static readonly int Speed = Animator.StringToHash("Speed");
+        private static readonly int Speed = Animator.StringToHash("ForwardSpeed");
 
         #endregion
 
