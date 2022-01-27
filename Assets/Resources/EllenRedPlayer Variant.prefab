@@ -67,10 +67,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5253724973357742861, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5254279406321362635, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5254406972079381071, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
       propertyPath: m_Name
       value: EllenRedPlayer Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5255603137159795943, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5263478453796488221, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
@@ -82,6 +97,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[1]
       value: 
       objectReference: {fileID: 2100000, guid: dfe51f051c0816c47a70ca71fa72783b, type: 2}
+    - target: {fileID: 5294767806190711937, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7692897072534817452, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
       propertyPath: sceneViewId

@@ -62,9 +62,9 @@ namespace GameManagement
         [SerializeField] private TextMeshProUGUI LevelLabel;
         [SerializeField] private TextMeshProUGUI LevelUpLabel;
         private GameObject[] levelUpButtons;
-        private Image Circular_Meter_1;
-        private Image Circular_Meter_2;
-        private Image Circular_Meter_3;
+        public Image Circular_Meter_RANGE;
+        public Image Circular_Meter_LINE;
+        public Image Circular_Meter_MINION;
 
         #endregion
 
@@ -91,37 +91,37 @@ namespace GameManagement
                 Instance = this;
             }
 
+            GameObject parentGameObject = this.gameObject.transform.parent.gameObject;
+
             ScoreboardEntries = new HashSet<GameData.Team>();
-            PauseMenuUI = GameObject.Find("PauseMenu_UI");
+            PauseMenuUI = parentGameObject.transform.Find("PauseMenu_UI").gameObject;
+
             if (PauseMenuUI != null && !PauseMenuUI.Equals(null))
                 PauseMenuUI.SetActive(false);
-            IngameUI = GameObject.Find("Ingame_UI");
 
-            MinionSwitchButtonImage = GameObject.Find("Player_Color_Sprite").GetComponent<Image>();
+            IngameUI = parentGameObject.transform.Find("Ingame_UI").gameObject;
+            GameObject actionButtonsGroup = IngameUI.transform.Find("Action Buttons Group").gameObject;
+            MinionSwitchButtonImage = actionButtonsGroup.transform.Find("Minion Switch").gameObject.transform.Find("Player_Color_Sprite").gameObject.GetComponent<Image>();
+            AutoAttackOnImage = actionButtonsGroup.transform.Find("Auto Attack Switch").gameObject.transform.Find("ON_Sprite").gameObject;
+            AutoAttackOffImage = actionButtonsGroup.transform.Find("Auto Attack Switch").gameObject.transform.Find("OFF_Sprite").gameObject;
+            LevelLabel = IngameUI.transform.Find("Level Panel").gameObject.transform.Find("Level_Text").gameObject.GetComponent<TextMeshProUGUI>();
+            LevelUpLabel = IngameUI.transform.Find("LevelUp_Label").gameObject.GetComponent<TextMeshProUGUI>();
 
-            AutoAttackOnImage = GameObject.Find("ON_Sprite");
-            AutoAttackOffImage = GameObject.Find("OFF_Sprite");
-
-            LevelLabel = GameObject.Find("Level_Text").GetComponent<TextMeshProUGUI>();
-            LevelUpLabel = GameObject.Find("LevelUp_Label").GetComponent<TextMeshProUGUI>();
             LevelUpLabel.enabled = false;
             levelUpButtons = GameObject.FindGameObjectsWithTag("LevelUpButton");
-            Circular_Meter_1 = GameObject.Find("Circular_Meter_1").GetComponent<Image>();
-            Circular_Meter_2 = GameObject.Find("Circular_Meter_2").GetComponent<Image>();
-            Circular_Meter_3 = GameObject.Find("Circular_Meter_3").GetComponent<Image>();
 
             UpdateCircularMeters();
             SetVisibilityOfLevelUpButtons(false);
 
             _playerController = PlayerController.LocalPlayerController;
 
-            PagesContainer = GameObject.Find("Pages Container");
+            PagesContainer = IngameUI.transform.Find("Pages Container").gameObject;
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
 
             SetAutoAttack(GameData.Instance.AutoAttack);
 
-            SlenderImage = GameObject.Find("SlenderImage").GetComponent<Image>();
-            HealthbarImage = GameObject.Find("Healthbar_InnerBar").GetComponent<Image>();
+            SlenderImage = IngameUI.transform.Find("SlenderImage").gameObject.GetComponent<Image>();
+            HealthbarImage = IngameUI.transform.Find("Healthbar").gameObject.transform.Find("Healthbar_InnerBar").gameObject.GetComponent<Image>();
 
             GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
         }
@@ -369,9 +369,9 @@ namespace GameManagement
                     return;
             }
 
-            Circular_Meter_1.fillAmount = _playerController.UpgradesAbility1 * 0.25f;
-            Circular_Meter_2.fillAmount = _playerController.UpgradesAbility2 * 0.25f;
-            Circular_Meter_3.fillAmount = _playerController.UpgradesMinion * 0.25f;
+            Circular_Meter_RANGE.fillAmount = _playerController.UpgradesAbility1 * 0.25f;
+            Circular_Meter_LINE.fillAmount = _playerController.UpgradesAbility2 * 0.25f;
+            Circular_Meter_MINION.fillAmount = _playerController.UpgradesMinion * 0.25f;
         }
 
         public void UpdateButtonClicked(int which)

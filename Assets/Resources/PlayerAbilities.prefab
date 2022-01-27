@@ -426,6 +426,7 @@ MonoBehaviour:
   isCooldown2: 0
   ability1Image: {fileID: 0}
   ability2Image: {fileID: 0}
+  ability3Image: {fileID: 0}
   targetCircle: {fileID: 2047804255721968271}
   rangeIndicatorCircle1: {fileID: 6058295653944057387}
   rangeIndicatorCircle2: {fileID: 624119069236450511}

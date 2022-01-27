@@ -77,18 +77,18 @@ public class PlayerInput : MonoBehaviour
     void Update()
     {
         m_Movement.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        m_Camera.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+        // m_Camera.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         m_Jump = Input.GetButton("Jump");
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            if (m_AttackWaitCoroutine != null)
-                StopCoroutine(m_AttackWaitCoroutine);
+        // if (Input.GetButtonDown("Fire1"))
+        // {
+        //     if (m_AttackWaitCoroutine != null)
+        //         StopCoroutine(m_AttackWaitCoroutine);
 
-            m_AttackWaitCoroutine = StartCoroutine(AttackWait());
-        }
+        //     m_AttackWaitCoroutine = StartCoroutine(AttackWait());
+        // }
 
-        m_Pause = Input.GetButtonDown ("Pause");
+        // m_Pause = Input.GetButtonDown ("Pause");
     }
 
     IEnumerator AttackWait()
@@ -114,4 +114,16 @@ public class PlayerInput : MonoBehaviour
     {
         m_ExternalInputBlocked = false;
     }
+
+    /* Start of non-official code */
+
+    public void DoAttack()
+    {
+        if (m_AttackWaitCoroutine != null)
+            StopCoroutine(m_AttackWaitCoroutine);
+
+        m_AttackWaitCoroutine = StartCoroutine(AttackWait());
+    }
+
+    /* End of non-official code */
 }
