@@ -38,6 +38,8 @@ namespace Controls.Abilities
 
         public Image ability1Image;
         public Image ability2Image;
+        public Image ability3Image;
+
         public Image targetCircle;
         public Image rangeIndicatorCircle1;
         public Image rangeIndicatorCircle2;
@@ -70,11 +72,15 @@ namespace Controls.Abilities
 
             ability1Image = GameObject.FindWithTag("Ability1Handle").GetComponent<Image>();
             ability2Image = GameObject.FindWithTag("Ability2Handle").GetComponent<Image>();
+            ability3Image = GameObject.FindWithTag("Ability3Handle").GetComponent<Image>();
+
             ability1Image.fillAmount = 1;
             ability2Image.fillAmount = 1;
+            ability3Image.fillAmount = 1;
 
             GameObject.FindWithTag("Ability1Handle").GetComponent<AbilityJoystick>().RefreshReferences();
             GameObject.FindWithTag("Ability2Handle").GetComponent<AbilityJoystick>().RefreshReferences();
+            GameObject.FindWithTag("Ability3Handle").GetComponent<AbilityJoystick>().RefreshReferences();
         }
 
         void Update()
@@ -181,9 +187,20 @@ namespace Controls.Abilities
             Vector3 startingPosition = new Vector3();
             Vector3 targetPosition = new Vector3();
             Vector3 direction = new Vector3();
+            /* Start of Ellen's  Attack Animation stuff */
+            PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
+            /* End of Ellen's Attack Animation stuff */
 
             switch (ability)
             {
+                case Ability.NORMAL:
+
+                /* Start of Ellen's  Attack Animation stuff */
+
+                ellenPlayerInput.DoAttack();
+
+                /* End of Ellen's Attack Animation stuff */
+                break;
                 case Ability.RANGE:
 
                     // We need to keep track of the cooldown of the caster.
@@ -210,6 +227,12 @@ namespace Controls.Abilities
                     
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
+
+                    /* Start of Ellen's  Attack Animation stuff */
+
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
 
                     break;
 
@@ -254,8 +277,12 @@ namespace Controls.Abilities
                     isCooldown2 = true;
                     ability2Image.fillAmount = 0;
 
-                    break;
-                case Ability.NORMAL:
+                    /* Start of Ellen's  Attack Animation stuff */
+
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
@@ -270,10 +297,21 @@ namespace Controls.Abilities
 
         private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability, Vector3 direction)
         {
+            /* Start of Ellen's  Attack Animation stuff */
+            PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
+            /* End of Ellen's Attack Animation stuff */
+
             switch (ability)
             {
                 case Ability.NORMAL:
-                    break;
+
+                /* Start of Ellen's  Attack Animation stuff */
+
+                ellenPlayerInput.DoAttack();
+
+                /* End of Ellen's Attack Animation stuff */
+
+                break;
                 case Ability.RANGE:
 
                     /* Start of the Energy Explosion stuff */
@@ -284,6 +322,12 @@ namespace Controls.Abilities
                     energyExplosionAbilityScript.setTargetPosition(target);
 
                     /* End of the Energy Explosion stuff*/
+
+                    /* Start of Ellen's  Attack Animation stuff */
+
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
 
                     break;
                 case Ability.LINE:
@@ -300,6 +344,12 @@ namespace Controls.Abilities
                     // iceLanceAbilityScript.setTargetPosition(direction, start); // Used for debugging.
                     
                     /* End of the Ice Lance stuff*/
+
+                    /* Start of Ellen's  Attack Animation stuff */
+
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
                     
                     break;
                 default:

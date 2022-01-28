@@ -74,7 +74,7 @@ namespace Network
 
         [Header("Player Data")]
         [SerializeField]
-        private GameObject playerPrefab;
+        private GameObject[] playerVariantPrefabs;
 
         [SerializeField] private GameObject abilityPrefab;
 
@@ -180,6 +180,24 @@ namespace Network
             Targets = new Dictionary<GameData.Team, GameData.Team>();
             GameUnits = new HashSet<IGameUnit>();
 
+            GameObject playerPrefab = null;
+
+            switch(PersistentData.Team.ToString())
+            {
+                case "RED":
+                    playerPrefab = playerVariantPrefabs[0];
+                break;
+                case "GREEN":
+                    playerPrefab = playerVariantPrefabs[1];
+                break;
+                case "BLUE":
+                    playerPrefab = playerVariantPrefabs[2];
+                break;
+                case "YELLOW":
+                    playerPrefab = playerVariantPrefabs[3];
+                break;                                                
+            }
+
             if (playerPrefab == null)
             {
                 // #Tip Never assume public properties of Components are filled up properly, always check and inform the developer of it.
@@ -195,7 +213,7 @@ namespace Network
                     Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
 
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    GameObject pl = PhotonNetwork.Instantiate(this.playerPrefab.name, pos, Quaternion.identity, 0);
+                    GameObject pl = PhotonNetwork.Instantiate(playerPrefab.name, pos, Quaternion.identity, 0);
 
                     pl.transform.Find("FogOfWarVisibleRangeMesh").gameObject.SetActive(true);
 
@@ -359,6 +377,13 @@ namespace Network
                         break;
                 }
 
+                // String sourceString = source == null ? "null" : source.ToString();
+                // String targetString = target == null ? "null" : target.ToString();
+
+                // Debug.Log($"source = {sourceString}");
+                // Debug.Log($"target = {targetString}");
+                // Debug.Log($"damage = {damage}");
+
                 if (target == null || source == null)
                 {
                     Debug.Log(
@@ -368,6 +393,34 @@ namespace Network
 
                     return;
                 }
+
+                /* Start of Ellen's Damaged Animation stuff */
+
+                if(source.ToString().StartsWith("Ellen") && source.Team != PlayerController.LocalPlayerController.Team)
+                {
+                    Debug.Log("Secondary Ellen is doing damage.");
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    /* Start of Ellen's Attack Animation stuff */
+
+                    PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
+                }          
+
+                if(target.ToString().StartsWith("Ellen") && target.Team != PlayerController.LocalPlayerController.Team)
+                {
+                    Debug.Log("Secondary Ellen is taking damage.");
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    /* Start of Ellen's Attack Animation stuff */
+
+                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
+
+                    /* End of Ellen's Attack Animation stuff */
+                }                            
 
                 // Debug.Log("showing damage dealt");
                 target.DoDamageVisual(source, damage);

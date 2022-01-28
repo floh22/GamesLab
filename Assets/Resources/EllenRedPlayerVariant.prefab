@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4046359354638727633
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2216218993101228433, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: sceneViewId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 26.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0000009536743
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -22.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253724973357742861, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5254279406321362635, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5254406972079381071, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_Name
+      value: EllenRedPlayerVariant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5255603137159795943, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5263478453796488221, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: a05a5efa79d4aba4c841a6a6ca617e6e, type: 2}
+    - target: {fileID: 5263478453796488221, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: dfe51f051c0816c47a70ca71fa72783b, type: 2}
+    - target: {fileID: 5294767806190711937, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7692897072534817452, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: sceneViewId
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5fbd0d802dc81fe47a533ac520fc2db0, type: 3}

@@ -13,7 +13,7 @@ namespace NetworkedPlayer
         private PlayerController player;
 
         Animator animator;
-        private static readonly int Speed = Animator.StringToHash("Speed");
+        private static readonly int Speed = Animator.StringToHash("ForwardSpeed");
 
         #endregion
 
@@ -89,6 +89,13 @@ namespace NetworkedPlayer
 
             float heading = Mathf.Atan2(h, v);
             transform.rotation = Quaternion.Euler(0, heading * Mathf.Rad2Deg, 0);
+
+            /* Start of Ellen's Move Animation stuff */
+
+            PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
+            ellenPlayerInput.DoMove(h, v);
+
+            /* End of Ellen's Move Animation stuff */
         }
 
         #endregion

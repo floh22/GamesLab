@@ -866,6 +866,13 @@ namespace NetworkedPlayer
                 yield break;
             }
 
+            /* Start of Ellen's Attack Animation stuff */
+
+            PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
+            ellenPlayerInput.DoAttack();
+
+            /* End of Ellen's Attack Animation stuff */
+
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);

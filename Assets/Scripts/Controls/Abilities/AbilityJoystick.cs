@@ -21,10 +21,28 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         if (PlayerController.LocalPlayerInstance == null || PlayerController.LocalPlayerInstance.Equals(null))
             return;
-        _abilities = Abilities.Instance;
-        _abilityJoystick = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Joystick>();
-        _abilityJoystickImage = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Image>();
-        _cirularMeterImage = GameObject.Find("Circular_Meter_" + ((int) currentAbility - 1)).GetComponent<Image>();
+
+        GameObject parentGameObject = this.gameObject.transform.parent.gameObject;
+            
+        _abilities = Abilities.Instance; 
+        _abilityJoystick = parentGameObject.GetComponent<Joystick>();
+        _abilityJoystickImage = parentGameObject.GetComponent<Image>();
+        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();  
+
+        // switch ((int) currentAbility)
+        // {
+        //     case ((int) Abilities.Ability.NORMAL):
+          
+        //     break;
+        //     case ((int) Abilities.Ability.LINE):
+
+        //     break;
+        //     case ((int) Abilities.Ability.RANGE):
+          
+        //     break;
+        //     default:
+        //     break;
+        // }        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -74,7 +92,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        GetComponentInParent<FixedJoystick>().SendMessage("OnPointerUp", eventData);
+        GetComponentInParent<FixedJoystick>().SendMessage("OnPointerUp", eventData);    
 
         if (InDeadZone())
         {
@@ -94,10 +112,27 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void RefreshReferences()
     {
+        GameObject parentGameObject = this.gameObject.transform.parent.gameObject;
+
         _abilities = Abilities.Instance; 
-        _abilityJoystick = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Joystick>();
-        _abilityJoystickImage = GameObject.Find("Ability_Joystick_" + (int) currentAbility).GetComponent<Image>();
-        _cirularMeterImage = GameObject.Find("Circular_Meter_" + ((int) currentAbility - 1)).GetComponent<Image>();
+        _abilityJoystick = parentGameObject.GetComponent<Joystick>();
+        _abilityJoystickImage = parentGameObject.GetComponent<Image>();
+        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();  
+
+        // switch ((int) currentAbility)
+        // {
+        //     case ((int) Abilities.Ability.NORMAL):
+          
+        //     break;
+        //     case ((int) Abilities.Ability.LINE):
+
+        //     break;
+        //     case ((int) Abilities.Ability.RANGE):
+          
+        //     break;
+        //     default:
+        //     break;
+        // }        
     }
 
     private bool InDeadZone()
