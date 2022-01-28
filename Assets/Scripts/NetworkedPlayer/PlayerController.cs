@@ -103,6 +103,8 @@ namespace NetworkedPlayer
         [field: SerializeField] public float DeathTimerMax { get; set; } = 15;
         [field: SerializeField] public float DeathTimerCurrently { get; set; } = 0;
 
+        private  GameObject deadPlayerObject;
+
         #region Public Fields
 
         [SerializeField] public GameObject DamageText;
@@ -149,6 +151,9 @@ namespace NetworkedPlayer
         private bool isAutoattackOn;
 
         private bool isAttacking;
+
+        public GameObject canvas;
+        private GameObject actionButtonsGroupGo;
 
         #endregion
 
@@ -241,6 +246,9 @@ namespace NetworkedPlayer
 
             // Asssign Layer to player depending on team
             this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units"); 
+
+            canvas = GameObject.Find("Canvas");
+            actionButtonsGroupGo = canvas.transform.Find("Ingame_UI").gameObject.transform.Find("Action Buttons Group").gameObject;
         }
 
 
@@ -406,8 +414,6 @@ namespace NetworkedPlayer
                 DropPageOnTheGround();
                 HasPage = false;
             }
-            
-            
 
             //remove attackers
             foreach (IGameUnit gameUnit in CurrentlyAttackedBy)
@@ -421,47 +427,62 @@ namespace NetworkedPlayer
                 gameUnit.TargetDied(this);
             }
 
-            //Stop following alive character
-            cameraController.OnStopFollowing();
-            CharacterController controller = GetComponent<CharacterController>();
-            controller.enabled = false;
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(false);
+            // actionButtonsGroupGo.SetActive(false); 
+
             UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);
+
+            /* Start of Ellen's Move Animation stuff */
+
+            Gamekit3D.PlayerController ellenGamekit3DPlayerController = this.gameObject.GetComponent<Gamekit3D.PlayerController>();
+            ellenGamekit3DPlayerController.DoDieVisual();
+
+            /* End of Ellen's Move Animation stuff */            
+                                            
+            takeAwayCameraFromPlayer();
+        }
+
+        void takeAwayCameraFromPlayer()
+        {
+            // Stop following alive character
+            cameraController.OnStopFollowing();
 
             //create dead character
             Vector3 position = transform.position;
-            GameObject deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
+            deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
-
             //follow dead character
             deadCameraController.OnStartFollowing();
+        }        
 
-            transform.position = new Vector3(0, -10, 0);
+        public void putCameraBackOnPlayer()
+        {
+            CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
 
-            GetComponent<Rigidbody>().position = new Vector3(0, -10, 0);
+            //Reset stats
+            IsAlive = true;
+            this.Health = this.MaxHealth;
 
-            StartCoroutine(Respawn(() =>
-            {
-                IsAlive = true;
+            //Start following player again
+            deadCameraController.OnStopFollowing();
+            cameraController.OnStartFollowing();         
+            
+            // Destroy dead player
+            Destroy(deadPlayerObject);
+        }
 
-                //Get Player spawn point
-                position = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
-                transform.position = position;
+        public void respawnEnded()
+        {
+            GameObject playerUiGo = playerUI.gameObject;
+            playerUiGo.SetActive(true);   
+            // actionButtonsGroupGo.SetActive(true);        
+        }
 
-                //Reset stats
-                this.Health = this.MaxHealth;
-
-                controller.enabled = true;
-                playerUiGo.SetActive(true);
-
-                //Start following player again
-                deadCameraController.OnStopFollowing();
-                cameraController.OnStartFollowing();
-
-                //Destroy dead player
-                Destroy(deadPlayerObject);
-            }));
+        public void setPosition(Vector3 position_p)
+        {
+            Vector3 positionn = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
+            transform.position = positionn;
         }
 
         public void OnStartSlendermanChannel(Vector3 slendermanSize)

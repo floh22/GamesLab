@@ -390,19 +390,16 @@ namespace Network
                     return;
                 }
 
-                /* Start of Ellen's Damaged Animation stuff */
+                /* Start of Ellen's Attack and Damaged Animations stuff */ 
 
                 if(source.ToString().StartsWith("Ellen") && source.Team != PlayerController.LocalPlayerController.Team)
                 {
                     Debug.Log("Secondary Ellen is doing damage.");
                     PlayerController ellenPlayerController = (PlayerController) target;
 
-                    /* Start of Ellen's Attack Animation stuff */
-
                     PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
                     ellenPlayerInput.DoAttack();
 
-                    /* End of Ellen's Attack Animation stuff */
                 }          
 
                 if(target.ToString().StartsWith("Ellen") && target.Team != PlayerController.LocalPlayerController.Team)
@@ -410,13 +407,37 @@ namespace Network
                     Debug.Log("Secondary Ellen is taking damage.");
                     PlayerController ellenPlayerController = (PlayerController) target;
 
-                    /* Start of Ellen's Attack Animation stuff */
+                    // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                    // ellenGamekit3DPlayerController.DoTakeDamageVisual();
 
-                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
-                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
+                    MonoBehaviour damager = null;
 
-                    /* End of Ellen's Attack Animation stuff */
-                }                            
+                    if(source.ToString().StartsWith("Minion"))
+                    {
+                        damager = ((Minion) source);
+                    }
+                    else if(source.ToString().StartsWith("Ellen"))
+                    {
+                        damager = ((PlayerController) source);
+                    }  
+
+                    Vector3 direction = (target.Position - source.Position).normalized;
+
+                    Gamekit3D.Damageable.DamageMessage dataMessage;
+                    dataMessage.damager = damager;                         // MonoBehaviour
+                    dataMessage.amount = (int) damage;                     // int
+                    dataMessage.direction = direction;                     // Vector3
+                    dataMessage.damageSource = source.Position;            // Vector3
+                    dataMessage.throwing = false;                          // bool
+                    dataMessage.stopCamera = false;                        // bool
+
+                    Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
+                    ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
+                    ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
+                    ellenDamageable.ApplyDamage(dataMessage);
+                }                    
+
+                /* End of Ellen's Attack and Damaged Animations stuff */        
 
                 // Debug.Log("showing damage dealt");
                 target.DoDamageVisual(source, damage);
