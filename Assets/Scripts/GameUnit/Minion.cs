@@ -624,23 +624,26 @@ namespace GameUnit
 
                 if(CurrentAttackTarget.ToString().StartsWith("Ellen"))
                 {
-                    MonoBehaviour damager = this;
-                    Vector3 direction = (CurrentAttackTarget.Position - this.transform.position).normalized;
-
-                    Gamekit3D.Damageable.DamageMessage data;
-                    data.damager = damager;                         // MonoBehaviour
-                    data.amount = (int) Values.MinionAttackDamage;  // int
-                    data.direction = direction;                     // Vector3
-                    data.damageSource = this.transform.position;    // Vector3
-                    data.throwing = false;                          // bool
-                    data.stopCamera = false;                        // bool
-
                     PlayerController ellenPlayerController = (PlayerController) CurrentAttackTarget;
 
-                    Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                    ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                    ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                    ellenDamageable.ApplyDamage(data);
+                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
+
+                    // MonoBehaviour damager = this;
+                    // Vector3 direction = (CurrentAttackTarget.Position - this.transform.position).normalized;
+
+                    // Gamekit3D.Damageable.DamageMessage data;
+                    // data.damager = damager;                         // MonoBehaviour
+                    // data.amount = (int) Values.MinionAttackDamage;  // int
+                    // data.direction = direction;                     // Vector3
+                    // data.damageSource = this.transform.position;    // Vector3
+                    // data.throwing = false;                          // bool
+                    // data.stopCamera = false;                        // bool
+
+                    // Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
+                    // ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
+                    // ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
+                    // ellenDamageable.ApplyDamage(data);
 
                     // String ellenName = CurrentAttackTarget.ToString();
                     // Debug.Log($"A minion hit {ellenName}");

@@ -390,6 +390,34 @@ namespace Network
                     return;
                 }
 
+                /* Start of Ellen's Damaged Animation stuff */
+
+                if(source.ToString().StartsWith("Ellen") && source.Team != PlayerController.LocalPlayerController.Team)
+                {
+                    Debug.Log("Secondary Ellen is doing damage.");
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    /* Start of Ellen's Attack Animation stuff */
+
+                    PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
+                    ellenPlayerInput.DoAttack();
+
+                    /* End of Ellen's Attack Animation stuff */
+                }          
+
+                if(target.ToString().StartsWith("Ellen") && target.Team != PlayerController.LocalPlayerController.Team)
+                {
+                    Debug.Log("Secondary Ellen is taking damage.");
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    /* Start of Ellen's Attack Animation stuff */
+
+                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
+
+                    /* End of Ellen's Attack Animation stuff */
+                }                            
+
                 // Debug.Log("showing damage dealt");
                 target.DoDamageVisual(source, damage);
 

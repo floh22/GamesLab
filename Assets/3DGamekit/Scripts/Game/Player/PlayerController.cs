@@ -678,5 +678,29 @@ namespace Gamekit3D
             m_Respawning = true;
             m_Damageable.isInvulnerable = true;
         }
+
+        /* Start of non-official code */
+
+        public void DoTakeDamageVisual()
+        {
+            m_Animator.SetTrigger(m_HashHurt);
+
+            // Play an audio clip of being hurt.
+            if (hurtAudioPlayer != null)
+            {
+                hurtAudioPlayer.PlayRandomClip();
+            }
+        }
+
+        public void DoDieVisual()
+        {
+            m_Animator.SetTrigger(m_HashDeath);
+            m_ForwardSpeed = 0f;
+            m_VerticalSpeed = 0f;
+            m_Respawning = true;
+            m_Damageable.isInvulnerable = true;
+        }    
+
+        /* End of non-official code */
     }
 }

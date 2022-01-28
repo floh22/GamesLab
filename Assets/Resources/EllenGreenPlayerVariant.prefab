@@ -25,7 +25,7 @@ PrefabInstance:
     - target: {fileID: 6864062946963207262, guid: 3324bcadbe018fa408ed93ef0003515c,
         type: 3}
       propertyPath: m_Name
-      value: EllenGreenPlayer Variant
+      value: EllenGreenPlayerVariant
       objectReference: {fileID: 0}
     - target: {fileID: 6866662898704289334, guid: 3324bcadbe018fa408ed93ef0003515c,
         type: 3}
