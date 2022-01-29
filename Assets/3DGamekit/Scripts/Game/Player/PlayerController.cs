@@ -732,6 +732,7 @@ namespace Gamekit3D
 
         public void DoDieVisual()
         {
+            m_CharCtrl.enabled = false;
             Die(new Damageable.DamageMessage());
 
             // if (emoteDeathPlayer != null)

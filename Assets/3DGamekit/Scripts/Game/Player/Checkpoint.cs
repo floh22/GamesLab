@@ -21,9 +21,7 @@ namespace Gamekit3D
             {
                 string currentTeam = PersistentData.Team.ToString();
                 Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
-                Debug.Log($"current team  = {currentTeam}, spawnpoint = {pos}"); 
                 transform.position = pos + Vector3.up;
-                // transform.position = GameStateController.Instance.GetPlayerSpawnPoint(PersistentData.Team) + Vector3.up;
             }
             else
                 Debug.Log("spawnPointHolder == null in Gamekit3D.Checkpoint.Awake()");            
@@ -37,6 +35,8 @@ namespace Gamekit3D
 
             if (controller == null)
                 return;
+
+            // Debug.Log($"Checkpoint Set, Collider = {other}");
 
             controller.SetCheckpoint(this);
         }
