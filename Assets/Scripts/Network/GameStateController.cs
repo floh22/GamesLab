@@ -394,16 +394,16 @@ namespace Network
 
                 // && source.Team != PlayerController.LocalPlayerController.Team
 
-                if(source.ToString().StartsWith("Ellen"))
-                {
-                    String sourceTeam = source.Team.ToString();
-                    Debug.Log($"Ellen of type {source} of team {sourceTeam} is doing damage.");
-                    PlayerController ellenPlayerController = (PlayerController) source;
+                // if(source.ToString().StartsWith("Ellen"))
+                // {
+                //     String sourceTeam = source.Team.ToString();
+                //     Debug.Log($"Ellen of type {source} of team {sourceTeam} is doing damage.");
+                //     PlayerController ellenPlayerController = (PlayerController) source;
 
-                    PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
-                    ellenPlayerInput.DoAttack();
+                //     PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
+                //     ellenPlayerInput.DoAttack();
 
-                }          
+                // }          
 
                 if(target.ToString().StartsWith("Ellen"))
                 {

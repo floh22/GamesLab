@@ -56,19 +56,18 @@ namespace Controls.Abilities
 
         void Start()
         {
-            if (!photonView.IsMine)
-                return;
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
             rangeIndicatorCircle1.GetComponent<Image>().enabled = false;
             rangeIndicatorCircle2.GetComponent<Image>().enabled = false;
 
+            if (!photonView.IsMine)
+                return;
+            if (Instance == null)
+            {
+                Instance = this;
+            }
 
             ability1Image = GameObject.FindWithTag("Ability1Handle").GetComponent<Image>();
             ability2Image = GameObject.FindWithTag("Ability2Handle").GetComponent<Image>();
@@ -307,7 +306,7 @@ namespace Controls.Abilities
             {
                 case Ability.NORMAL:
 
-                /* Start of Ellen's  Attack Animation stuff */
+                /* Start of Ellen's Attack Animation stuff */
 
                 ellenPlayerInput.DoAttack();
 
@@ -382,6 +381,8 @@ namespace Controls.Abilities
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
                 Vector3 direction = (Vector3)data[4];
+
+                Debug.Log("eventCode == CastAbilityEventCode");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability, direction);
             }

@@ -493,6 +493,23 @@ namespace Gamekit3D
         // Called each physics step (so long as the Animator component is set to Animate Physics) after FixedUpdate to override root motion.
         void OnAnimatorMove()
         {
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+            {
+                return;
+            }    
+
             /* Start of non-official code */
 
             if(m_CharCtrl.enabled == false)
