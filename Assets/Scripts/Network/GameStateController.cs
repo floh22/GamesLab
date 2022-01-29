@@ -382,29 +382,33 @@ namespace Network
 
                 if (target == null || source == null)
                 {
-                    Debug.Log(
-                        $"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
-                    Debug.Log(GameUnits.Select(unit => unit.NetworkID).ToList()
-                        .Aggregate("GameUnits: ", (current, item) => current + (item + ", ")));
+                    // Debug.Log(
+                    //     $"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
+                    // Debug.Log(GameUnits.Select(unit => unit.NetworkID).ToList()
+                    //     .Aggregate("GameUnits: ", (current, item) => current + (item + ", ")));
 
                     return;
                 }
 
                 /* Start of Ellen's Attack and Damaged Animations stuff */ 
 
-                if(source.ToString().StartsWith("Ellen") && source.Team != PlayerController.LocalPlayerController.Team)
+                // && source.Team != PlayerController.LocalPlayerController.Team
+
+                if(source.ToString().StartsWith("Ellen"))
                 {
-                    Debug.Log("Secondary Ellen is doing damage.");
-                    PlayerController ellenPlayerController = (PlayerController) target;
+                    String sourceTeam = source.Team.ToString();
+                    Debug.Log($"Ellen of type {source} of team {sourceTeam} is doing damage.");
+                    PlayerController ellenPlayerController = (PlayerController) source;
 
                     PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
                     ellenPlayerInput.DoAttack();
 
                 }          
 
-                if(target.ToString().StartsWith("Ellen") && target.Team != PlayerController.LocalPlayerController.Team)
+                if(target.ToString().StartsWith("Ellen"))
                 {
-                    Debug.Log("Secondary Ellen is taking damage.");
+                    String targetTeam = target.Team.ToString();
+                    Debug.Log($"Ellen of type {target} of team {targetTeam} is taking damage.");
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();

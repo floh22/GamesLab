@@ -2,9 +2,9 @@
 using System;
 using System.Collections;
 using Gamekit3D;
-
-
-public class PlayerInput : MonoBehaviour
+using Photon.Pun;
+using NetworkedPlayer;
+public class PlayerInput : MonoBehaviourPunCallbacks
 {
     public static PlayerInput Instance
     {
@@ -65,6 +65,36 @@ public class PlayerInput : MonoBehaviour
 
     void Awake()
     {
+        // Debug.Log($"LocalPlayerController.Team = {NetworkedPlayer.PlayerController.LocalPlayerController.Team}");
+
+        /*
+            photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+            instance represents the physical person playing on this computer within this application. So if it is 
+            false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+            transform and animator components we've setup earlier.
+
+            But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+            during development, we may want to test this prefab without being connected. In a dummy scene for 
+            example, just to create and validate code that is not related to networking features per se. And so 
+            with this additional expression, we will allow input to be used if we are not connected. It's a very 
+            simple trick and will greatly improve your workflow during development.        
+        */
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+        {
+            return;
+        }        
+
+        // String characterTeam = gameObject.GetComponent<NetworkedPlayer.PlayerController>().Team.ToString();
+        // String localPlayerTeam = NetworkedPlayer.PlayerController.LocalPlayerController.Team.ToString();
+
+        
+
+        // // If the character instance'S team is different from the local player team don't proceed.
+        // if (gameObject.GetComponent<NetworkedPlayer.PlayerController>().Team != NetworkedPlayer.PlayerController.LocalPlayerController.Team)
+        // {
+        //     return;
+        // }        
+
         m_AttackInputWait = new WaitForSeconds(k_AttackInputDuration);
 
         if (s_Instance == null)
@@ -76,6 +106,12 @@ public class PlayerInput : MonoBehaviour
 
     void Update()
     {
+        // Prevent control is connected to Photon and represent the localPlayer
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+        {
+            return;
+        }       
+
         m_Movement.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         // m_Camera.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         m_Jump = Input.GetButton("Jump");
@@ -119,6 +155,18 @@ public class PlayerInput : MonoBehaviour
 
     public void DoAttack()
     {
+        Debug.Log($"photonView.IsMine = {photonView.IsMine}, PhotonNetwork.IsConnected = {PhotonNetwork.IsConnected}");
+
+        String characterTeam = gameObject.GetComponent<NetworkedPlayer.PlayerController>().Team.ToString();
+        String localPlayerTeam = NetworkedPlayer.PlayerController.LocalPlayerController.Team.ToString();  
+              
+        Debug.Log($"characterTeam = {characterTeam}, localPlayerTeam = {localPlayerTeam}");
+
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+        {
+            return;
+        }    
+
         if (m_AttackWaitCoroutine != null)
             StopCoroutine(m_AttackWaitCoroutine);
 
@@ -127,6 +175,11 @@ public class PlayerInput : MonoBehaviour
 
     public void DoMove(float x, float y)
     {
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+        {
+            return;
+        }    
+
         m_Movement.Set(x, y);
     }    
 

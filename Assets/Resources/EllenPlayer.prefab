@@ -13620,7 +13620,6 @@ GameObject:
   - component: {fileID: 6779222162400648198}
   - component: {fileID: 6825229714519530080}
   - component: {fileID: 472333705809908729}
-  - component: {fileID: 2138381760978195551}
   - component: {fileID: 3055250096434536097}
   - component: {fileID: 678069653901993856}
   - component: {fileID: 7735783974728570878}
@@ -13876,19 +13875,6 @@ MonoBehaviour:
   myRenderer: {fileID: 6819235346987837964}
   shouldNotAlwaysRender: 0
   threshold: 0.1
---- !u!114 &2138381760978195551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6864062946963207262}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9efe0272f1f3436428f3e6c819de3fdc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  joystick: {fileID: 0}
 --- !u!114 &3055250096434536097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13925,7 +13911,6 @@ MonoBehaviour:
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   ChannelParticleSystem: {fileID: 869939701100057814}
   RingsParticleSystem: {fileID: 7926362558119179767}
-  canvas: {fileID: 0}
 --- !u!114 &678069653901993856
 MonoBehaviour:
   m_ObjectHideFlags: 0

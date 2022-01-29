@@ -152,8 +152,8 @@ namespace NetworkedPlayer
 
         private bool isAttacking;
 
-        public GameObject canvas;
-        private GameObject actionButtonsGroupGo;
+        // public GameObject canvas;
+        // private GameObject actionButtonsGroupGo;
 
         #endregion
 
@@ -247,8 +247,8 @@ namespace NetworkedPlayer
             // Asssign Layer to player depending on team
             this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units"); 
 
-            canvas = GameObject.Find("Canvas");
-            actionButtonsGroupGo = canvas.transform.Find("Ingame_UI").gameObject.transform.Find("Action Buttons Group").gameObject;
+            // canvas = GameObject.Find("Canvas");
+            // actionButtonsGroupGo = canvas.transform.Find("Ingame_UI").gameObject.transform.Find("Action Buttons Group").gameObject;
         }
 
 
@@ -886,12 +886,12 @@ namespace NetworkedPlayer
                 yield break;
             }
 
-            /* Start of Ellen's Attack Animation stuff */
+            // /* Start of Ellen's Attack Animation stuff */
 
-            PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
-            ellenPlayerInput.DoAttack();
+            // PlayerInput ellenPlayerInput = this.gameObject.GetComponent<PlayerInput>();
+            // ellenPlayerInput.DoAttack();
 
-            /* End of Ellen's Attack Animation stuff */
+            // /* End of Ellen's Attack Animation stuff */
 
             isAttacking = true;
             // OnAttacking();
@@ -904,19 +904,19 @@ namespace NetworkedPlayer
             isAttacking = false;
         }
 
-        public IEnumerator Respawn(Action nextFunc)
-        {
-            //wait out death timer
-            DeathTimerCurrently = DeathTimerMax;
+        // public IEnumerator Respawn(Action nextFunc)
+        // {
+        //     //wait out death timer
+        //     DeathTimerCurrently = DeathTimerMax;
 
-            while (DeathTimerCurrently > 0)
-            {
-                DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
-                yield return new WaitForSeconds(0.1f);
-            }
+        //     while (DeathTimerCurrently > 0)
+        //     {
+        //         DeathTimerCurrently = Mathf.Max(0, DeathTimerCurrently - 0.1f);
+        //         yield return new WaitForSeconds(0.1f);
+        //     }
 
-            nextFunc.Invoke();
-        }
+        //     nextFunc.Invoke();
+        // }
 
         #endregion
     }

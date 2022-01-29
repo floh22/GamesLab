@@ -187,6 +187,7 @@ namespace Controls.Abilities
             Vector3 startingPosition = new Vector3();
             Vector3 targetPosition = new Vector3();
             Vector3 direction = new Vector3();
+            
             /* Start of Ellen's  Attack Animation stuff */
             PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
             /* End of Ellen's Attack Animation stuff */
@@ -298,7 +299,8 @@ namespace Controls.Abilities
         private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability, Vector3 direction)
         {
             /* Start of Ellen's  Attack Animation stuff */
-            PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
+            PlayerController casterPlayerController = (PlayerController) caster;
+            PlayerInput ellenPlayerInput = casterPlayerController.gameObject.GetComponent<PlayerInput>();
             /* End of Ellen's Attack Animation stuff */
 
             switch (ability)

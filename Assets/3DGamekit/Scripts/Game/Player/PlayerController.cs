@@ -2,12 +2,13 @@ using UnityEngine;
 using Gamekit3D.Message;
 using System.Collections;
 using UnityEngine.XR.WSA;
+using Photon.Pun;
 
 namespace Gamekit3D
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Animator))]
-    public class PlayerController : MonoBehaviour, IMessageReceiver
+    public class PlayerController : MonoBehaviourPunCallbacks, IMessageReceiver
     {
         protected static PlayerController s_Instance;
         public static PlayerController instance { get { return s_Instance; } }
