@@ -3,6 +3,7 @@ using Gamekit3D.Message;
 using System.Collections;
 using UnityEngine.XR.WSA;
 using Photon.Pun;
+using Network;
 
 namespace Gamekit3D
 {
@@ -56,7 +57,7 @@ namespace Gamekit3D
         protected bool m_InCombo;                      // Whether Ellen is currently in the middle of her melee combo.
         protected Damageable m_Damageable;             // Reference used to set invulnerablity and health based on respawning.
         protected Renderer[] m_Renderers;              // References used to make sure Renderers are reset properly. 
-        protected Checkpoint m_CurrentCheckpoint;      // Reference used to reset Ellen to the correct position on respawn.
+        // protected Checkpoint m_CurrentCheckpoint;      // Reference used to reset Ellen to the correct position on respawn.
         protected bool m_Respawning;                   // Whether Ellen is currently respawning.
         protected float m_IdleTimer;                   // Used to count up to Ellen considering a random idle.
 
@@ -100,6 +101,8 @@ namespace Gamekit3D
 
         // Tags
         readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
+
+        GameObject spawnPointHolder;
 
         protected bool IsMoveInput
         {
@@ -150,6 +153,8 @@ namespace Gamekit3D
             meleeWeapon.SetOwner(gameObject);
 
             s_Instance = this;   
+
+            spawnPointHolder = GameObject.Find("SpawnPoints"); // Unofficial code
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
@@ -618,8 +623,8 @@ namespace Gamekit3D
         // This is called by Checkpoints to make sure Ellen respawns correctly.
         public void SetCheckpoint(Checkpoint checkpoint)
         {
-            if (checkpoint != null)
-                m_CurrentCheckpoint = checkpoint;
+            // if (checkpoint != null)
+            //     m_CurrentCheckpoint = checkpoint;
         }
 
         // This is usually called by a state machine behaviour on the animator controller but can be called from anywhere.
@@ -658,18 +663,29 @@ namespace Gamekit3D
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
             spawn.enabled = true;
 
+            // // If there is a checkpoint, move Ellen to it.
+            // if (m_CurrentCheckpoint != null)
+            // {
+            //     m_CharCtrl.enabled = false; // Unofficial code
+
+            //     transform.position = m_CurrentCheckpoint.transform.position;
+            //     transform.rotation = m_CurrentCheckpoint.transform.rotation;
+            // }
+            // else
+            // {
+            //     Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
+            // }           
+
             // If there is a checkpoint, move Ellen to it.
-            if (m_CurrentCheckpoint != null)
+            if (spawnPointHolder != null)
             {
                 m_CharCtrl.enabled = false; // Unofficial code
 
-                transform.position = m_CurrentCheckpoint.transform.position;
-                transform.rotation = m_CurrentCheckpoint.transform.rotation;
+                string currentTeam = PersistentData.Team.ToString();
+                Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
+                transform.position = pos;
+                // transform.rotation = m_CurrentCheckpoint.transform.rotation;
             }
-            else
-            {
-                Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
-            }           
             
             // Set the Respawn parameter of the animator.
             m_Animator.SetTrigger(m_HashRespawn);
