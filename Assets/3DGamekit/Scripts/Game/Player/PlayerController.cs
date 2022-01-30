@@ -149,7 +149,7 @@ namespace Gamekit3D
 
             meleeWeapon.SetOwner(gameObject);
 
-            s_Instance = this;
+            s_Instance = this;   
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
@@ -199,7 +199,7 @@ namespace Gamekit3D
             SetTargetRotation();
 
             if (IsOrientationUpdated() && IsMoveInput)
-                UpdateOrientation();
+                UpdateOrientation();  
 
             PlayAudio();
 
@@ -267,6 +267,23 @@ namespace Gamekit3D
             // Adjust the forward speed towards the desired speed.
             m_ForwardSpeed = Mathf.MoveTowards(m_ForwardSpeed, m_DesiredForwardSpeed, acceleration * Time.deltaTime);
 
+            /* Start of unofficial code */
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                return;
+            /* End of unofficial code */
+                
             // Set the animator parameter to control what animation is being played.
             m_Animator.SetFloat(m_HashForwardSpeed, m_ForwardSpeed);
         }
@@ -470,6 +487,23 @@ namespace Gamekit3D
         // Called each physics step to count up to the point where Ellen considers a random idle.
         void TimeoutToIdle()
         {
+            /* Start of unofficial code */
+
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                return;
+                            
             bool inputDetected = IsMoveInput || m_Input.Attack || m_Input.JumpInput;
             if (m_IsGrounded && !inputDetected)
             {
@@ -493,6 +527,8 @@ namespace Gamekit3D
         // Called each physics step (so long as the Animator component is set to Animate Physics) after FixedUpdate to override root motion.
         void OnAnimatorMove()
         {
+            /* Start of unofficial code */
+
             /*
                 photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
                 instance represents the physical person playing on this computer within this application. So if it is 
@@ -506,16 +542,12 @@ namespace Gamekit3D
                 simple trick and will greatly improve your workflow during development.        
             */
             if (photonView.IsMine == false && PhotonNetwork.IsConnected)
-            {
                 return;
-            }    
-
-            /* Start of non-official code */
 
             if(m_CharCtrl.enabled == false)
                 return;
 
-            /* End of non-official code */
+            /* End of unofficial code */
 
             Vector3 movement;
 
@@ -598,6 +630,9 @@ namespace Gamekit3D
         
         protected IEnumerator RespawnRoutine()
         {
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                yield return null;
+
             // Wait for the animator to be transitioning from the EllenDeath state.
             while (m_CurrentStateInfo.shortNameHash != m_HashEllenDeath || !m_IsAnimatorTransitioning)
             {
@@ -617,7 +652,7 @@ namespace Gamekit3D
             while (ScreenFader.IsFading)
             {
                 yield return null;
-            }
+            }     
 
             // Enable spawning.
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
@@ -649,13 +684,20 @@ namespace Gamekit3D
             if(!networkedPlayerController.IsAlive)
                 networkedPlayerController.putCameraBackOnPlayer();   
 
-            /* End of non-official code */            
-            
+            /* End of non-official code */      
+
             // Wait for the screen to fade in.
             // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
             yield return StartCoroutine(ScreenFader.FadeSceneIn());
-            
+                              
             m_Damageable.ResetDamage();
+
+            /* Start of unofficial code */
+
+            if(m_CharCtrl.enabled == false)
+                m_CharCtrl.enabled = true;    
+
+            /* End of unofficial code */
         }
 
         // Called by a state machine behaviour on Ellen's animator controller.
@@ -666,10 +708,7 @@ namespace Gamekit3D
             //we set the damageable invincible so we can't get hurt just after being respawned (feel like a double punitive)
             m_Damageable.isInvulnerable = false;
 
-            /* Start of non-official code */
-
-            if(m_CharCtrl.enabled == false)
-                m_CharCtrl.enabled = true;
+            /* Start of unofficial code */
 
             NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
 

@@ -23,6 +23,8 @@ public class PlayerInput : MonoBehaviourPunCallbacks
     protected bool m_Pause;
     protected bool m_ExternalInputBlocked;
 
+    private Joystick joystick;
+
     public Vector2 MoveInput
     {
         get
@@ -101,18 +103,33 @@ public class PlayerInput : MonoBehaviourPunCallbacks
             s_Instance = this;
         else if (s_Instance != this)
             throw new UnityException("There cannot be more than one PlayerInput script.  The instances are " + s_Instance.name + " and " + name + ".");
+
+        joystick = GameObject.FindWithTag("Joystick").GetComponent<FixedJoystick>(); // Unofficial code
     }
 
 
     void Update()
     {
+        /* Start of unofficial code */
+
         // Prevent control is connected to Photon and represent the localPlayer
         if (photonView.IsMine == false && PhotonNetwork.IsConnected)
         {
             return;
         }       
 
-        m_Movement.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        float h = Math.Clamp(Input.GetAxis("Horizontal") + joystick.Horizontal, -1, 1);
+        float v = Math.Clamp(Input.GetAxis("Vertical") + joystick.Vertical, -1, 1); 
+
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0
+            || joystick.Horizontal != 0 || joystick.Vertical != 0)
+        {
+            NetworkedPlayer.PlayerController.LocalPlayerController.InterruptChanneling();
+        }        
+        
+        /* End of unofficial code */       
+
+        m_Movement.Set(h, v);
         // m_Camera.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         m_Jump = Input.GetButton("Jump");
 
@@ -155,18 +172,6 @@ public class PlayerInput : MonoBehaviourPunCallbacks
 
     public void DoAttack()
     {
-        Debug.Log($"photonView.IsMine = {photonView.IsMine}, PhotonNetwork.IsConnected = {PhotonNetwork.IsConnected}");
-
-        String characterTeam = gameObject.GetComponent<NetworkedPlayer.PlayerController>().Team.ToString();
-        String localPlayerTeam = NetworkedPlayer.PlayerController.LocalPlayerController.Team.ToString();  
-              
-        Debug.Log($"characterTeam = {characterTeam}, localPlayerTeam = {localPlayerTeam}");
-
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected)
-        {
-            return;
-        }    
-
         if (m_AttackWaitCoroutine != null)
             StopCoroutine(m_AttackWaitCoroutine);
 

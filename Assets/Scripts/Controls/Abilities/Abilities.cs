@@ -288,6 +288,9 @@ namespace Controls.Abilities
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
 
+            // String mainclientTeam = PlayerController.LocalPlayerController.Team.ToString();
+            // Debug.Log($"main client {mainclientTeam}");
+
             //Send ability cast to other players
             SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, targetPosition, direction);
             
@@ -297,6 +300,9 @@ namespace Controls.Abilities
 
         private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability, Vector3 direction)
         {
+            // String secondaryclientTeam = PlayerController.LocalPlayerController.Team.ToString();
+            // Debug.Log($"secondary client {secondaryclientTeam}, caster = {caster}");         
+
             /* Start of Ellen's  Attack Animation stuff */
             PlayerController casterPlayerController = (PlayerController) caster;
             PlayerInput ellenPlayerInput = casterPlayerController.gameObject.GetComponent<PlayerInput>();

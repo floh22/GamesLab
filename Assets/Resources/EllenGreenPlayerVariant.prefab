@@ -7,6 +7,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 277893316746189102, guid: 3324bcadbe018fa408ed93ef0003515c,
+        type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[7].SynchronizeType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 678069653901993856, guid: 3324bcadbe018fa408ed93ef0003515c,
         type: 3}
       propertyPath: sceneViewId
