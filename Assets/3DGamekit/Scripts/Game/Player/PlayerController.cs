@@ -2,12 +2,14 @@ using UnityEngine;
 using Gamekit3D.Message;
 using System.Collections;
 using UnityEngine.XR.WSA;
+using Photon.Pun;
+using Network;
 
 namespace Gamekit3D
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Animator))]
-    public class PlayerController : MonoBehaviour, IMessageReceiver
+    public class PlayerController : MonoBehaviourPunCallbacks, IMessageReceiver
     {
         protected static PlayerController s_Instance;
         public static PlayerController instance { get { return s_Instance; } }
@@ -55,7 +57,7 @@ namespace Gamekit3D
         protected bool m_InCombo;                      // Whether Ellen is currently in the middle of her melee combo.
         protected Damageable m_Damageable;             // Reference used to set invulnerablity and health based on respawning.
         protected Renderer[] m_Renderers;              // References used to make sure Renderers are reset properly. 
-        protected Checkpoint m_CurrentCheckpoint;      // Reference used to reset Ellen to the correct position on respawn.
+        // protected Checkpoint m_CurrentCheckpoint;      // Reference used to reset Ellen to the correct position on respawn.
         protected bool m_Respawning;                   // Whether Ellen is currently respawning.
         protected float m_IdleTimer;                   // Used to count up to Ellen considering a random idle.
 
@@ -99,6 +101,8 @@ namespace Gamekit3D
 
         // Tags
         readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
+
+        GameObject spawnPointHolder;
 
         protected bool IsMoveInput
         {
@@ -148,7 +152,9 @@ namespace Gamekit3D
 
             meleeWeapon.SetOwner(gameObject);
 
-            s_Instance = this;
+            s_Instance = this;   
+
+            spawnPointHolder = GameObject.Find("SpawnPoints"); // Unofficial code
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
@@ -198,7 +204,7 @@ namespace Gamekit3D
             SetTargetRotation();
 
             if (IsOrientationUpdated() && IsMoveInput)
-                UpdateOrientation();
+                UpdateOrientation();  
 
             PlayAudio();
 
@@ -266,6 +272,23 @@ namespace Gamekit3D
             // Adjust the forward speed towards the desired speed.
             m_ForwardSpeed = Mathf.MoveTowards(m_ForwardSpeed, m_DesiredForwardSpeed, acceleration * Time.deltaTime);
 
+            /* Start of unofficial code */
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                return;
+            /* End of unofficial code */
+                
             // Set the animator parameter to control what animation is being played.
             m_Animator.SetFloat(m_HashForwardSpeed, m_ForwardSpeed);
         }
@@ -469,6 +492,23 @@ namespace Gamekit3D
         // Called each physics step to count up to the point where Ellen considers a random idle.
         void TimeoutToIdle()
         {
+            /* Start of unofficial code */
+
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                return;
+                            
             bool inputDetected = IsMoveInput || m_Input.Attack || m_Input.JumpInput;
             if (m_IsGrounded && !inputDetected)
             {
@@ -492,6 +532,28 @@ namespace Gamekit3D
         // Called each physics step (so long as the Animator component is set to Animate Physics) after FixedUpdate to override root motion.
         void OnAnimatorMove()
         {
+            /* Start of unofficial code */
+
+            /*
+                photonView.IsMine will be true if the instance is controlled by the 'client' application, meaning this 
+                instance represents the physical person playing on this computer within this application. So if it is 
+                false, we don't want to do anything and solely rely on the PhotonView component to synchronize the 
+                transform and animator components we've setup earlier.
+
+                But, why having then to enforce PhotonNetwork.IsConnected == true in our if statement? eh eh :) because 
+                during development, we may want to test this prefab without being connected. In a dummy scene for 
+                example, just to create and validate code that is not related to networking features per se. And so 
+                with this additional expression, we will allow input to be used if we are not connected. It's a very 
+                simple trick and will greatly improve your workflow during development.        
+            */
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                return;
+
+            if(m_CharCtrl.enabled == false)
+                return;
+
+            /* End of unofficial code */
+
             Vector3 movement;
 
             // If Ellen is on the ground...
@@ -561,8 +623,8 @@ namespace Gamekit3D
         // This is called by Checkpoints to make sure Ellen respawns correctly.
         public void SetCheckpoint(Checkpoint checkpoint)
         {
-            if (checkpoint != null)
-                m_CurrentCheckpoint = checkpoint;
+            // if (checkpoint != null)
+            //     m_CurrentCheckpoint = checkpoint;
         }
 
         // This is usually called by a state machine behaviour on the animator controller but can be called from anywhere.
@@ -573,32 +635,56 @@ namespace Gamekit3D
         
         protected IEnumerator RespawnRoutine()
         {
+            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
+                yield return null;
+
             // Wait for the animator to be transitioning from the EllenDeath state.
             while (m_CurrentStateInfo.shortNameHash != m_HashEllenDeath || !m_IsAnimatorTransitioning)
             {
                 yield return null;
             }
-            
+
+            /* Start of non-official code */
+
+            NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
+
+            yield return new WaitForSeconds(networkedPlayerController.DeathTimerMax-2);
+
+            /* End of non-official code */
+
             // Wait for the screen to fade out.
             yield return StartCoroutine(ScreenFader.FadeSceneOut());
             while (ScreenFader.IsFading)
             {
                 yield return null;
-            }
+            }     
 
             // Enable spawning.
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
             spawn.enabled = true;
 
+            // // If there is a checkpoint, move Ellen to it.
+            // if (m_CurrentCheckpoint != null)
+            // {
+            //     m_CharCtrl.enabled = false; // Unofficial code
+
+            //     transform.position = m_CurrentCheckpoint.transform.position;
+            //     transform.rotation = m_CurrentCheckpoint.transform.rotation;
+            // }
+            // else
+            // {
+            //     Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
+            // }           
+
             // If there is a checkpoint, move Ellen to it.
-            if (m_CurrentCheckpoint != null)
+            if (spawnPointHolder != null)
             {
-                transform.position = m_CurrentCheckpoint.transform.position;
-                transform.rotation = m_CurrentCheckpoint.transform.rotation;
-            }
-            else
-            {
-                Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
+                m_CharCtrl.enabled = false; // Unofficial code
+
+                string currentTeam = PersistentData.Team.ToString();
+                Vector3 pos = spawnPointHolder.transform.Find(PersistentData.Team.ToString()).transform.position;
+                transform.position = pos;
+                // transform.rotation = m_CurrentCheckpoint.transform.rotation;
             }
             
             // Set the Respawn parameter of the animator.
@@ -606,12 +692,28 @@ namespace Gamekit3D
             
             // Start the respawn graphic effects.
             spawn.StartEffect();
-            
+
+            /* Start of non-official code */
+
+            networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
+
+            if(!networkedPlayerController.IsAlive)
+                networkedPlayerController.putCameraBackOnPlayer();   
+
+            /* End of non-official code */      
+
             // Wait for the screen to fade in.
             // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
             yield return StartCoroutine(ScreenFader.FadeSceneIn());
-            
+                              
             m_Damageable.ResetDamage();
+
+            /* Start of unofficial code */
+
+            if(m_CharCtrl.enabled == false)
+                m_CharCtrl.enabled = true;    
+
+            /* End of unofficial code */
         }
 
         // Called by a state machine behaviour on Ellen's animator controller.
@@ -621,6 +723,15 @@ namespace Gamekit3D
             
             //we set the damageable invincible so we can't get hurt just after being respawned (feel like a double punitive)
             m_Damageable.isInvulnerable = false;
+
+            /* Start of unofficial code */
+
+            NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
+
+            if(networkedPlayerController.IsAlive)
+                networkedPlayerController.respawnEnded();                   
+
+            /* End of non-official code */
         }
 
         // Called by Ellen's Damageable when she is hurt.
@@ -694,11 +805,13 @@ namespace Gamekit3D
 
         public void DoDieVisual()
         {
-            m_Animator.SetTrigger(m_HashDeath);
-            m_ForwardSpeed = 0f;
-            m_VerticalSpeed = 0f;
-            m_Respawning = true;
-            m_Damageable.isInvulnerable = true;
+            m_CharCtrl.enabled = false;
+            Die(new Damageable.DamageMessage());
+
+            // if (emoteDeathPlayer != null)
+            // {
+            //     emoteDeathPlayer.PlayRandomClip();
+            // }
         }    
 
         /* End of non-official code */
