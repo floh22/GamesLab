@@ -56,19 +56,18 @@ namespace Controls.Abilities
 
         void Start()
         {
-            if (!photonView.IsMine)
-                return;
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-
             abilityCanvas.SetActive(true);
             targetCircle.GetComponent<Image>().enabled = false;
             arrowIndicatorPivot.GetComponentInChildren<Image>().enabled = false;
             rangeIndicatorCircle1.GetComponent<Image>().enabled = false;
             rangeIndicatorCircle2.GetComponent<Image>().enabled = false;
 
+            if (!photonView.IsMine)
+                return;
+            if (Instance == null)
+            {
+                Instance = this;
+            }
 
             ability1Image = GameObject.FindWithTag("Ability1Handle").GetComponent<Image>();
             ability2Image = GameObject.FindWithTag("Ability2Handle").GetComponent<Image>();
@@ -187,6 +186,7 @@ namespace Controls.Abilities
             Vector3 startingPosition = new Vector3();
             Vector3 targetPosition = new Vector3();
             Vector3 direction = new Vector3();
+            
             /* Start of Ellen's  Attack Animation stuff */
             PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
             /* End of Ellen's Attack Animation stuff */
@@ -288,6 +288,9 @@ namespace Controls.Abilities
                     throw new ArgumentOutOfRangeException(nameof(ability), ability, null);
             }
 
+            // String mainclientTeam = PlayerController.LocalPlayerController.Team.ToString();
+            // Debug.Log($"main client {mainclientTeam}");
+
             //Send ability cast to other players
             SendCastAbilityEvent(PlayerController.LocalPlayerController.NetworkID, ability, startingPosition, targetPosition, direction);
             
@@ -297,15 +300,19 @@ namespace Controls.Abilities
 
         private void CastAbility(IGameUnit caster, Vector3 start, Vector3 target, Ability ability, Vector3 direction)
         {
+            // String secondaryclientTeam = PlayerController.LocalPlayerController.Team.ToString();
+            // Debug.Log($"secondary client {secondaryclientTeam}, caster = {caster}");         
+
             /* Start of Ellen's  Attack Animation stuff */
-            PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
+            PlayerController casterPlayerController = (PlayerController) caster;
+            PlayerInput ellenPlayerInput = casterPlayerController.gameObject.GetComponent<PlayerInput>();
             /* End of Ellen's Attack Animation stuff */
 
             switch (ability)
             {
                 case Ability.NORMAL:
 
-                /* Start of Ellen's  Attack Animation stuff */
+                /* Start of Ellen's Attack Animation stuff */
 
                 ellenPlayerInput.DoAttack();
 
@@ -380,6 +387,8 @@ namespace Controls.Abilities
                 Vector3 start = (Vector3)data[2];
                 Vector3 target = (Vector3)data[3];
                 Vector3 direction = (Vector3)data[4];
+
+                Debug.Log("eventCode == CastAbilityEventCode");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability, direction);
             }

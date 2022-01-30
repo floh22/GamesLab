@@ -55,7 +55,6 @@ namespace NetworkedPlayer
 
             if (!player.IsAlive)
             {
-                transform.position = new Vector3(0, -10, 0);
                 return;
             }
 
@@ -73,7 +72,7 @@ namespace NetworkedPlayer
             */
 
             // set the Animator Parameters
-            animator.SetFloat(Speed, h * h + v * v);
+            // animator.SetFloat(Speed, h * h + v * v);
             //animator.SetFloat( Direction, h, directionDampTime, Time.deltaTime * 10);
 
             if (h == 0 && v == 0)
