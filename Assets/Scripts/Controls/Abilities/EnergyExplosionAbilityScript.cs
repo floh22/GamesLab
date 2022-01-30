@@ -1,3 +1,4 @@
+using System;
 using Character;
 using NetworkedPlayer;
 using UnityEngine;
@@ -6,31 +7,35 @@ namespace Controls.Abilities
 {
     public class EnergyExplosionAbilityScript : MonoBehaviour
     {
+        public AudioSource AudioSource;
         public GameObject targetCirclePrefab;
         private GameObject targetCircle;
         public GameObject explosion;
         private Vector3 targetPosition;
         float animationProgress = 0;
+        private bool explosionAudioPlayedOnce = false;
 
         void FixedUpdate()
-        {    
+        {
             // This is done to move the explosion to the target location
             if (Vector3.Distance(this.gameObject.transform.position, targetPosition) < 0.5f && explosion != null)
-            {       
+            {
                 explosion.SetActive(true);
-                
-                if(explosion.transform.Find("BoundingSphere") != null)
+                playExplosionAudio();
+
+                if (explosion.transform.Find("BoundingSphere") != null)
                     Destroy(explosion.transform.Find("BoundingSphere").gameObject);
-                
-                if(targetCircle != null)
-                    Destroy(targetCircle);               
+
+                if (targetCircle != null)
+                    Destroy(targetCircle);
             }
             else
             {
-                this.gameObject.transform.position = MathParabola.Parabola(this.gameObject.transform.position, targetPosition, 0.3f, animationProgress);
+                this.gameObject.transform.position = MathParabola.Parabola(this.gameObject.transform.position,
+                    targetPosition, 0.3f, animationProgress);
                 animationProgress += Time.deltaTime;
 
-                if(explosion == null)
+                if (explosion == null)
                 {
                     // Destroy the whole object
                     Destroy(this.gameObject);
@@ -47,7 +52,19 @@ namespace Controls.Abilities
 
         public void activateDamage()
         {
-            explosion.transform.Find("BoundingSphere").gameObject.GetComponent<EnergyExplosionBoundingSphereScript>().activateDamage();
-        }  
-    }  
+            explosion.transform.Find("BoundingSphere").gameObject.GetComponent<EnergyExplosionBoundingSphereScript>()
+                .activateDamage();
+
+        }
+
+        private void playExplosionAudio()
+        {
+            if (!explosionAudioPlayedOnce)
+            {
+                explosionAudioPlayedOnce = true;
+                AudioSource.enabled = true;
+                AudioSource.Play();
+            }
+        }
+    }
 }
