@@ -70,7 +70,7 @@ PrefabInstance:
     - target: {fileID: 5254406972079381071, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
       propertyPath: m_Name
-      value: EllenYellowPlayer Variant
+      value: EllenYellowPlayerVariant
       objectReference: {fileID: 0}
     - target: {fileID: 5263478453796488221, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}

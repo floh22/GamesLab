@@ -32,7 +32,7 @@ namespace Network
         public const byte FinishChannelEventCode = 5;
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
-        //public const byte UpdateBasePagesEventCode = 8;
+        public const byte PlayerAutoAttackEventCode = 8;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -69,6 +69,13 @@ namespace Network
             object[] content = { team, networkID, value}; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
             PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static void SendPlayerAutoAttackEvent(GameData.Team sourceTeam)
+        {
+            object[] content = { sourceTeam }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
+            PhotonNetwork.RaiseEvent(PlayerAutoAttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
 
@@ -394,25 +401,11 @@ namespace Network
                     return;
                 }
 
-                /* Start of Ellen's Attack and Damaged Animations stuff */ 
-
-                // && source.Team != PlayerController.LocalPlayerController.Team
-
-                // if(source.ToString().StartsWith("Ellen"))
-                // {
-                //     String sourceTeam = source.Team.ToString();
-                //     Debug.Log($"Ellen of type {source} of team {sourceTeam} is doing damage.");
-                //     PlayerController ellenPlayerController = (PlayerController) source;
-
-                //     PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
-                //     ellenPlayerInput.DoAttack();
-
-                // }          
+                /* Start of Ellen's Attack and Damaged Animations stuff */      
 
                 if(target.ToString().StartsWith("Ellen"))
                 {
                     String targetTeam = target.Team.ToString();
-                    Debug.Log($"Ellen of type {target} of team {targetTeam} is taking damage.");
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
@@ -543,6 +536,22 @@ namespace Network
 
                     return;
                 }
+            }
+
+            if (eventCode == PlayerAutoAttackEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                
+                GameData.Team sourceTeam = (GameData.Team) data[0];
+
+                PlayerController sourcePlayerController = Players[sourceTeam];
+
+                /* Start of Ellen's Attack Animation stuff */
+
+                PlayerInput ellenPlayerInput = sourcePlayerController.gameObject.GetComponent<PlayerInput>();
+                ellenPlayerInput.DoAttack();
+
+                /* End of Ellen's Attack Animation stuff */
             }
         }
 

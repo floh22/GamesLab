@@ -635,9 +635,6 @@ namespace Gamekit3D
         
         protected IEnumerator RespawnRoutine()
         {
-            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
-                yield return null;
-
             // Wait for the animator to be transitioning from the EllenDeath state.
             while (m_CurrentStateInfo.shortNameHash != m_HashEllenDeath || !m_IsAnimatorTransitioning)
             {
@@ -652,12 +649,15 @@ namespace Gamekit3D
 
             /* End of non-official code */
 
-            // Wait for the screen to fade out.
-            yield return StartCoroutine(ScreenFader.FadeSceneOut());
-            while (ScreenFader.IsFading)
+            if (photonView.IsMine == true && PhotonNetwork.IsConnected)
             {
-                yield return null;
-            }     
+                // Wait for the screen to fade out.
+                yield return StartCoroutine(ScreenFader.FadeSceneOut());
+                while (ScreenFader.IsFading)
+                {
+                    yield return null;
+                }  
+            }
 
             // Enable spawning.
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
@@ -702,9 +702,12 @@ namespace Gamekit3D
 
             /* End of non-official code */      
 
-            // Wait for the screen to fade in.
-            // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
-            yield return StartCoroutine(ScreenFader.FadeSceneIn());
+            if (photonView.IsMine == true && PhotonNetwork.IsConnected)
+            {
+                // Wait for the screen to fade in.
+                // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
+                yield return StartCoroutine(ScreenFader.FadeSceneIn());
+            }            
                               
             m_Damageable.ResetDamage();
 
