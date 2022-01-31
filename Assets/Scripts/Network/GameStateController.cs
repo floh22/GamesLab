@@ -370,10 +370,10 @@ namespace Network
                 int sourceID = (int) data[0];
                 int targetID = (int) data[1];
                 float damage = (float) data[2];
-
+#nullable enable
                 IGameUnit? source = null;
                 IGameUnit? target = null;
-
+#nullable disable
                 foreach (IGameUnit unit in GameUnits)
                 {
                     if (unit.NetworkID == sourceID)
@@ -405,6 +405,8 @@ namespace Network
 
                 if(target.ToString().StartsWith("Ellen"))
                 {
+                    Debug.Log("Ellen is being attacked.");
+
                     String targetTeam = target.Team.ToString();
                     PlayerController ellenPlayerController = (PlayerController) target;
 
@@ -588,13 +590,13 @@ namespace Network
             Debug.Log($"Switching {team} minion target to {target}");
 
             return;
-            if (!PhotonNetwork.IsMasterClient) return;
+            // if (!PhotonNetwork.IsMasterClient) return;
 
-            //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
-            foreach (Minion minionBehavior in Minions[team].NotNull())
-            {
-                minionBehavior.SetTargetTeam(target);
-            }
+            // //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
+            // foreach (Minion minionBehavior in Minions[team].NotNull())
+            // {
+            //     minionBehavior.SetTargetTeam(target);
+            // }
         }
     }
 }

@@ -2,6 +2,8 @@
 using System.Linq;
 using Newtonsoft.Json;
 
+#nullable enable
+
 namespace Utils
 {
     //Adapted from https://github.com/Johannes-Schneider/GoldDiff/blob/master/GoldDiff.Shared/Utility/StringVersion.cs
@@ -223,3 +225,4 @@ namespace Utils
     }
 }
 
+#nullable disable

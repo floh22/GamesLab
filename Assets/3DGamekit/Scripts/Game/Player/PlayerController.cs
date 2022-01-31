@@ -158,7 +158,7 @@ namespace Gamekit3D
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
-        void OnEnable()
+        public override void OnEnable()
         {
             SceneLinkedSMB<PlayerController>.Initialise(m_Animator, this);
 
@@ -173,7 +173,7 @@ namespace Gamekit3D
         }
 
         // Called automatically by Unity whenever the script is disabled.
-        void OnDisable()
+        public override void OnDisable()
         {
             m_Damageable.onDamageMessageReceivers.Remove(this);
 

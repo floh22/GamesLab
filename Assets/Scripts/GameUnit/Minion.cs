@@ -796,11 +796,11 @@ namespace GameUnit
             
             //Don't think any of this is needed honestly
             return;
-            Vector3 dest = currentPath.FindNearestPointTo(Position);
-            nextWayPoint = dest;
+            // Vector3 dest = currentPath.FindNearestPointTo(Position);
+            // nextWayPoint = dest;
 
-            agent.SetDestination(dest);
-            currentMinionState = MinionState.Walking;
+            // agent.SetDestination(dest);
+            // currentMinionState = MinionState.Walking;
         }
 
 

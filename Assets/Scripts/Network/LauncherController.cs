@@ -131,12 +131,12 @@ namespace Network
                 }
                 catch (NoAvailableRoomFoundException noRoomFound)
                 {
-                    Debug.Log("No open room found");
+                    Debug.Log("No open room found " + noRoomFound.ToString());
                     CreateRoom();
                 }
                 catch (ArgumentNullException e)
                 {
-                    Debug.LogError("Game Running not set on lobby");
+                    Debug.LogError("Game Running not set on lobby " + e.ToString());
                 }
           
             }

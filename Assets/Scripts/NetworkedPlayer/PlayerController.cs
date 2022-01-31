@@ -67,7 +67,7 @@ namespace NetworkedPlayer
 
         private float _damageMultiplierMinion;
 
-        [field: SerializeField]
+        [property: SerializeField]
         public float DamageMultiplierMinion
         {
             get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierMinion); }
@@ -76,7 +76,7 @@ namespace NetworkedPlayer
 
         private float _damageMultiplierAbility1;
 
-        [field: SerializeField]
+        [property: SerializeField]
         public float DamageMultiplierAbility1
         {
             get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility1); }
@@ -85,7 +85,7 @@ namespace NetworkedPlayer
 
         private float _damageMultiplierAbility2;
 
-        [field: SerializeField]
+        [property: SerializeField]
         public float DamageMultiplierAbility2
         {
             get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility2); }
@@ -500,7 +500,8 @@ namespace NetworkedPlayer
             Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
 
             ParticleSystem channelParticleSystem = ChannelParticleSystem.GetComponent<ParticleSystem>();
-            channelParticleSystem.startColor = color;
+            var channelParticleSystemMain = channelParticleSystem.main;
+            channelParticleSystemMain.startColor = color;
 
             // Set the force that will change the particles direcion
             var fo = channelParticleSystem.forceOverLifetime;
@@ -517,8 +518,10 @@ namespace NetworkedPlayer
 
             ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
             ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
-            embers.startColor = color;
-            smoke.startColor = color;
+            var embersMain = embers.main;
+            var smokeMain = smoke.main;
+            embersMain.startColor = color;
+            smokeMain.startColor = color;
             
             Gradient gradient;
             GradientColorKey[] colorKey;
@@ -627,7 +630,8 @@ namespace NetworkedPlayer
             }
 
             Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
-            channelParticleSystem.startColor = color;
+            var channelParticleSystemMain = channelParticleSystem.main;
+            channelParticleSystemMain.startColor = color;
 
             /* Start of Rings Channeling Effect Stuff */
             RingsParticleSystem.SetActive(true);
@@ -637,8 +641,10 @@ namespace NetworkedPlayer
 
             ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
             ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
-            embers.startColor = color;
-            smoke.startColor = color;
+            var embersMain = embers.main;
+            var smokeMain = smoke.main;
+            embersMain.startColor = color;
+            smokeMain.startColor = color;
             
             Gradient gradient;
             GradientColorKey[] colorKey;
