@@ -33,8 +33,11 @@ namespace Network
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
         public const byte PlayerAutoAttackEventCode = 8;
+        // public const byte PlayerSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
+
+        public static int numberOfPlayersActuallySpawned = 0;
 
         public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
         {
@@ -77,6 +80,13 @@ namespace Network
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
             PhotonNetwork.RaiseEvent(PlayerAutoAttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
+
+        // public static void SendPlayerSpawnedEvent(GameData.Team playerTeam, bool isSpawned)
+        // {
+        //     object[] content = { playerTeam, isSpawned }; 
+        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
+        //     PhotonNetwork.RaiseEvent(PlayerSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        // }        
 
 
         [Header("Player Data")]
@@ -289,12 +299,21 @@ namespace Network
 
         private IEnumerator InitSyncedGameObjects()
         {
-            //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
-            yield return new WaitForSeconds(15);
+            Debug.Log("Number of players that should spawn = " + PhotonNetwork.CurrentRoom.PlayerCount);
 
+            while(numberOfPlayersActuallySpawned < PhotonNetwork.CurrentRoom.PlayerCount)
+            {
+                // Debug.Log($"Still waiting for all players to spawn {numberOfPlayersActuallySpawned}/{PhotonNetwork.CurrentRoom.PlayerCount}.");
+                yield return null;
+            }
+
+            // //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
+            // yield return new WaitForSeconds(15);
+              
             Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
             {
                 PlayerController pc = playerGo.GetComponent<PlayerController>();
+                pc.hasSpawned = true;
                 return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
             }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
@@ -336,6 +355,8 @@ namespace Network
             {
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
             }
+
+            yield return null;
         }
 
         public void QuitApplication()
@@ -370,12 +391,18 @@ namespace Network
                 int sourceID = (int) data[0];
                 int targetID = (int) data[1];
                 float damage = (float) data[2];
+
+                // Debug.Log($"sourceID = {sourceID}");
+                // Debug.Log($"targetID = {targetID}");
+
 #nullable enable
                 IGameUnit? source = null;
                 IGameUnit? target = null;
 #nullable disable
                 foreach (IGameUnit unit in GameUnits)
                 {
+                    // Debug.Log($"unit.NetworkID = {unit.NetworkID}");
+
                     if (unit.NetworkID == sourceID)
                         source = unit;
                     if (unit.NetworkID == targetID)
@@ -391,6 +418,47 @@ namespace Network
                 // Debug.Log($"target = {targetString}");
                 // Debug.Log($"damage = {damage}");
 
+                /* Start of Ellen's Attack and Damaged Animations stuff */      
+
+                if(target != null && target.ToString().StartsWith("Ellen"))
+                {
+                    // Debug.Log("Ellen is being attacked.");
+
+                    String targetTeam = target.Team.ToString();
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
+
+                    // MonoBehaviour damager = null;
+
+                    // if(source.ToString().StartsWith("Minion"))
+                    // {
+                    //     damager = ((Minion) source);
+                    // }
+                    // else if(source.ToString().StartsWith("Ellen"))
+                    // {
+                    //     damager = ((PlayerController) source);
+                    // }  
+
+                    // Vector3 direction = (target.Position - source.Position).normalized;
+
+                    // Gamekit3D.Damageable.DamageMessage dataMessage;
+                    // dataMessage.damager = damager;                         // MonoBehaviour
+                    // dataMessage.amount = (int) damage;                     // int
+                    // dataMessage.direction = direction;                     // Vector3
+                    // dataMessage.damageSource = source.Position;            // Vector3
+                    // dataMessage.throwing = false;                          // bool
+                    // dataMessage.stopCamera = false;                        // bool
+
+                    // Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
+                    // ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
+                    // ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
+                    // ellenDamageable.ApplyDamage(dataMessage);
+                }                    
+
+                /* End of Ellen's Attack and Damaged Animations stuff */                        
+
                 if (target == null || source == null)
                 {
                     // Debug.Log(
@@ -401,46 +469,8 @@ namespace Network
                     return;
                 }
 
-                /* Start of Ellen's Attack and Damaged Animations stuff */      
-
-                if(target.ToString().StartsWith("Ellen"))
-                {
-                    Debug.Log("Ellen is being attacked.");
-
-                    String targetTeam = target.Team.ToString();
-                    PlayerController ellenPlayerController = (PlayerController) target;
-
-                    // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
-                    // ellenGamekit3DPlayerController.DoTakeDamageVisual();
-
-                    MonoBehaviour damager = null;
-
-                    if(source.ToString().StartsWith("Minion"))
-                    {
-                        damager = ((Minion) source);
-                    }
-                    else if(source.ToString().StartsWith("Ellen"))
-                    {
-                        damager = ((PlayerController) source);
-                    }  
-
-                    Vector3 direction = (target.Position - source.Position).normalized;
-
-                    Gamekit3D.Damageable.DamageMessage dataMessage;
-                    dataMessage.damager = damager;                         // MonoBehaviour
-                    dataMessage.amount = (int) damage;                     // int
-                    dataMessage.direction = direction;                     // Vector3
-                    dataMessage.damageSource = source.Position;            // Vector3
-                    dataMessage.throwing = false;                          // bool
-                    dataMessage.stopCamera = false;                        // bool
-
-                    Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                    ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                    ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                    ellenDamageable.ApplyDamage(dataMessage);
-                }                    
-
-                /* End of Ellen's Attack and Damaged Animations stuff */        
+                // After this point only the client that spawned the minions will execute this code
+                // because they will not exist in other clients
 
                 // Debug.Log("showing damage dealt");
                 target.DoDamageVisual(source, damage);
@@ -555,6 +585,22 @@ namespace Network
 
                 /* End of Ellen's Attack Animation stuff */
             }
+
+            // if (eventCode == PlayerSpawnedEventCode)
+            // {
+            //     object[] data = (object[])photonEvent.CustomData;
+                
+            //     GameData.Team sourceTeam = (GameData.Team) data[0];
+            //     bool hasSpawned = (bool) data[1];
+
+            //     // Players[sourceTeam].hasSpawned = hasSpawned;
+
+            //     numberOfPlayersActuallySpawned++;
+
+            //     String sourceTeamString = sourceTeam.ToString();
+
+            //     Debug.Log($"Player of team {sourceTeamString} spawned. numberOfPlayersActuallySpawned = {numberOfPlayersActuallySpawned}");
+            // }
         }
 
         public void OnLose()

@@ -155,6 +155,8 @@ namespace NetworkedPlayer
         // public GameObject canvas;
         // private GameObject actionButtonsGroupGo;
 
+        public bool hasSpawned = false;        
+
         #endregion
 
         #region MonoBehaviour CallBacks
@@ -477,6 +479,17 @@ namespace NetworkedPlayer
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(true);   
             // actionButtonsGroupGo.SetActive(true);        
+            // GameStateController.SendPlayerSpawnedEvent(Team, true);
+            GameStateController.numberOfPlayersActuallySpawned++;
+            hasSpawned = true;
+            Debug.Log($"Local instance of player of team {Team} spawned. numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
+        }
+
+        public void dieEnded()
+        {
+            GameStateController.numberOfPlayersActuallySpawned--;
+            hasSpawned = false;
+            Debug.Log($"Local instance of player of team {Team} died. numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");            
         }
 
         public void setPosition(Vector3 position_p)

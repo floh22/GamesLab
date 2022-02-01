@@ -811,6 +811,9 @@ namespace Gamekit3D
             m_CharCtrl.enabled = false;
             Die(new Damageable.DamageMessage());
 
+            NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
+            networkedPlayerController.dieEnded();                       
+
             // if (emoteDeathPlayer != null)
             // {
             //     emoteDeathPlayer.PlayRandomClip();
