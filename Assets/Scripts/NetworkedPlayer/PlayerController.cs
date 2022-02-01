@@ -262,14 +262,14 @@ namespace NetworkedPlayer
         /// </summary>
         public void Update()
         {
+            // if (this.Health <= 0f && IsAlive)
+            // {
+            //     Die();
+            // }
+
             // we only process Inputs and check health if we are the local player
             if (photonView.IsMine)
             {
-                if (this.Health <= 0f && IsAlive)
-                {
-                    Die();
-                }
-
                 //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
                 if (!(CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || isAttacking))
                 {
@@ -433,14 +433,7 @@ namespace NetworkedPlayer
             playerUiGo.SetActive(false);
             // actionButtonsGroupGo.SetActive(false); 
 
-            UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);
-
-            /* Start of Ellen's Move Animation stuff */
-
-            Gamekit3D.PlayerController ellenGamekit3DPlayerController = this.gameObject.GetComponent<Gamekit3D.PlayerController>();
-            ellenGamekit3DPlayerController.DoDieVisual();
-
-            /* End of Ellen's Move Animation stuff */            
+            UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);         
                                             
             takeAwayCameraFromPlayer();
         }
@@ -462,10 +455,6 @@ namespace NetworkedPlayer
         {
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
 
-            //Reset stats
-            IsAlive = true;
-            this.Health = this.MaxHealth;
-
             //Start following player again
             deadCameraController.OnStopFollowing();
             cameraController.OnStartFollowing();         
@@ -476,20 +465,27 @@ namespace NetworkedPlayer
 
         public void respawnEnded()
         {
+            //Reset stats
+            IsAlive = true;
+            this.Health = this.MaxHealth;
+
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(true);   
             // actionButtonsGroupGo.SetActive(true);        
             // GameStateController.SendPlayerSpawnedEvent(Team, true);
             GameStateController.numberOfPlayersActuallySpawned++;
             hasSpawned = true;
-            Debug.Log($"Local instance of player of team {Team} spawned. numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
+            Debug.Log($"Local instance of player of team {Team} spawned.");
+            Debug.Log($"numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
         }
 
         public void dieEnded()
         {
             GameStateController.numberOfPlayersActuallySpawned--;
             hasSpawned = false;
-            Debug.Log($"Local instance of player of team {Team} died. numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");            
+            IsAlive = false;
+            Debug.Log($"Local instance of player of team {Team} died.");            
+            Debug.Log($"numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
         }
 
         public void setPosition(Vector3 position_p)

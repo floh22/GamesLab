@@ -13911,6 +13911,7 @@ MonoBehaviour:
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
   ChannelParticleSystem: {fileID: 869939701100057814}
   RingsParticleSystem: {fileID: 7926362558119179767}
+  hasSpawned: 0
 --- !u!114 &678069653901993856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14006,7 +14007,7 @@ MonoBehaviour:
     SynchronizeType: 0
     Name: TimeoutToIdle
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Grounded
   - Type: 4
     SynchronizeType: 2

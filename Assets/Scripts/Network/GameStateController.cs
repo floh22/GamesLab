@@ -33,7 +33,7 @@ namespace Network
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
         public const byte PlayerAutoAttackEventCode = 8;
-        // public const byte PlayerSpawnedEventCode = 12;
+        // public const byte MinionSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -81,11 +81,11 @@ namespace Network
             PhotonNetwork.RaiseEvent(PlayerAutoAttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
-        // public static void SendPlayerSpawnedEvent(GameData.Team playerTeam, bool isSpawned)
+        // public static void SendMinionSpawnedEvent(GameData.Team team, int networkID)
         // {
-        //     object[] content = { playerTeam, isSpawned }; 
-        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
-        //     PhotonNetwork.RaiseEvent(PlayerSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        //     object[] content = { team, networkID }; 
+        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+        //     PhotonNetwork.RaiseEvent(MinionSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         // }        
 
 
@@ -416,48 +416,7 @@ namespace Network
 
                 // Debug.Log($"source = {sourceString}");
                 // Debug.Log($"target = {targetString}");
-                // Debug.Log($"damage = {damage}");
-
-                /* Start of Ellen's Attack and Damaged Animations stuff */      
-
-                if(target != null && target.ToString().StartsWith("Ellen"))
-                {
-                    // Debug.Log("Ellen is being attacked.");
-
-                    String targetTeam = target.Team.ToString();
-                    PlayerController ellenPlayerController = (PlayerController) target;
-
-                    Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
-                    ellenGamekit3DPlayerController.DoTakeDamageVisual();
-
-                    // MonoBehaviour damager = null;
-
-                    // if(source.ToString().StartsWith("Minion"))
-                    // {
-                    //     damager = ((Minion) source);
-                    // }
-                    // else if(source.ToString().StartsWith("Ellen"))
-                    // {
-                    //     damager = ((PlayerController) source);
-                    // }  
-
-                    // Vector3 direction = (target.Position - source.Position).normalized;
-
-                    // Gamekit3D.Damageable.DamageMessage dataMessage;
-                    // dataMessage.damager = damager;                         // MonoBehaviour
-                    // dataMessage.amount = (int) damage;                     // int
-                    // dataMessage.direction = direction;                     // Vector3
-                    // dataMessage.damageSource = source.Position;            // Vector3
-                    // dataMessage.throwing = false;                          // bool
-                    // dataMessage.stopCamera = false;                        // bool
-
-                    // Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                    // ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                    // ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                    // ellenDamageable.ApplyDamage(dataMessage);
-                }                    
-
-                /* End of Ellen's Attack and Damaged Animations stuff */                        
+                // Debug.Log($"damage = {damage}");                     
 
                 if (target == null || source == null)
                 {
@@ -469,17 +428,85 @@ namespace Network
                     return;
                 }
 
-                // After this point only the client that spawned the minions will execute this code
-                // because they will not exist in other clients
+                if(target.ToString().StartsWith("Minion"))
+                {                 
+                    //I am the owner. Deal the damage. This will get synced by photon
+                    if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                    {
+                        target.Health = Mathf.Max(0, target.Health - damage);   
+                        target.DoDamageVisual(source, damage);                            
+                    }    
+                }      
 
-                // Debug.Log("showing damage dealt");
-                target.DoDamageVisual(source, damage);
+                /* Start of Ellen's Attack and Damaged Animations stuff */      
 
-                //I am the owner. Deal the damage. This will get synced by photon
-                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
-                {
-                    target.Health = Mathf.Max(0, target.Health - damage);
-                }
+                if(target.ToString().StartsWith("Ellen"))
+                {          
+                    target.Health = Mathf.Max(0, target.Health - damage);   
+                    target.DoDamageVisual(source, damage);                      
+
+                    String targetTeam = target.Team.ToString();
+                    PlayerController ellenPlayerController = (PlayerController) target;
+
+                    // Debug.Log($"Ellen of team {targetTeam} is taking dmg."); 
+
+                    if (ellenPlayerController.Health <= 0f && ellenPlayerController.IsAlive)
+                    {
+                        if (ellenPlayerController.gameObject.GetPhotonView().IsMine)
+                        {
+                            // Debug.Log($"Ellen of team {targetTeam} is mine.");   
+                            ellenPlayerController.Die();
+                            // target.DoDamageVisual(source, damage);                            
+                        }                            
+
+                        /* Start of Ellen's Move Animation stuff */
+
+                        Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                        ellenGamekit3DPlayerController.DoDieVisual();
+
+                        /* End of Ellen's Move Animation stuff */      
+                                             
+                        // Debug.Log($"Ellen of team {targetTeam} died.");                        
+                    }                    
+                    else
+                    {
+                        if(ellenPlayerController.IsAlive)
+                        {
+                            Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                            ellenGamekit3DPlayerController.DoTakeDamageVisual();
+
+                            // MonoBehaviour damager = null;
+
+                            // if(source.ToString().StartsWith("Minion"))
+                            // {
+                            //     damager = ((Minion) source);
+                            // }
+                            // else if(source.ToString().StartsWith("Ellen"))
+                            // {
+                            //     damager = ((PlayerController) source);
+                            // }  
+
+                            // Vector3 direction = (target.Position - source.Position).normalized;
+
+                            // Gamekit3D.Damageable.DamageMessage dataMessage;
+                            // dataMessage.damager = damager;                         // MonoBehaviour
+                            // dataMessage.amount = (int) damage;                     // int
+                            // dataMessage.direction = direction;                     // Vector3
+                            // dataMessage.damageSource = source.Position;            // Vector3
+                            // dataMessage.throwing = false;                          // bool
+                            // dataMessage.stopCamera = false;                        // bool
+
+                            // Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
+                            // ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
+                            // ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
+                            // ellenDamageable.ApplyDamage(dataMessage);
+
+                            // Debug.Log($"Ellen of team {targetTeam} is being attacked.");   
+                        } 
+                    }       
+                }       
+                                                                                
+                /* End of Ellen's Attack and Damaged Animations stuff */                 
             }
 
             if (eventCode == LoseGameEventCode)
@@ -586,20 +613,12 @@ namespace Network
                 /* End of Ellen's Attack Animation stuff */
             }
 
-            // if (eventCode == PlayerSpawnedEventCode)
+            // if (eventCode == MinionSpawnedEventCode)
             // {
             //     object[] data = (object[])photonEvent.CustomData;
                 
             //     GameData.Team sourceTeam = (GameData.Team) data[0];
-            //     bool hasSpawned = (bool) data[1];
-
-            //     // Players[sourceTeam].hasSpawned = hasSpawned;
-
-            //     numberOfPlayersActuallySpawned++;
-
-            //     String sourceTeamString = sourceTeam.ToString();
-
-            //     Debug.Log($"Player of team {sourceTeamString} spawned. numberOfPlayersActuallySpawned = {numberOfPlayersActuallySpawned}");
+            //     int networkID = (int) data[1];
             // }
         }
 

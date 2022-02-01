@@ -108,32 +108,32 @@ namespace GameManagement
 
         void SpawnMinions(object o , EventArgs e)
         {
+            Minion minion = null;
+
             //Don't actually spawn the minions unless we are the master client
-            if (!PhotonNetwork.IsMasterClient)
-            {
-                return;
-            }
-            foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
-            {
-                Vector3 spawnPoint = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
-
-                GameObject go = PhotonNetwork.Instantiate(GameStateController.Instance.minionPrefab.name, spawnPoint,
-                    Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
-
-                Minion behavior = go.GetComponent<Minion>();
-                behavior.Init(go.GetPhotonView().InstantiationId, team, GameStateController.Instance.Targets[team]);
-                GameStateController.Instance.Minions[team].Add(behavior);
-                
-
-                //Debug
-                /*
-                if (team == GameData.Team.BLUE)
+            if (PhotonNetwork.IsMasterClient)
+            {            
+                foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
                 {
-                    behavior.showDestination = true;
+                    Vector3 spawnPoint = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
+
+                    GameObject go = PhotonNetwork.Instantiate(GameStateController.Instance.minionPrefab.name, spawnPoint,
+                        Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
+
+                    minion = go.GetComponent<Minion>();
+                    minion.Init(go.GetPhotonView().InstantiationId, team, GameStateController.Instance.Targets[team]);
+                    // GameStateController.Instance.Minions[team].Add(minion); // Moved to Minion Awake()
+
+                    //Debug
+                    /*
+                    if (team == GameData.Team.BLUE)
+                    {
+                        minion.showDestination = true;
+                    }
+                    */
+                    
+                    minion.ShowTarget = true;
                 }
-                */
-                
-                behavior.ShowTarget = true;
             }
         }
 
