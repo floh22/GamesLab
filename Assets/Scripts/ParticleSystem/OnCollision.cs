@@ -70,7 +70,8 @@ public class OnCollision : MonoBehaviour
                 }
 
                 Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
-                channelParticleSystem.startColor = color;
+                var channelParticleSystemMain = channelParticleSystem.main;
+                channelParticleSystemMain.startColor = color;
             }
         }
         else if(gameObj.name.StartsWith("Slender"))

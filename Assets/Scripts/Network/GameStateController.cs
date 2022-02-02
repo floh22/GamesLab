@@ -9,6 +9,7 @@ using ExitGames.Client.Photon;
 using GameManagement;
 using GameUnit;
 using JetBrains.Annotations;
+using Lobby;
 using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
@@ -32,7 +33,10 @@ namespace Network
         public const byte FinishChannelEventCode = 5;
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
-        //public const byte UpdateBasePagesEventCode = 8;
+        public const byte PlayerAutoAttackEventCode = 8;
+
+        public const byte PlayerLoadedEventCode = 12;
+        // public const byte MinionSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -71,6 +75,27 @@ namespace Network
             PhotonNetwork.RaiseEvent(FinishChannelEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
+        public static void SendPlayerAutoAttackEvent(GameData.Team sourceTeam)
+        {
+            object[] content = { sourceTeam }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
+            PhotonNetwork.RaiseEvent(PlayerAutoAttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static void SendPlayerLoadedEvent(GameData.Team sourceTeam)
+        {
+            object[] content = { sourceTeam }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
+            PhotonNetwork.RaiseEvent(PlayerLoadedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        // public static void SendMinionSpawnedEvent(GameData.Team team, int networkID)
+        // {
+        //     object[] content = { team, networkID }; 
+        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+        //     PhotonNetwork.RaiseEvent(MinionSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        // }        
+
 
         [Header("Player Data")]
         [SerializeField]
@@ -106,6 +131,8 @@ namespace Network
         public HashSet<IGameUnit> GameUnits;
         public Dictionary<GameData.Team, GameData.Team> Targets;
         public Slenderman Slenderman;
+
+        public List<GameData.Team> LoadedTeams;
 
         
         [field: SerializeField] public float GameTime { get; set; }
@@ -181,22 +208,17 @@ namespace Network
             GameUnits = new HashSet<IGameUnit>();
 
             GameObject playerPrefab = null;
+            
+            LocalPlayerSpawnEvent.AddListener(() => SendPlayerLoadedEvent(PersistentData.Team ?? throw new NullReferenceException()));
 
-            switch(PersistentData.Team.ToString())
+            playerPrefab = PersistentData.Team.ToString() switch
             {
-                case "RED":
-                    playerPrefab = playerVariantPrefabs[0];
-                break;
-                case "GREEN":
-                    playerPrefab = playerVariantPrefabs[1];
-                break;
-                case "BLUE":
-                    playerPrefab = playerVariantPrefabs[2];
-                break;
-                case "YELLOW":
-                    playerPrefab = playerVariantPrefabs[3];
-                break;                                                
-            }
+                "RED" => playerVariantPrefabs[0],
+                "GREEN" => playerVariantPrefabs[1],
+                "BLUE" => playerVariantPrefabs[2],
+                "YELLOW" => playerVariantPrefabs[3],
+                _ => null
+            };
 
             if (playerPrefab == null)
             {
@@ -242,9 +264,6 @@ namespace Network
             Minion.Values = minionValues;
             Minion.Splines = minionPaths;
 
-
-            StartCoroutine(InitSyncedGameObjects());
-
             if (!PhotonNetwork.IsMasterClient) return;
             try
             {
@@ -282,9 +301,6 @@ namespace Network
 
         private IEnumerator InitSyncedGameObjects()
         {
-            //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
-            yield return new WaitForSeconds(15);
-
             Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
             {
                 PlayerController pc = playerGo.GetComponent<PlayerController>();
@@ -319,16 +335,17 @@ namespace Network
                 Bases.Add(team, bb);
                 GameUnits.Add(bb);
             }
-            
-            Debug.Log($"{Players.Count} Players, {Bases.Count} Bases found");
+
             if(Slenderman != null && !Slenderman.Equals(null))
                 Debug.Log("Slenderman found");
-            
-            LoadingScreenController.SendGameStartingEvent();
+
             if(PhotonNetwork.IsMasterClient && controller != null && !controller.Equals(null))
             {
+                LoadingScreenController.SendGameStartingEvent();
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
             }
+
+            yield return null;
         }
 
         public void QuitApplication()
@@ -364,11 +381,17 @@ namespace Network
                 int targetID = (int) data[1];
                 float damage = (float) data[2];
 
+                // Debug.Log($"sourceID = {sourceID}");
+                // Debug.Log($"targetID = {targetID}");
+
+#nullable enable
                 IGameUnit? source = null;
                 IGameUnit? target = null;
-
+#nullable disable
                 foreach (IGameUnit unit in GameUnits)
                 {
+                    // Debug.Log($"unit.NetworkID = {unit.NetworkID}");
+
                     if (unit.NetworkID == sourceID)
                         source = unit;
                     if (unit.NetworkID == targetID)
@@ -382,9 +405,9 @@ namespace Network
 
                 // Debug.Log($"source = {sourceString}");
                 // Debug.Log($"target = {targetString}");
-                // Debug.Log($"damage = {damage}");
+                // Debug.Log($"damage = {damage}");                     
 
-                if (target == null || source == null)
+                if (target == null || target.Equals(null) || source == null || source.Equals(null))
                 {
                     // Debug.Log(
                     //     $"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
@@ -394,67 +417,85 @@ namespace Network
                     return;
                 }
 
-                /* Start of Ellen's Attack and Damaged Animations stuff */ 
+                if(target.ToString().StartsWith("Minion"))
+                {                 
+                    //I am the owner. Deal the damage. This will get synced by photon
+                    if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                    {
+                        target.Health = Mathf.Max(0, target.Health - damage);   
+                        target.DoDamageVisual(source, damage);                            
+                    }    
+                }      
 
-                // && source.Team != PlayerController.LocalPlayerController.Team
-
-                // if(source.ToString().StartsWith("Ellen"))
-                // {
-                //     String sourceTeam = source.Team.ToString();
-                //     Debug.Log($"Ellen of type {source} of team {sourceTeam} is doing damage.");
-                //     PlayerController ellenPlayerController = (PlayerController) source;
-
-                //     PlayerInput ellenPlayerInput = ellenPlayerController.gameObject.GetComponent<PlayerInput>();
-                //     ellenPlayerInput.DoAttack();
-
-                // }          
+                /* Start of Ellen's Attack and Damaged Animations stuff */      
 
                 if(target.ToString().StartsWith("Ellen"))
-                {
+                {          
+                    target.Health = Mathf.Max(0, target.Health - damage);   
+                    target.DoDamageVisual(source, damage);                      
+
                     String targetTeam = target.Team.ToString();
-                    Debug.Log($"Ellen of type {target} of team {targetTeam} is taking damage.");
                     PlayerController ellenPlayerController = (PlayerController) target;
 
-                    // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
-                    // ellenGamekit3DPlayerController.DoTakeDamageVisual();
+                    // Debug.Log($"Ellen of team {targetTeam} is taking dmg."); 
 
-                    MonoBehaviour damager = null;
-
-                    if(source.ToString().StartsWith("Minion"))
+                    if (ellenPlayerController.Health <= 0f && ellenPlayerController.IsAlive)
                     {
-                        damager = ((Minion) source);
-                    }
-                    else if(source.ToString().StartsWith("Ellen"))
+                        if (ellenPlayerController.gameObject.GetPhotonView().IsMine)
+                        {
+                            // Debug.Log($"Ellen of team {targetTeam} is mine.");   
+                            ellenPlayerController.Die();
+                            // target.DoDamageVisual(source, damage);                            
+                        }                            
+
+                        /* Start of Ellen's Move Animation stuff */
+
+                        Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                        ellenGamekit3DPlayerController.DoDieVisual();
+
+                        /* End of Ellen's Move Animation stuff */      
+                                             
+                        // Debug.Log($"Ellen of team {targetTeam} died.");                        
+                    }                    
+                    else
                     {
-                        damager = ((PlayerController) source);
-                    }  
+                        if(ellenPlayerController.IsAlive)
+                        {
+                            // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
+                            // ellenGamekit3DPlayerController.DoTakeDamageVisual();
 
-                    Vector3 direction = (target.Position - source.Position).normalized;
+                            MonoBehaviour damager = null;
 
-                    Gamekit3D.Damageable.DamageMessage dataMessage;
-                    dataMessage.damager = damager;                         // MonoBehaviour
-                    dataMessage.amount = (int) damage;                     // int
-                    dataMessage.direction = direction;                     // Vector3
-                    dataMessage.damageSource = source.Position;            // Vector3
-                    dataMessage.throwing = false;                          // bool
-                    dataMessage.stopCamera = false;                        // bool
+                            if(source.ToString().StartsWith("Minion"))
+                            {
+                                damager = ((Minion) source);
+                            }
+                            else if(source.ToString().StartsWith("Ellen"))
+                            {
+                                damager = ((PlayerController) source);
+                            }  
 
-                    Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                    ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                    ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                    ellenDamageable.ApplyDamage(dataMessage);
-                }                    
+                            Vector3 direction = (target.Position - source.Position).normalized;
 
-                /* End of Ellen's Attack and Damaged Animations stuff */        
+                            Gamekit3D.Damageable.DamageMessage dataMessage;
+                            dataMessage.damager = damager;                         // MonoBehaviour
+                            dataMessage.amount = (int) damage;                     // int
+                            dataMessage.direction = direction;                     // Vector3
+                            dataMessage.damageSource = source.Position;            // Vector3
+                            dataMessage.throwing = false;                          // bool
+                            dataMessage.stopCamera = false;                        // bool
 
-                // Debug.Log("showing damage dealt");
-                target.DoDamageVisual(source, damage);
+                            Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
+                            ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
+                            ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
+                            ellenDamageable.ApplyDamage(dataMessage);
 
-                //I am the owner. Deal the damage. This will get synced by photon
-                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
-                {
-                    target.Health = Mathf.Max(0, target.Health - damage);
-                }
+                            // Debug.Log($"Ellen of team {targetTeam} is being attacked.");   
+                        } 
+                    }       
+                }       
+                                                                                
+                /* End of Ellen's Attack and Damaged Animations stuff */                 
             }
 
             if (eventCode == LoseGameEventCode)
@@ -483,7 +524,7 @@ namespace Network
                 if (targetNetworkID == Slenderman.NetworkID)
                 {
                     //Channeled slenderman
-                    source.setChannelingTo(Slenderman.gameObject.transform.position);
+                    source.SetChannelingTo(Slenderman.gameObject.transform.position);
                     source.OnStartSlendermanChannel(Slenderman.gameObject.GetComponent<BoxCollider>().bounds.size);
                     return;
                 }
@@ -491,7 +532,7 @@ namespace Network
                 foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
                 {
                     //channeled a base
-                    source.setChannelingTo(baseStructure.innerChannelingParticleSystem.transform.position);
+                    source.SetChannelingTo(baseStructure.innerChannelingParticleSystem.transform.position);
                     source.OnStartBaseChannel();
                     return;
                 }
@@ -544,6 +585,38 @@ namespace Network
                     return;
                 }
             }
+
+            if (eventCode == PlayerAutoAttackEventCode)
+            {
+                object[] data = (object[])photonEvent.CustomData;
+                
+                GameData.Team sourceTeam = (GameData.Team) data[0];
+
+                PlayerController sourcePlayerController = Players[sourceTeam];
+
+                /* Start of Ellen's Attack Animation stuff */
+
+                PlayerInput ellenPlayerInput = sourcePlayerController.gameObject.GetComponent<PlayerInput>();
+                ellenPlayerInput.DoAttack();
+
+                /* End of Ellen's Attack Animation stuff */
+            }
+
+            if (eventCode == PlayerLoadedEventCode)
+            {
+                LoadedTeams.Add((GameData.Team) ((object[]) photonEvent.CustomData)[0]);
+                
+                if(LoadedTeams.Count == PhotonNetwork.CurrentRoom.PlayerCount) 
+                    StartCoroutine(InitSyncedGameObjects());
+            }
+
+            // if (eventCode == MinionSpawnedEventCode)
+            // {
+            //     object[] data = (object[])photonEvent.CustomData;
+                
+            //     GameData.Team sourceTeam = (GameData.Team) data[0];
+            //     int networkID = (int) data[1];
+            // }
         }
 
         public void OnLose()
@@ -579,13 +652,13 @@ namespace Network
             Debug.Log($"Switching {team} minion target to {target}");
 
             return;
-            if (!PhotonNetwork.IsMasterClient) return;
+            // if (!PhotonNetwork.IsMasterClient) return;
 
-            //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
-            foreach (Minion minionBehavior in Minions[team].NotNull())
-            {
-                minionBehavior.SetTargetTeam(target);
-            }
+            // //For now, have all minions instantly switch agro. Maybe change this over so only future minions switch agro?
+            // foreach (Minion minionBehavior in Minions[team].NotNull())
+            // {
+            //     minionBehavior.SetTargetTeam(target);
+            // }
         }
     }
 }

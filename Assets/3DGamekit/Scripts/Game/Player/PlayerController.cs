@@ -158,7 +158,7 @@ namespace Gamekit3D
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
-        void OnEnable()
+        public override void OnEnable()
         {
             SceneLinkedSMB<PlayerController>.Initialise(m_Animator, this);
 
@@ -173,7 +173,7 @@ namespace Gamekit3D
         }
 
         // Called automatically by Unity whenever the script is disabled.
-        void OnDisable()
+        public override void OnDisable()
         {
             m_Damageable.onDamageMessageReceivers.Remove(this);
 
@@ -635,9 +635,6 @@ namespace Gamekit3D
         
         protected IEnumerator RespawnRoutine()
         {
-            if (photonView.IsMine == false && PhotonNetwork.IsConnected)
-                yield return null;
-
             // Wait for the animator to be transitioning from the EllenDeath state.
             while (m_CurrentStateInfo.shortNameHash != m_HashEllenDeath || !m_IsAnimatorTransitioning)
             {
@@ -652,29 +649,19 @@ namespace Gamekit3D
 
             /* End of non-official code */
 
-            // Wait for the screen to fade out.
-            yield return StartCoroutine(ScreenFader.FadeSceneOut());
-            while (ScreenFader.IsFading)
+            if (photonView.IsMine == true && PhotonNetwork.IsConnected)
             {
-                yield return null;
-            }     
+                // Wait for the screen to fade out.
+                yield return StartCoroutine(ScreenFader.FadeSceneOut());
+                while (ScreenFader.IsFading)
+                {
+                    yield return null;
+                }  
+            }
 
             // Enable spawning.
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
             spawn.enabled = true;
-
-            // // If there is a checkpoint, move Ellen to it.
-            // if (m_CurrentCheckpoint != null)
-            // {
-            //     m_CharCtrl.enabled = false; // Unofficial code
-
-            //     transform.position = m_CurrentCheckpoint.transform.position;
-            //     transform.rotation = m_CurrentCheckpoint.transform.rotation;
-            // }
-            // else
-            // {
-            //     Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
-            // }           
 
             // If there is a checkpoint, move Ellen to it.
             if (spawnPointHolder != null)
@@ -697,14 +684,17 @@ namespace Gamekit3D
 
             networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
 
-            if(!networkedPlayerController.IsAlive)
-                networkedPlayerController.putCameraBackOnPlayer();   
-
             /* End of non-official code */      
 
-            // Wait for the screen to fade in.
-            // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
-            yield return StartCoroutine(ScreenFader.FadeSceneIn());
+            if (photonView.IsMine && PhotonNetwork.IsConnected)
+            {
+                if(!networkedPlayerController.IsAlive)
+                    networkedPlayerController.PutCameraBackOnPlayer();   
+
+                // Wait for the screen to fade in.
+                // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
+                yield return StartCoroutine(ScreenFader.FadeSceneIn());
+            }            
                               
             m_Damageable.ResetDamage();
 
@@ -729,9 +719,7 @@ namespace Gamekit3D
             /* Start of unofficial code */
 
             NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
-
-            if(networkedPlayerController.IsAlive)
-                networkedPlayerController.respawnEnded();                   
+            networkedPlayerController.RespawnEnded();                   
 
             /* End of non-official code */
         }
@@ -806,14 +794,9 @@ namespace Gamekit3D
         }
 
         public void DoDieVisual()
-        {
+        {        
             m_CharCtrl.enabled = false;
             Die(new Damageable.DamageMessage());
-
-            // if (emoteDeathPlayer != null)
-            // {
-            //     emoteDeathPlayer.PlayRandomClip();
-            // }
         }    
 
         /* End of non-official code */

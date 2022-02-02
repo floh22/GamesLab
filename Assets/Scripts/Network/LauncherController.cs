@@ -37,17 +37,7 @@ namespace Network
         [Tooltip("This client's version number. Users are separated from each other by gameVersion, allows breaking changes")]
         public StringVersion GameVersion { get; } = new(1, 0, 0);
 
-        [SerializeField]
-        private Button joinButton;
-
-        [SerializeField] private TMP_InputField playerNameField;
-
-        [SerializeField] private TMP_Text connectionInfo;
-        
-        [SerializeField] private TMP_Text connectionStatus;
-
         [SerializeField] private Button forceStart;
-        [SerializeField] private Button leaveRoomButton;
 
         [SerializeField] private PersistentData persistentData;
 
@@ -131,12 +121,12 @@ namespace Network
                 }
                 catch (NoAvailableRoomFoundException noRoomFound)
                 {
-                    Debug.Log("No open room found");
+                    Debug.Log("No open room found " + noRoomFound.ToString());
                     CreateRoom();
                 }
                 catch (ArgumentNullException e)
                 {
-                    Debug.LogError("Game Running not set on lobby");
+                    Debug.LogError("Game Running not set on lobby " + e.ToString());
                 }
           
             }
@@ -179,7 +169,6 @@ namespace Network
         {
             Debug.Log("Connected to Server");
             PhotonNetwork.JoinLobby();
-            connectionStatus.text = "Connected to Server";
         }
 
         public void OnConnectedToServer()
@@ -309,23 +298,12 @@ namespace Network
     
         private void ShowConnectionInfo(string info)
         {
-            //leaveRoomButton.gameObject.SetActive(true);
-            joinButton.gameObject.SetActive(false);
             forceStart.gameObject.SetActive(true);
-            playerNameField.gameObject.SetActive(false);
-            connectionInfo.gameObject.SetActive(true);
-            connectionStatus.gameObject.SetActive(false);
-            connectionInfo.SetText(info);
         }
 
         private void HideConnectionInfo()
         {
-            //leaveRoomButton.gameObject.SetActive(false);
-            joinButton.gameObject.SetActive(true);
             forceStart.gameObject.SetActive(false);
-            playerNameField.gameObject.SetActive(true);
-            connectionInfo.gameObject.SetActive(false);
-            connectionStatus.gameObject.SetActive(true);
         }
     }
 }
