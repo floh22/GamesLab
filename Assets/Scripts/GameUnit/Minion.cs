@@ -583,7 +583,20 @@ namespace GameUnit
                 CurrentAttackTarget = CurrentChaseTarget;
                 CurrentChaseTarget = null;
                 currentMinionState = MinionState.Attacking;
-                
+                return;
+            }
+            
+            
+            if (!agent.enabled)
+            {
+                StartCoroutine(EnableAgent(() =>
+                {
+                    agent.destination = CurrentChaseTarget.Position.XZPlane();
+                }));
+            }
+            else
+            {
+                agent.destination = CurrentChaseTarget.Position.XZPlane();
             }
         }
 

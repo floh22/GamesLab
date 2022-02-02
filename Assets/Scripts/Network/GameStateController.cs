@@ -410,69 +410,30 @@ namespace Network
                     if (source != null && target != null)
                         break;
                 }
-
-                // String sourceString = source == null ? "null" : source.ToString();
-                // String targetString = target == null ? "null" : target.ToString();
-
-                // Debug.Log($"source = {sourceString}");
-                // Debug.Log($"target = {targetString}");
-                // Debug.Log($"damage = {damage}");
-
                 /* Start of Ellen's Attack and Damaged Animations stuff */      
 
                 if(target != null && target.ToString().StartsWith("Ellen"))
                 {
-                    // Debug.Log("Ellen is being attacked.");
-
+                    
                     String targetTeam = target.Team.ToString();
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
                     ellenGamekit3DPlayerController.DoTakeDamageVisual();
-
-                    // MonoBehaviour damager = null;
-
-                    // if(source.ToString().StartsWith("Minion"))
-                    // {
-                    //     damager = ((Minion) source);
-                    // }
-                    // else if(source.ToString().StartsWith("Ellen"))
-                    // {
-                    //     damager = ((PlayerController) source);
-                    // }  
-
-                    // Vector3 direction = (target.Position - source.Position).normalized;
-
-                    // Gamekit3D.Damageable.DamageMessage dataMessage;
-                    // dataMessage.damager = damager;                         // MonoBehaviour
-                    // dataMessage.amount = (int) damage;                     // int
-                    // dataMessage.direction = direction;                     // Vector3
-                    // dataMessage.damageSource = source.Position;            // Vector3
-                    // dataMessage.throwing = false;                          // bool
-                    // dataMessage.stopCamera = false;                        // bool
-
-                    // Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                    // ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                    // ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                    // ellenDamageable.ApplyDamage(dataMessage);
                 }                    
 
                 /* End of Ellen's Attack and Damaged Animations stuff */                        
 
-                if (target == null || source == null)
+                if (target == null || target.Equals(null)|| source == null || source.Equals(null))
                 {
-                    // Debug.Log(
-                    //     $"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
-                    // Debug.Log(GameUnits.Select(unit => unit.NetworkID).ToList()
-                    //     .Aggregate("GameUnits: ", (current, item) => current + (item + ", ")));
-
                     return;
                 }
 
+                //this is false? the minion still exists, its just not registered in the list of minions
+                
                 // After this point only the client that spawned the minions will execute this code
                 // because they will not exist in other clients
-
-                // Debug.Log("showing damage dealt");
+                
                 target.DoDamageVisual(source, damage);
 
                 //I am the owner. Deal the damage. This will get synced by photon
