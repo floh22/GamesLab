@@ -189,6 +189,7 @@ namespace Controls.Abilities
             
             /* Start of Ellen's  Attack Animation stuff */
             PlayerInput ellenPlayerInput = PlayerController.LocalPlayerController.gameObject.GetComponent<PlayerInput>();
+            CustomSphereForStaff collisionSphereForStaff = PlayerController.LocalPlayerController.gameObject.transform.Find("Staff").gameObject.transform.Find("CustomSphere").gameObject.GetComponent<CustomSphereForStaff>();
             /* End of Ellen's Attack Animation stuff */
 
             switch (ability)
@@ -198,6 +199,7 @@ namespace Controls.Abilities
                 /* Start of Ellen's  Attack Animation stuff */
 
                 ellenPlayerInput.DoAttack();
+                collisionSphereForStaff.activateDamage();
 
                 /* End of Ellen's Attack Animation stuff */
                 break;

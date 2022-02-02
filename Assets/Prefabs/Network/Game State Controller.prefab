@@ -44,7 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebd551532a9b4be42b176a3b89cf7af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 100030, guid: d07d4dad02303cd4eb88e65df7a9526a, type: 3}
+  playerVariantPrefabs:
+  - {fileID: 8128127792667779998, guid: 4103a1ad64ed26a43848eb452e3641c8, type: 3}
+  - {fileID: 5254406972079381071, guid: 5fbd0d802dc81fe47a533ac520fc2db0, type: 3}
+  - {fileID: 5447191130004462333, guid: a75cbeccc4c600444a2859528c125e55, type: 3}
+  - {fileID: 6609525516356189718, guid: 5f89f5a550a58204a8966dd6ee64fdf4, type: 3}
   abilityPrefab: {fileID: 8131443997823057609, guid: d4322ee10f9384b4b93d6c3575dec820,
     type: 3}
   spawnPointHolder: {fileID: 0}

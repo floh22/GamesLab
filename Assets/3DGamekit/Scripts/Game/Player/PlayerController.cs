@@ -697,13 +697,13 @@ namespace Gamekit3D
 
             networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
 
-            if(!networkedPlayerController.IsAlive)
-                networkedPlayerController.putCameraBackOnPlayer();   
-
             /* End of non-official code */      
 
             if (photonView.IsMine == true && PhotonNetwork.IsConnected)
             {
+                if(!networkedPlayerController.IsAlive)
+                    networkedPlayerController.putCameraBackOnPlayer();   
+
                 // Wait for the screen to fade in.
                 // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
                 yield return StartCoroutine(ScreenFader.FadeSceneIn());
@@ -730,9 +730,7 @@ namespace Gamekit3D
             /* Start of unofficial code */
 
             NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
-
-            if(networkedPlayerController.IsAlive)
-                networkedPlayerController.respawnEnded();                   
+            networkedPlayerController.respawnEnded();                   
 
             /* End of non-official code */
         }
@@ -807,12 +805,12 @@ namespace Gamekit3D
         }
 
         public void DoDieVisual()
-        {
+        {        
             m_CharCtrl.enabled = false;
             Die(new Damageable.DamageMessage());
 
             NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
-            networkedPlayerController.dieEnded();                       
+            networkedPlayerController.dieEnded();                    
 
             // if (emoteDeathPlayer != null)
             // {

@@ -125,6 +125,30 @@ namespace GameUnit
 
         public bool ShowTarget = false;
 
+        void Awake()
+        {
+            this.NetworkID = gameObject.GetPhotonView().InstantiationId;
+            
+            Vector3 minionSpawnLocation = transform.position;
+            Vector3 baseSpawnLocation;
+
+            foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
+            {
+                baseSpawnLocation = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
+
+                if(baseSpawnLocation == minionSpawnLocation)
+                {
+                    this.Team = team;
+                }
+            }            
+
+            // Debug.Log("Minion of team " + Team.ToString() + " spawned locally with NetworkID = " + NetworkID.ToString());
+
+            // Add to local instance of GameStateController
+            GameStateController.Instance.GameUnits.Add(this);
+            GameStateController.Instance.Minions[Team].Add(this);            
+        }
+
         // Start is called before the first frame update
         void Start()
         {
@@ -175,9 +199,9 @@ namespace GameUnit
             obstacle = GetComponent<NavMeshObstacle>();
             
             //Values
-            this.NetworkID = networkID;
+            // this.NetworkID = networkID; // moved to Awake()
             this.targetTeam = target;
-            this.Team = team;
+            // this.Team = team;  // moved to Awake()
             Health = Values.MinionHealth;
             MaxHealth = Values.MinionHealth;
             MoveSpeed = Values.MinionMoveSpeed;
@@ -199,8 +223,9 @@ namespace GameUnit
 
             currentMinionState = MinionState.LookingForPath;
 
-            GameStateController.Instance.GameUnits.Add(this);
-            GameStateController.Instance.Minions[Team].Add(this);
+            // Moved to Awake()
+            // GameStateController.Instance.GameUnits.Add(this);
+            // GameStateController.Instance.Minions[Team].Add(this);
         }
 
         // Update is called once per frame
@@ -644,40 +669,6 @@ namespace GameUnit
             if (CurrentAttackTarget.Team != this.Team)
             {
                 IGameUnit.SendDealDamageEvent(this, CurrentAttackTarget, Values.MinionAttackDamage);
-
-                // /* Start of Ellen's Damaged Animation stuff */
-
-                // if(CurrentAttackTarget.ToString().StartsWith("Ellen"))
-                // {
-                //     PlayerController ellenPlayerController = (PlayerController) CurrentAttackTarget;
-
-                //     // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
-                //     // ellenGamekit3DPlayerController.DoTakeDamageVisual();
-
-                //     MonoBehaviour damager = this;
-                //     Vector3 direction = (CurrentAttackTarget.Position - this.transform.position).normalized;
-
-                //     Gamekit3D.Damageable.DamageMessage data;
-                //     data.damager = damager;                         // MonoBehaviour
-                //     data.amount = (int) Values.MinionAttackDamage;  // int
-                //     data.direction = direction;                     // Vector3
-                //     data.damageSource = this.transform.position;    // Vector3
-                //     data.throwing = false;                          // bool
-                //     data.stopCamera = false;                        // bool
-
-                //     Gamekit3D.Damageable ellenDamageable = ellenPlayerController.gameObject.GetComponent<Gamekit3D.Damageable>();
-                //     ellenDamageable.maxHitPoints = (int) ellenPlayerController.MaxHealth; // Could be set somewhere else but this is fine for now
-                //     ellenDamageable.currentHitPoints = (int) ellenPlayerController.Health;
-                //     ellenDamageable.ApplyDamage(data);
-
-                //     // String ellenName = CurrentAttackTarget.ToString();
-                //     // Debug.Log($"A minion hit {ellenName}");
-                //     // Debug.Log($"A minion really hit {ellenPlayerController.gameObject.name}");
-                //     // Debug.Log($"ellenDamageable.maxHitPoints = {ellenDamageable.maxHitPoints}");
-                //     // Debug.Log($"data.amount = {data.amount}");
-                // }
-
-                // /* End of Ellen's Damaged Animation stuff */
             }
         }
 
