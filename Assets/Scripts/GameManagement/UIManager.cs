@@ -463,13 +463,14 @@ namespace GameManagement
                         ScoreboardEntries.Add(entry.Value.Team);
                         DisplayRowInScoreboard(counter, true);
                         UpdateRowInScoreboard(counter, entry.Value.Team);
+                        counter++;
                     }
                 }
                 else
                 {
                     UpdateRowInScoreboard(counter, entry.Value.Team);
+                    counter++;
                 }
-                counter++;
             }
             
             for (int i = counter; i < 3; i++)
