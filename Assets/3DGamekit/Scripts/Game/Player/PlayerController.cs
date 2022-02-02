@@ -663,19 +663,6 @@ namespace Gamekit3D
             EllenSpawn spawn = GetComponentInChildren<EllenSpawn>();
             spawn.enabled = true;
 
-            // // If there is a checkpoint, move Ellen to it.
-            // if (m_CurrentCheckpoint != null)
-            // {
-            //     m_CharCtrl.enabled = false; // Unofficial code
-
-            //     transform.position = m_CurrentCheckpoint.transform.position;
-            //     transform.rotation = m_CurrentCheckpoint.transform.rotation;
-            // }
-            // else
-            // {
-            //     Debug.LogError("There is no Checkpoint set, there should always be a checkpoint set. Did you add a checkpoint at the spawn?");
-            // }           
-
             // If there is a checkpoint, move Ellen to it.
             if (spawnPointHolder != null)
             {
@@ -699,10 +686,10 @@ namespace Gamekit3D
 
             /* End of non-official code */      
 
-            if (photonView.IsMine == true && PhotonNetwork.IsConnected)
+            if (photonView.IsMine && PhotonNetwork.IsConnected)
             {
                 if(!networkedPlayerController.IsAlive)
-                    networkedPlayerController.putCameraBackOnPlayer();   
+                    networkedPlayerController.PutCameraBackOnPlayer();   
 
                 // Wait for the screen to fade in.
                 // Currently it is not important to yield here but should some changes occur that require waiting until a respawn has finished this will be required.
@@ -730,7 +717,7 @@ namespace Gamekit3D
             /* Start of unofficial code */
 
             NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
-            networkedPlayerController.respawnEnded();                   
+            networkedPlayerController.RespawnEnded();                   
 
             /* End of non-official code */
         }
@@ -808,14 +795,6 @@ namespace Gamekit3D
         {        
             m_CharCtrl.enabled = false;
             Die(new Damageable.DamageMessage());
-
-            NetworkedPlayer.PlayerController networkedPlayerController = gameObject.GetComponent<NetworkedPlayer.PlayerController>();
-            networkedPlayerController.dieEnded();                    
-
-            // if (emoteDeathPlayer != null)
-            // {
-            //     emoteDeathPlayer.PlayRandomClip();
-            // }
         }    
 
         /* End of non-official code */

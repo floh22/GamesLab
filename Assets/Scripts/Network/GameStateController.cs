@@ -9,6 +9,7 @@ using ExitGames.Client.Photon;
 using GameManagement;
 using GameUnit;
 using JetBrains.Annotations;
+using Lobby;
 using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
@@ -33,11 +34,11 @@ namespace Network
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
         public const byte PlayerAutoAttackEventCode = 8;
+
+        public const byte PlayerLoadedEventCode = 12;
         // public const byte MinionSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
-
-        public static int numberOfPlayersActuallySpawned = 0;
 
         public static void SendChangeTargetEvent(GameData.Team team, GameData.Team target)
         {
@@ -79,6 +80,13 @@ namespace Network
             object[] content = { sourceTeam }; 
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
             PhotonNetwork.RaiseEvent(PlayerAutoAttackEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static void SendPlayerLoadedEvent(GameData.Team sourceTeam)
+        {
+            object[] content = { sourceTeam }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
+            PhotonNetwork.RaiseEvent(PlayerLoadedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         // public static void SendMinionSpawnedEvent(GameData.Team team, int networkID)
@@ -123,6 +131,8 @@ namespace Network
         public HashSet<IGameUnit> GameUnits;
         public Dictionary<GameData.Team, GameData.Team> Targets;
         public Slenderman Slenderman;
+
+        public List<GameData.Team> LoadedTeams;
 
         
         [field: SerializeField] public float GameTime { get; set; }
@@ -198,22 +208,17 @@ namespace Network
             GameUnits = new HashSet<IGameUnit>();
 
             GameObject playerPrefab = null;
+            
+            LocalPlayerSpawnEvent.AddListener(() => SendPlayerLoadedEvent(PersistentData.Team ?? throw new NullReferenceException()));
 
-            switch(PersistentData.Team.ToString())
+            playerPrefab = PersistentData.Team.ToString() switch
             {
-                case "RED":
-                    playerPrefab = playerVariantPrefabs[0];
-                break;
-                case "GREEN":
-                    playerPrefab = playerVariantPrefabs[1];
-                break;
-                case "BLUE":
-                    playerPrefab = playerVariantPrefabs[2];
-                break;
-                case "YELLOW":
-                    playerPrefab = playerVariantPrefabs[3];
-                break;                                                
-            }
+                "RED" => playerVariantPrefabs[0],
+                "GREEN" => playerVariantPrefabs[1],
+                "BLUE" => playerVariantPrefabs[2],
+                "YELLOW" => playerVariantPrefabs[3],
+                _ => null
+            };
 
             if (playerPrefab == null)
             {
@@ -259,9 +264,6 @@ namespace Network
             Minion.Values = minionValues;
             Minion.Splines = minionPaths;
 
-
-            StartCoroutine(InitSyncedGameObjects());
-
             if (!PhotonNetwork.IsMasterClient) return;
             try
             {
@@ -299,21 +301,9 @@ namespace Network
 
         private IEnumerator InitSyncedGameObjects()
         {
-            Debug.Log("Number of players that should spawn = " + PhotonNetwork.CurrentRoom.PlayerCount);
-
-            while(numberOfPlayersActuallySpawned < PhotonNetwork.CurrentRoom.PlayerCount)
-            {
-                // Debug.Log($"Still waiting for all players to spawn {numberOfPlayersActuallySpawned}/{PhotonNetwork.CurrentRoom.PlayerCount}.");
-                yield return null;
-            }
-
-            // //Wait 2 seconds to init players to let everyone join. Replace this with spawn events later on
-            // yield return new WaitForSeconds(15);
-              
             Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
             {
                 PlayerController pc = playerGo.GetComponent<PlayerController>();
-                pc.hasSpawned = true;
                 return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
             }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
@@ -345,14 +335,13 @@ namespace Network
                 Bases.Add(team, bb);
                 GameUnits.Add(bb);
             }
-            
-            Debug.Log($"{Players.Count} Players, {Bases.Count} Bases found");
+
             if(Slenderman != null && !Slenderman.Equals(null))
                 Debug.Log("Slenderman found");
-            
-            LoadingScreenController.SendGameStartingEvent();
+
             if(PhotonNetwork.IsMasterClient && controller != null && !controller.Equals(null))
             {
+                LoadingScreenController.SendGameStartingEvent();
                 controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
             }
 
@@ -418,7 +407,7 @@ namespace Network
                 // Debug.Log($"target = {targetString}");
                 // Debug.Log($"damage = {damage}");                     
 
-                if (target == null || source == null)
+                if (target == null || target.Equals(null) || source == null || source.Equals(null))
                 {
                     // Debug.Log(
                     //     $"target or source null: source: {source?.NetworkID}, target: {target?.NetworkID}. sourceID: {sourceID}, targetID: {targetID}");
@@ -535,7 +524,7 @@ namespace Network
                 if (targetNetworkID == Slenderman.NetworkID)
                 {
                     //Channeled slenderman
-                    source.setChannelingTo(Slenderman.gameObject.transform.position);
+                    source.SetChannelingTo(Slenderman.gameObject.transform.position);
                     source.OnStartSlendermanChannel(Slenderman.gameObject.GetComponent<BoxCollider>().bounds.size);
                     return;
                 }
@@ -543,7 +532,7 @@ namespace Network
                 foreach (BaseBehavior baseStructure in Bases.Values.Where(baseStructure => baseStructure.NetworkID == targetNetworkID))
                 {
                     //channeled a base
-                    source.setChannelingTo(baseStructure.innerChannelingParticleSystem.transform.position);
+                    source.SetChannelingTo(baseStructure.innerChannelingParticleSystem.transform.position);
                     source.OnStartBaseChannel();
                     return;
                 }
@@ -611,6 +600,14 @@ namespace Network
                 ellenPlayerInput.DoAttack();
 
                 /* End of Ellen's Attack Animation stuff */
+            }
+
+            if (eventCode == PlayerLoadedEventCode)
+            {
+                LoadedTeams.Add((GameData.Team) ((object[]) photonEvent.CustomData)[0]);
+                
+                if(LoadedTeams.Count == PhotonNetwork.CurrentRoom.PlayerCount) 
+                    StartCoroutine(InitSyncedGameObjects());
             }
 
             // if (eventCode == MinionSpawnedEventCode)

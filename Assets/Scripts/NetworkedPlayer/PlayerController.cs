@@ -47,7 +47,7 @@ namespace NetworkedPlayer
         public bool IsChannelingObjective => isChannelingObjective;
         public bool IsVisible { get; set; }
         [SerializeField] public bool HasSlenderBuff { get; set; }
-        [SerializeField] public float SlenderBuffDuration = 45;
+        [FormerlySerializedAs("SlenderBuffDuration")] [SerializeField] public float slenderBuffDuration = 45;
 
 
         public IGameUnit CurrentAttackTarget { get; set; }
@@ -65,31 +65,31 @@ namespace NetworkedPlayer
         public int GainedExperienceByMinion { get; set; }
         public int GainedExperienceByPlayer { get; set; }
 
-        private float _damageMultiplierMinion;
+        private float damageMultiplierMinion;
 
         [property: SerializeField]
         public float DamageMultiplierMinion
         {
-            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierMinion); }
-            set { _damageMultiplierMinion = value; }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(damageMultiplierMinion); }
+            set { damageMultiplierMinion = value; }
         }
 
-        private float _damageMultiplierAbility1;
+        private float damageMultiplierAbility1;
 
         [property: SerializeField]
         public float DamageMultiplierAbility1
         {
-            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility1); }
-            set { _damageMultiplierAbility1 = value; }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(damageMultiplierAbility1); }
+            set { damageMultiplierAbility1 = value; }
         }
 
-        private float _damageMultiplierAbility2;
+        private float damageMultiplierAbility2;
 
         [property: SerializeField]
         public float DamageMultiplierAbility2
         {
-            get { return ReturnMultiplierWithRespectToSlenderBuff(_damageMultiplierAbility2); }
-            set { _damageMultiplierAbility2 = value; }
+            get { return ReturnMultiplierWithRespectToSlenderBuff(damageMultiplierAbility2); }
+            set { damageMultiplierAbility2 = value; }
         }
 
         [field: SerializeField] public int UpgradesMinion { get; set; }
@@ -107,14 +107,14 @@ namespace NetworkedPlayer
 
         #region Public Fields
 
-        [SerializeField] public GameObject DamageText;
+        [FormerlySerializedAs("DamageText")] [SerializeField] public GameObject damageText;
 
-        [FormerlySerializedAs("DeadPlayer")] [SerializeField]
-        public GameObject DeadPlayerPrefab;
+        [FormerlySerializedAs("DeadPlayerPrefab")] [FormerlySerializedAs("DeadPlayer")] [SerializeField]
+        public GameObject deadPlayerPrefab;
 
-        [SerializeField] public GameObject SlenderBuffPrefab;
-        [SerializeField] public GameObject PagePrefab;
-        private Page CurrentPage;
+        [FormerlySerializedAs("SlenderBuffPrefab")] [SerializeField] public GameObject slenderBuffPrefab;
+        [FormerlySerializedAs("PagePrefab")] [SerializeField] public GameObject pagePrefab;
+        private Page currentPage;
 
 
         [SerializeField] public bool HasPage { get; set; }
@@ -140,8 +140,8 @@ namespace NetworkedPlayer
 
         private PlayerUI playerUI;
 
-        [SerializeField] public GameObject ChannelParticleSystem;
-        public GameObject RingsParticleSystem;
+        [FormerlySerializedAs("ChannelParticleSystem")] [SerializeField] public GameObject channelParticleSystem;
+        [FormerlySerializedAs("RingsParticleSystem")] public GameObject ringsParticleSystem;
 
         private bool isChannelingObjective;
         private Vector3 channelingTo = Vector3.positiveInfinity;
@@ -151,11 +151,6 @@ namespace NetworkedPlayer
         private bool isAutoattackOn;
 
         private bool isAttacking;
-
-        // public GameObject canvas;
-        // private GameObject actionButtonsGroupGo;
-
-        public bool hasSpawned = false;        
 
         #endregion
 
@@ -324,11 +319,11 @@ namespace NetworkedPlayer
                 
                 
                 HasPage = true;
-                CurrentPage = page;
+                currentPage = page;
                 isChannelingObjective = false;
                 // Disable the channeling effect
-                ChannelParticleSystem.SetActive(false);
-                RingsParticleSystem.SetActive(false);
+                channelParticleSystem.SetActive(false);
+                ringsParticleSystem.SetActive(false);
                 Debug.Log($"Page has been picked up by player of {Team} team");
             }
             
@@ -401,7 +396,7 @@ namespace NetworkedPlayer
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Uncomment next line sometime
             // CurrentlyAttackedBy.Add(unit);
 
-            DamageIndicator indicator = Instantiate(DamageText, transform.position, Quaternion.identity)
+            DamageIndicator indicator = Instantiate(damageText, transform.position, Quaternion.identity)
                 .GetComponent<DamageIndicator>();
             indicator.SetDamageText(damage);
         }
@@ -435,23 +430,23 @@ namespace NetworkedPlayer
 
             UIManager.Instance.ShowDeathIndicatorCountdown(DeathTimerMax);         
                                             
-            takeAwayCameraFromPlayer();
+            TakeAwayCameraFromPlayer();
         }
 
-        void takeAwayCameraFromPlayer()
+        private void TakeAwayCameraFromPlayer()
         {
             // Stop following alive character
             cameraController.OnStopFollowing();
 
             //create dead character
             Vector3 position = transform.position;
-            deadPlayerObject = Instantiate(DeadPlayerPrefab, position, Quaternion.identity);
+            deadPlayerObject = Instantiate(deadPlayerPrefab, position, Quaternion.identity);
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
             //follow dead character
             deadCameraController.OnStartFollowing();
         }        
 
-        public void putCameraBackOnPlayer()
+        public void PutCameraBackOnPlayer()
         {
             CameraController deadCameraController = deadPlayerObject.GetComponent<CameraController>();
 
@@ -463,35 +458,19 @@ namespace NetworkedPlayer
             Destroy(deadPlayerObject);
         }
 
-        public void respawnEnded()
+        public void RespawnEnded()
         {
             //Reset stats
             IsAlive = true;
             this.Health = this.MaxHealth;
 
             GameObject playerUiGo = playerUI.gameObject;
-            playerUiGo.SetActive(true);   
-            // actionButtonsGroupGo.SetActive(true);        
-            // GameStateController.SendPlayerSpawnedEvent(Team, true);
-            GameStateController.numberOfPlayersActuallySpawned++;
-            hasSpawned = true;
-            Debug.Log($"Local instance of player of team {Team} spawned.");
-            Debug.Log($"numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
+            playerUiGo.SetActive(true);
         }
 
-        public void dieEnded()
+        public void DieEnded()
         {
-            GameStateController.numberOfPlayersActuallySpawned--;
-            hasSpawned = false;
             IsAlive = false;
-            Debug.Log($"Local instance of player of team {Team} died.");            
-            Debug.Log($"numberOfPlayersActuallySpawned = {GameStateController.numberOfPlayersActuallySpawned}");
-        }
-
-        public void setPosition(Vector3 position_p)
-        {
-            Vector3 positionn = GameStateController.Instance.GetPlayerSpawnPoint(Team) + Vector3.up;
-            transform.position = positionn;
         }
 
         public void OnStartSlendermanChannel(Vector3 slendermanSize)
@@ -500,7 +479,7 @@ namespace NetworkedPlayer
             // The channeling effect on Slenderman will be activated in the OnCollision.cs script
             // when the particles from the channeler hit Slenderman.
 
-            ChannelParticleSystem.SetActive(true);
+            this.channelParticleSystem.SetActive(true);
 
             float hSliderValueR = 255.0F / 255;
             float hSliderValueG = 0.0F / 255;
@@ -508,7 +487,7 @@ namespace NetworkedPlayer
             float hSliderValueA = 255.0F / 255;   
             Color color = new Color(hSliderValueR, hSliderValueG, hSliderValueB, hSliderValueA);
 
-            ParticleSystem channelParticleSystem = ChannelParticleSystem.GetComponent<ParticleSystem>();
+            ParticleSystem channelParticleSystem = this.channelParticleSystem.GetComponent<ParticleSystem>();
             var channelParticleSystemMain = channelParticleSystem.main;
             channelParticleSystemMain.startColor = color;
 
@@ -521,12 +500,12 @@ namespace NetworkedPlayer
             fo.z = new ParticleSystem.MinMaxCurve(channelingTo.z - transform.position.z);            
 
             /* Start of Rings Channeling Effect Stuff */
-            RingsParticleSystem.SetActive(true);
-            ParticleSystem ringsParticleSystem = RingsParticleSystem.GetComponent<ParticleSystem>();
+            this.ringsParticleSystem.SetActive(true);
+            ParticleSystem ringsParticleSystem = this.ringsParticleSystem.GetComponent<ParticleSystem>();
             ringsParticleSystem.Play(true);       
 
-            ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
-            ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem embers = this.ringsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem smoke = this.ringsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
             var embersMain = embers.main;
             var smokeMain = smoke.main;
             embersMain.startColor = color;
@@ -561,10 +540,10 @@ namespace NetworkedPlayer
             // The channeling effect the base will be activated in the OnCollision.cs script
             // when the particles from the channeler hit it.
 
-            ChannelParticleSystem.SetActive(true);
+            this.channelParticleSystem.SetActive(true);
             
             // Set this in the player themselves
-            ParticleSystem channelParticleSystem = ChannelParticleSystem.GetComponent<ParticleSystem>();
+            ParticleSystem channelParticleSystem = this.channelParticleSystem.GetComponent<ParticleSystem>();
 
             // Set the force that will change the particles direcion
             var fo = channelParticleSystem.forceOverLifetime;
@@ -643,13 +622,13 @@ namespace NetworkedPlayer
             channelParticleSystemMain.startColor = color;
 
             /* Start of Rings Channeling Effect Stuff */
-            RingsParticleSystem.SetActive(true);
+            this.ringsParticleSystem.SetActive(true);
 
-            ParticleSystem ringsParticleSystem = RingsParticleSystem.GetComponent<ParticleSystem>();
+            ParticleSystem ringsParticleSystem = this.ringsParticleSystem.GetComponent<ParticleSystem>();
             ringsParticleSystem.Play(true);       
 
-            ParticleSystem embers = RingsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
-            ParticleSystem smoke = RingsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem embers = this.ringsParticleSystem.transform.Find("Embers").gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem smoke = this.ringsParticleSystem.transform.Find("Smoke").gameObject.GetComponent<ParticleSystem>();
             var embersMain = embers.main;
             var smokeMain = smoke.main;
             embersMain.startColor = color;
@@ -678,15 +657,15 @@ namespace NetworkedPlayer
             /* End of Rings Channeling Effect Stuff */
         }
 
-        public void setChannelingTo(Vector3 channelingTo_p)
+        public void SetChannelingTo(Vector3 channelingToP)
         {
-            channelingTo = channelingTo_p;
+            channelingTo = channelingToP;
         }
 
         public void DisableChannelEffects()
         {
-            ChannelParticleSystem.SetActive(false);
-            RingsParticleSystem.SetActive(false);
+            channelParticleSystem.SetActive(false);
+            ringsParticleSystem.SetActive(false);
             isChannelingObjective = false;
         }
         
@@ -735,8 +714,8 @@ namespace NetworkedPlayer
             channelingTo = Vector3.positiveInfinity;
 
             // Disable the channeling effect
-            ChannelParticleSystem.SetActive(false);
-            RingsParticleSystem.SetActive(false);
+            channelParticleSystem.SetActive(false);
+            ringsParticleSystem.SetActive(false);
             Debug.Log($"Player's channeling from team {Team} has been interrupted");
         }
 
@@ -844,8 +823,8 @@ namespace NetworkedPlayer
             HasSlenderBuff = true;
             GameObject effect = PhotonNetwork.Instantiate("SlenderBuffVisual", position, Quaternion.identity);
             AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.SLENDERMAN, gameObject);
-            UIManager.Instance.ShowSlenderBuffCountdown(SlenderBuffDuration);
-            yield return new WaitForSeconds(SlenderBuffDuration);
+            UIManager.Instance.ShowSlenderBuffCountdown(slenderBuffDuration);
+            yield return new WaitForSeconds(slenderBuffDuration);
             PhotonNetwork.Destroy(effect);
         }
 
@@ -865,9 +844,9 @@ namespace NetworkedPlayer
         private void DropPageOnTheGround()
         {
             //Cant drop a page that doesnt exist
-            if (CurrentPage == null) return;
+            if (currentPage == null) return;
             
-            CurrentPage.Drop();
+            currentPage.Drop();
             Debug.Log($"Page has been dropped on the ground by player of {Team} team");
         }
 
@@ -879,15 +858,14 @@ namespace NetworkedPlayer
         {
             Vector3 position = transform.position;
             GameObject pageObject = PhotonNetwork.Instantiate("Page", position, Quaternion.identity);
-            CurrentPage = pageObject.GetComponent<Page>();
-            CurrentPage.Follow(this.transform);
-            //AutoObjectParenter.SendParentEvent(AutoObjectParenter.ParentEventTarget.PAGE, gameObject);
+            currentPage = pageObject.GetComponent<Page>();
+            currentPage.Follow(this.transform);
             HasPage = true;
         }
 
         private void DestroyPage()
         {
-            PhotonNetwork.Destroy(CurrentPage.gameObject);
+            PhotonNetwork.Destroy(currentPage.gameObject);
             HasPage = false;
         }
 
