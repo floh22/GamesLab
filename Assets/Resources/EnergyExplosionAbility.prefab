@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4865135451303388}
   - component: {fileID: 2817960164279825508}
+  - component: {fileID: 4919313596749538818}
   m_Layer: 11
   m_Name: EnergyExplosionAbility
   m_TagString: Untagged
@@ -49,6 +50,22 @@ MonoBehaviour:
   targetCirclePrefab: {fileID: 3445304694089561301, guid: 079580edbe20a864b816da65e20c0cf6,
     type: 3}
   explosion: {fileID: 2160732062967934828}
+--- !u!54 &4919313596749538818
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329845292236604}
+  serializedVersion: 2
+  m_Mass: 0.0000001
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &462954999386109458
 GameObject:
   m_ObjectHideFlags: 0
