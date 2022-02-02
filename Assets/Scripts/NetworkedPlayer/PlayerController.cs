@@ -114,6 +114,12 @@ namespace NetworkedPlayer
 
         [SerializeField] public GameObject SlenderBuffPrefab;
         [SerializeField] public GameObject PagePrefab;
+        
+        public AudioSource audioSourceLocal;
+        public AudioSource audioSourceOmnipresent;
+        public AudioClip LevelUpAudioClip;
+        public AudioClip SpawnAudioClip;
+
         private Page CurrentPage;
 
 
@@ -245,7 +251,8 @@ namespace NetworkedPlayer
             }
 
             // Asssign Layer to player depending on team
-            this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units"); 
+            this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units");
+            audioSourceOmnipresent = GameObject.Find("OmnipresentAudioSource").GetComponent<AudioSource>();
 
             // canvas = GameObject.Find("Canvas");
             // actionButtonsGroupGo = canvas.transform.Find("Ingame_UI").gameObject.transform.Find("Action Buttons Group").gameObject;
@@ -474,8 +481,10 @@ namespace NetworkedPlayer
 
         public void respawnEnded()
         {
+            photonView.RPC("playSpawnAudioForEverybdoy", RpcTarget.All, PersistentData.Team);
             GameObject playerUiGo = playerUI.gameObject;
-            playerUiGo.SetActive(true);   
+            playerUiGo.SetActive(true);
+            this.PlaySpawnAudio();
             // actionButtonsGroupGo.SetActive(true);        
         }
 
@@ -773,6 +782,7 @@ namespace NetworkedPlayer
             UnspentLevelUps++;
             Experience -= ExperienceToReachNextLevel;
             ExperienceToReachNextLevel += ExperienceBetweenLevels;
+            this.PlayLevelUpAudio();
             StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
         }
 
@@ -816,6 +826,29 @@ namespace NetworkedPlayer
 
                     break;
             }
+        }
+        
+        [PunRPC]
+        public void playSpawnAudioForEverybdoy(GameData.Team team)
+        {
+            if (photonView.IsMine)
+            {
+                return;
+            }
+            audioSourceLocal.clip = SpawnAudioClip;
+            audioSourceLocal.Play();
+        }
+
+        private void PlaySpawnAudio()
+        {
+            audioSourceOmnipresent.clip = SpawnAudioClip;
+            audioSourceOmnipresent.Play();
+        }
+        
+        private void PlayLevelUpAudio()
+        {
+            audioSourceOmnipresent.clip = LevelUpAudioClip;
+            audioSourceOmnipresent.Play();
         }
 
         private float ReturnMultiplierWithRespectToSlenderBuff(float mulitplier)
