@@ -31,6 +31,9 @@ namespace Lobby
 
         void Start()
         {
+            int clickOffset = Camera.main.scaledPixelWidth / 2;
+            clickOffsetBackground = new Vector3(clickOffset, 0, 0);
+            clickOffsetForeground = new Vector3(clickOffset, 0, 0);
             Vector3 foregroundT = foreground.transform.position;
             Vector3 backgroundT = background.transform.position;
             startingPositions.Add(foreground, foregroundT);

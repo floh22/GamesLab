@@ -71,16 +71,32 @@ public class LobbyUIController : MonoBehaviour
         float smoothTime = 0.3f;
         float smoothTimeChange = 0.0025f;
         float displayRoutineVelocity = 0;
-        while (Math.Abs(playerNameMask.padding.z - paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount]) > 0.01f)
+
+        bool doMove = true;
+        while (doMove)
         {
+            int padding = paddingValuesPerPlayer[0];
+            try
+            {
+                padding = paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount];
+            }
+            catch (NullReferenceException)
+            {
+                //Player left lobby while animating
+                playerNameMask.padding = new Vector4(0, 0, padding, 0);
+                yield break;
+            }
+
             float newPadding = Mathf.SmoothDamp(playerNameMask.padding.z,
-                paddingValuesPerPlayer[PhotonNetwork.CurrentRoom.PlayerCount], ref displayRoutineVelocity, smoothTime);
+                padding, ref displayRoutineVelocity, smoothTime);
 
             smoothTime -= smoothTimeChange;
                 
             playerNameMask.padding = new Vector4(0, 0,  newPadding, 0);
 
             yield return null;
+            
+            doMove = Math.Abs(playerNameMask.padding.z - padding) > 0.01f;
         }
     }
 

@@ -132,7 +132,7 @@ namespace Network
         public Dictionary<GameData.Team, GameData.Team> Targets;
         public Slenderman Slenderman;
 
-        public List<GameData.Team> LoadedTeams;
+        public HashSet<GameData.Team> LoadedTeams;
 
         
         [field: SerializeField] public float GameTime { get; set; }
@@ -208,8 +208,8 @@ namespace Network
             GameUnits = new HashSet<IGameUnit>();
 
             GameObject playerPrefab = null;
-            
-            LocalPlayerSpawnEvent.AddListener(() => SendPlayerLoadedEvent(PersistentData.Team ?? throw new NullReferenceException()));
+
+            LoadedTeams = new HashSet<GameData.Team>();
 
             playerPrefab = PersistentData.Team.ToString() switch
             {
@@ -251,8 +251,6 @@ namespace Network
                 }
             }
 
-            GameObject baseHolder = GameObject.Find("Bases");
-
             foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
             {
                 Minions.Add(team, new HashSet<Minion>());
@@ -265,6 +263,9 @@ namespace Network
             //Set minion values here so all clients have them when it comes time to switch masters
             Minion.Values = minionValues;
             Minion.Splines = minionPaths;
+
+
+            StartCoroutine(LoadSyncedObjects());
 
             if (!PhotonNetwork.IsMasterClient) return;
             try
@@ -301,53 +302,72 @@ namespace Network
             }
         }
 
-        private IEnumerator InitSyncedGameObjects()
+
+        private IEnumerator LoadSyncedObjects()
         {
-            Players = GameObject.FindGameObjectsWithTag("Player").Select(playerGo =>
-            {
-                PlayerController pc = playerGo.GetComponent<PlayerController>();
-                return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
-            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            bool basesLoaded = false;
+            bool playersLoaded = false;
+            bool slenderLoaded = false;
 
-            //Add them to gameUnits
-            
-            int preSize = GameUnits.Count;
-            foreach (PlayerController player in Players.Values)
+            while (!(basesLoaded && playersLoaded && slenderLoaded))
             {
-                int size = GameUnits.Count;
-                GameUnits.Add(player);
-                if (size + 1 != GameUnits.Count)
+                if (!basesLoaded)
                 {
-                    Debug.LogError("Could not add player to GameUnit list");
+                    GameObject basesO = GameObject.Find("Bases(Clone)");
+                    if (basesO != null && !basesO.Equals(null))
+                    {
+                        Bases.Clear();
+                        foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
+                        {
+                            BaseBehavior bb = basesO.transform.Find(team.ToString()).GetComponent<BaseBehavior>();
+                            Bases.Add(team, bb);
+                            GameUnits.Add(bb);
+                        }
+
+                        if (Bases.Count == 4)
+                        {
+                            Debug.Log("Bases loaded");
+                            basesLoaded = true;
+                        }
+                            
+                    }
                 }
+
+                if (!playersLoaded)
+                {
+                    var playerObjects = GameObject.FindGameObjectsWithTag("Player");
+                    
+                    if (playerObjects.Length == PhotonNetwork.CurrentRoom.PlayerCount)
+                    {
+                        Players = playerObjects.Select(playerGo =>
+                        {
+                            PlayerController pc = playerGo.GetComponent<PlayerController>();
+                            GameUnits.Add(pc);
+                            return new KeyValuePair<GameData.Team, PlayerController>(pc.Team, pc);
+                        }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                        
+                        Debug.Log("Players loaded");
+                        playersLoaded = true;
+                    }
+                }
+
+                if (!slenderLoaded)
+                {
+                    GameObject slenderO = GameObject.FindWithTag("Slenderman");
+                    if (slenderO != null && !slenderO.Equals(null))
+                    {
+                        Slenderman = slenderO.GetComponent<Slenderman>();
+
+                        Debug.Log("Slenderman loaded");
+                        slenderLoaded = true;
+                    }
+                }
+                
+                //Check 10 times a second if everything has loaded
+                yield return new WaitForSeconds(0.10f);
             }
-
-            if (GameUnits.Count != preSize + Players.Count)
-            {
-                Debug.LogError("Something went wrong adding players to GameUnit list");
-            }
-
-
-            Slenderman = GameObject.FindWithTag("Slenderman").GetComponent<Slenderman>();
             
-            
-            foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
-            {
-                BaseBehavior bb = GameObject.Find("Bases(Clone)").transform.Find(team.ToString()).GetComponent<BaseBehavior>();
-                Bases.Add(team, bb);
-                GameUnits.Add(bb);
-            }
-
-            if(Slenderman != null && !Slenderman.Equals(null))
-                Debug.Log("Slenderman found");
-
-            if(PhotonNetwork.IsMasterClient && controller != null && !controller.Equals(null))
-            {
-                LoadingScreenController.SendGameStartingEvent();
-                controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
-            }
-
-            yield return null;
+            SendPlayerLoadedEvent(PersistentData.Team ?? throw new NullReferenceException());
         }
 
         public void QuitApplication()
@@ -606,10 +626,18 @@ namespace Network
 
             if (eventCode == PlayerLoadedEventCode)
             {
-                LoadedTeams.Add((GameData.Team) ((object[]) photonEvent.CustomData)[0]);
-                
-                if(LoadedTeams.Count == PhotonNetwork.CurrentRoom.PlayerCount) 
-                    StartCoroutine(InitSyncedGameObjects());
+                GameData.Team team = (GameData.Team)((object[])photonEvent.CustomData)[0];
+                LoadedTeams.Add(team);
+                Debug.Log($"{team} player ready");
+
+                if (LoadedTeams.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+                {
+                    if(PhotonNetwork.IsMasterClient && controller != null && !controller.Equals(null))
+                    {
+                        LoadingScreenController.SendGameStartingEvent();
+                        controller.StartMinionSpawning(Minion.Values.InitWaveDelayInMs);
+                    }
+                }
             }
 
             // if (eventCode == MinionSpawnedEventCode)
