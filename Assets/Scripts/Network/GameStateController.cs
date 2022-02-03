@@ -132,7 +132,7 @@ namespace Network
         public Dictionary<GameData.Team, GameData.Team> Targets;
         public Slenderman Slenderman;
 
-        public List<GameData.Team> LoadedTeams;
+        public HashSet<GameData.Team> LoadedTeams;
 
         
         [field: SerializeField] public float GameTime { get; set; }
@@ -208,7 +208,8 @@ namespace Network
             GameUnits = new HashSet<IGameUnit>();
 
             GameObject playerPrefab = null;
-            
+
+            LoadedTeams = new HashSet<GameData.Team>();
             LocalPlayerSpawnEvent.AddListener(() => SendPlayerLoadedEvent(PersistentData.Team ?? throw new NullReferenceException()));
 
             playerPrefab = PersistentData.Team.ToString() switch
@@ -604,7 +605,9 @@ namespace Network
 
             if (eventCode == PlayerLoadedEventCode)
             {
-                LoadedTeams.Add((GameData.Team) ((object[]) photonEvent.CustomData)[0]);
+                GameData.Team team = (GameData.Team)((object[])photonEvent.CustomData)[0];
+                LoadedTeams.Add(team);
+                Debug.Log($"{team} player ready");
                 
                 if(LoadedTeams.Count == PhotonNetwork.CurrentRoom.PlayerCount) 
                     StartCoroutine(InitSyncedGameObjects());

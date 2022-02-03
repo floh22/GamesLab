@@ -168,12 +168,12 @@ namespace NetworkedPlayer
                 LocalPlayerController = this;
                 Team = PersistentData.Team ?? throw new NullReferenceException();
                 this.transform.rotation = Quaternion.LookRotation(Vector3.zero);
+                
+                GameStateController.LocalPlayerSpawnEvent.Invoke();
             }
 
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
             DontDestroyOnLoad(gameObject);
-
-            GameStateController.LocalPlayerSpawnEvent.Invoke();
         }
 
         /// <summary>
