@@ -242,6 +242,8 @@ namespace Network
                     GameObject abilityGo =
                         PhotonNetwork.Instantiate("PlayerAbilities", Vector3.zero, Quaternion.identity);
                     abilityGo.GetComponent<GameUnitFollower>().StartFollowing(pl.transform);
+
+                    pl.AddComponent<AudioListener>();
                 }
                 else
                 {

@@ -7,11 +7,46 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1107276456253610370, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: MaxDistance
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1107276456253610370, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 45bc14794e2ea5c4e911941728d1ab04, type: 3}
+    - target: {fileID: 1107276456253610370, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: rolloffMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1107276456253610370, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: m_PlayOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1107276456253610370, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2216218993101228433, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4453785605213286576, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: SpawnAudioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 8b48f504ea14bd3478589ee8b764f061, type: 3}
+    - target: {fileID: 4453785605213286576, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
+        type: 3}
+      propertyPath: LevelUpAudioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 45bc14794e2ea5c4e911941728d1ab04, type: 3}
     - target: {fileID: 5251797675561885735, guid: 5fbd0d802dc81fe47a533ac520fc2db0,
         type: 3}
       propertyPath: m_RootOrder

@@ -112,6 +112,10 @@ namespace NetworkedPlayer
         [FormerlySerializedAs("DeadPlayerPrefab")] [FormerlySerializedAs("DeadPlayer")] [SerializeField]
         public GameObject deadPlayerPrefab;
 
+        public AudioSource audioSource;
+        public AudioClip LevelUpAudioClip;
+        public AudioClip SpawnAudioClip;
+
         [FormerlySerializedAs("SlenderBuffPrefab")] [SerializeField] public GameObject slenderBuffPrefab;
         [FormerlySerializedAs("PagePrefab")] [SerializeField] public GameObject pagePrefab;
         private Page currentPage;
@@ -217,6 +221,7 @@ namespace NetworkedPlayer
                 if (photonView.IsMine)
                 {
                     cameraController.OnStartFollowing();
+                    audioSource = GetComponent<AudioSource>();
                 }
             }
             else
@@ -242,7 +247,7 @@ namespace NetworkedPlayer
             }
 
             // Asssign Layer to player depending on team
-            this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units"); 
+            this.gameObject.layer = LayerMask.NameToLayer(this.Team.ToString() + "Units");
 
             // canvas = GameObject.Find("Canvas");
             // actionButtonsGroupGo = canvas.transform.Find("Ingame_UI").gameObject.transform.Find("Action Buttons Group").gameObject;
@@ -460,12 +465,15 @@ namespace NetworkedPlayer
 
         public void RespawnEnded()
         {
+            photonView.RPC("playSpawnAudio", RpcTarget.All, this.NetworkID);
+            GameObject playerUiGo = playerUI.gameObject;
+            playerUiGo.SetActive(true);
+            // actionButtonsGroupGo.SetActive(true);  
+            
             //Reset stats
             IsAlive = true;
             this.Health = this.MaxHealth;
 
-            GameObject playerUiGo = playerUI.gameObject;
-            playerUiGo.SetActive(true);
         }
 
         public void DieEnded()
@@ -767,6 +775,7 @@ namespace NetworkedPlayer
             UnspentLevelUps++;
             Experience -= ExperienceToReachNextLevel;
             ExperienceToReachNextLevel += ExperienceBetweenLevels;
+            this.PlayLevelUpAudio();
             StartCoroutine(UIManager.Instance.ShowLevelUpLabel());
         }
 
@@ -810,6 +819,24 @@ namespace NetworkedPlayer
 
                     break;
             }
+        }
+        
+        [PunRPC]
+        public void playSpawnAudio(int networkID, GameData.Team team)
+        {
+            if (this.NetworkID != networkID)
+            {
+                return;
+            }
+            Debug.Log(team + "|" + this.Team);
+            audioSource.clip = SpawnAudioClip;
+            audioSource.Play();
+        }
+
+        private void PlayLevelUpAudio()
+        {
+            audioSource.clip = LevelUpAudioClip;
+            audioSource.Play();
         }
 
         private float ReturnMultiplierWithRespectToSlenderBuff(float mulitplier)

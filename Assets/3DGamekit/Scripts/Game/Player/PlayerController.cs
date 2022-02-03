@@ -709,6 +709,8 @@ namespace Gamekit3D
         // Called by a state machine behaviour on Ellen's animator controller.
         public void RespawnFinished()
         {
+
+            
             m_Respawning = false;
             
             //we set the damageable invincible so we can't get hurt just after being respawned (feel like a double punitive)
