@@ -13891,7 +13891,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Team>k__BackingField: 0
   <Health>k__BackingField: 0
-  SlenderBuffDuration: 45
+  slenderBuffDuration: 45
   <Level>k__BackingField: 0
   <MaxLevel>k__BackingField: 0
   <Experience>k__BackingField: 0
@@ -13902,22 +13902,20 @@ MonoBehaviour:
   <UnspentLevelUps>k__BackingField: 0
   <DeathTimerMax>k__BackingField: 5
   <DeathTimerCurrently>k__BackingField: 0
-  DamageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
+  damageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
     type: 3}
-  DeadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
+  deadPlayerPrefab: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
     type: 3}
-  SlenderBuffPrefab: {fileID: 1726926769373873527, guid: 03de876cb360cf24db2f39b0b718114f,
-    type: 3}
-  PagePrefab: {fileID: 4729148963790719949, guid: 6d3b8bd2cd967ba40ad5f86c275e78f4,
-    type: 3}
-  audioSourceLocal: {fileID: 5193041093547074854}
-  audioSourceOmnipresent: {fileID: 0}
+  audioSource: {fileID: 5193041093547074854}
   LevelUpAudioClip: {fileID: 8300000, guid: 45bc14794e2ea5c4e911941728d1ab04, type: 3}
   SpawnAudioClip: {fileID: 8300000, guid: 8b48f504ea14bd3478589ee8b764f061, type: 3}
+  slenderBuffPrefab: {fileID: 1726926769373873527, guid: 03de876cb360cf24db2f39b0b718114f,
+    type: 3}
+  pagePrefab: {fileID: 4729148963790719949, guid: 6d3b8bd2cd967ba40ad5f86c275e78f4,
+    type: 3}
   playerUiPrefab: {fileID: 170056, guid: d302703ee10cf5745a3f6089104269c7, type: 3}
-  ChannelParticleSystem: {fileID: 869939701100057814}
-  RingsParticleSystem: {fileID: 7926362558119179767}
-  hasSpawned: 0
+  channelParticleSystem: {fileID: 869939701100057814}
+  ringsParticleSystem: {fileID: 7926362558119179767}
 --- !u!114 &678069653901993856
 MonoBehaviour:
   m_ObjectHideFlags: 0
