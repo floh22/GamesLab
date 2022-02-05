@@ -226,6 +226,8 @@ namespace GameUnit
             // Moved to Awake()
             // GameStateController.Instance.GameUnits.Add(this);
             // GameStateController.Instance.Minions[Team].Add(this);
+            
+            Material material = GetComponent<Renderer>().material;
         }
 
         // Update is called once per frame

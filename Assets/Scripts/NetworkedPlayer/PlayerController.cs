@@ -465,10 +465,15 @@ namespace NetworkedPlayer
 
         public void RespawnEnded()
         {
-            photonView.RPC("playSpawnAudio", RpcTarget.All, this.NetworkID);
             GameObject playerUiGo = playerUI.gameObject;
             playerUiGo.SetActive(true);
             // actionButtonsGroupGo.SetActive(true);  
+            
+            if (!photonView.IsMine)
+            {
+                return;
+            }
+            photonView.RPC("playSpawnAudio", RpcTarget.All, this.NetworkID);
             
             //Reset stats
             IsAlive = true;
@@ -822,13 +827,14 @@ namespace NetworkedPlayer
         }
         
         [PunRPC]
-        public void playSpawnAudio(int networkID, GameData.Team team)
+        public void playSpawnAudio(int networkID)
         {
+            Debug.Log("Here"+networkID+"|"+this.NetworkID);
+            Debug.Log("Here"+this.Team);
             if (this.NetworkID != networkID)
             {
                 return;
             }
-            Debug.Log(team + "|" + this.Team);
             audioSource.clip = SpawnAudioClip;
             audioSource.Play();
         }
