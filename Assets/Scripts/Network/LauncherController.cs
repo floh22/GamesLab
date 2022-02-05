@@ -215,6 +215,10 @@ namespace Network
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+            
+            ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = PersistentData.Team};
+            PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
+            
             InLobby = true;
             CheckGameStart();
         }
