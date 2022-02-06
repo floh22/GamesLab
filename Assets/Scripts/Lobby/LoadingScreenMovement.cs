@@ -28,7 +28,7 @@ public class LoadingScreenMovement : MonoBehaviour
     void Start()
     {
         RectTransform t = LeftMaskOne.transform.GetComponent<RectTransform>();
-        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 10.5f;
+        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 5f;
 
         //width = 1920 / 2;
         
@@ -48,7 +48,7 @@ public class LoadingScreenMovement : MonoBehaviour
         lastScreenSize = new Vector2(Screen.width, Screen.height);
             
         RectTransform t = LeftMaskOne.transform.GetComponent<RectTransform>();
-        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 10.5f;
+        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 5f;
             
         leftPosStart = LeftMaskOne.transform.position;
         leftPosEnd = leftPosStart + new Vector3(width, 0, 0);
