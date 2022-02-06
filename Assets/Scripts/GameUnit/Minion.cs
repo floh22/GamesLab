@@ -209,6 +209,21 @@ namespace GameUnit
                 GameObject uiGo = Instantiate(minionUiPrefab);
                 minionUI = uiGo.GetComponent<MinionUI>();
                 minionUI.SetTarget(this);
+                switch (Team)
+                {
+                    case GameData.Team.RED: 
+                        minionUI.SetColor(Color.red);
+                        break;
+                    case GameData.Team.BLUE: 
+                        minionUI.SetColor(Color.blue);
+                        break;
+                    case GameData.Team.GREEN:
+                        minionUI.SetColor(Color.green);
+                        break;
+                    case GameData.Team.YELLOW: 
+                        minionUI.SetColor(Color.yellow);
+                        break;
+                }
             }
             else
             {

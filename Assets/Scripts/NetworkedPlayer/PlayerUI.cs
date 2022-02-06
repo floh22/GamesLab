@@ -18,6 +18,9 @@ namespace NetworkedPlayer
 		[Tooltip("UI Slider to display Player's Health")]
 		[SerializeField]
 		private Slider playerHealthSlider;
+		
+		[SerializeField]
+		private Image fill;
 
 		private PlayerController target;
 
@@ -91,6 +94,11 @@ namespace NetworkedPlayer
 
 		#region Public Methods
 		
+		public void SetColor(Color color)
+		{
+			fill.color = color;
+		}
+
 		public void SetTarget(PlayerController toTarget){
 
 			if (toTarget == null) {

@@ -5,6 +5,7 @@ using System.Linq;
 using Network;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Lobby
@@ -87,6 +88,7 @@ namespace Lobby
         public void ShowCredits()
         {
             OnButtonClicked(showCredits);
+            SceneManager.LoadScene(2);
         }
 
         public void Exit()
