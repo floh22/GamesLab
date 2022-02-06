@@ -64,8 +64,8 @@ namespace Network
         private Coroutine playerNameDisplayRoutine;
         private float displayRoutineVelocity;
         
-        private static readonly int Offset = Animator.StringToHash("Offset");
-        private static readonly int Speed = Animator.StringToHash("Speed");
+        private static readonly int Offset = Animator.StringToHash("VerticalSpeed");
+        private static readonly int Speed = Animator.StringToHash("AirborneVerticalSpeed");
 
         #endregion
         

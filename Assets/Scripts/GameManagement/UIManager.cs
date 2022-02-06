@@ -133,7 +133,7 @@ namespace GameManagement
 
             SetAutoAttack(GameData.Instance.AutoAttack);
 
-            SlenderImage = IngameUI.transform.Find("SlenderImage").gameObject.GetComponent<Image>();
+            SlenderImage = IngameUI.transform.Find("SlenderIndicator").gameObject.GetComponent<Image>();
 
             GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
         }
