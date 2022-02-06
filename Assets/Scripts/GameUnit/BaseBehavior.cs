@@ -55,6 +55,9 @@ namespace GameUnit
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
         public GameObject innerChannelingParticleSystem;
 
+        public IEnumerator IsAttackedCoroutine;
+        public int TimeUntilIsAttackedSoundIsPlayedAgainst = 8;
+
         private int pages;
         
         public int Pages
@@ -164,7 +167,7 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
-            
+            this.IsAttackedCoroutine = this.IsAttackedTimer();
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -332,6 +335,18 @@ namespace GameUnit
             {
                 baseBehavior.hasBeenChanneledOnce = true;
             }
+        }
+
+        private IEnumerator IsAttackedTimer()
+        {
+            if (this.IsAttackedCoroutine == null && this.IsAttackedCoroutine.Equals(null))
+            {
+                Debug.Log("Hier könnte auch ihr Sound spielen.");
+            }
+            
+            yield return new WaitForSeconds(this.TimeUntilIsAttackedSoundIsPlayedAgainst);
+
+            this.IsAttackedCoroutine = null;
         }
 
         private Color Copy(Color color)
