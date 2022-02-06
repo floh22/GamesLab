@@ -439,19 +439,25 @@ namespace Network
                     return;
                 }
 
-                //Why only for minions??? this is why we have IGameUnit Aymane....
-                //I am the owner. Deal the damage. This will get synced by photon
-                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                if(target is Minion || target is BaseBehavior)
                 {
-                    target.Health = Mathf.Max(0, target.Health - damage);
-                } 
-                
-                target.DoDamageVisual(source, damage);
+                    //Why only for minions??? this is why we have IGameUnit Aymane....
+                    //I am the owner. Deal the damage. This will get synced by photon
+                    if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                    {
+                        target.Health = Mathf.Max(0, target.Health - damage);
+                    } 
+                    
+                    target.DoDamageVisual(source, damage);
+                }
 
                 /* Start of Ellen's Attack and Damaged Animations stuff */      
 
-                if(target.ToString().StartsWith("Ellen"))
+                else if(target is PlayerController)
                 {
+                    target.Health = Mathf.Max(0, target.Health - damage);
+                    target.DoDamageVisual(source, damage);
+
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     // Debug.Log($"Ellen of team {targetTeam} is taking dmg."); 
