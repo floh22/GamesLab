@@ -289,28 +289,11 @@ namespace NetworkedPlayer
             // we only process Inputs and check health if we are the local player
             if (photonView.IsMine)
             {
-                if (!HasCurrentTarget())
-                {
-                    SetPotentialTargetToCurrentTarget();
-                }
-                if (!HasCurrentTarget() || isAttacking)
+                if (!isAutoattackOn)
                 {
                     return;
                 }
-                if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
-                {
-                    return;
-                }
-
-                switch (CurrentAttackTarget.Type)
-                {
-                    case GameUnitType.Player:
-                        StartCoroutine(Attack(AttackDamage));
-                        break;
-                    case GameUnitType.Minion:
-                        StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
-                        break;
-                }
+                AttackTarget();
 
                 //This should in theory not be needed anymore since pages are now fully networked
                 /*
@@ -381,6 +364,11 @@ namespace NetworkedPlayer
         #endregion
 
         #region Public API
+
+        public void AttackCurrentTarget()
+        {
+            AttackTarget();
+        }
 
         public void AutoAttackOn()
         {
@@ -885,6 +873,37 @@ namespace NetworkedPlayer
 
         #region Utils
 
+        private void AttackTarget()
+        {
+            if (isChannelingObjective)
+            {
+                return;
+            }
+
+            if (!HasCurrentTarget())
+            {
+                SetPotentialTargetToCurrentTarget();
+            }
+            if (!HasCurrentTarget() || isAttacking)
+            {
+                return;
+            }
+            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+            {
+                return;
+            }
+
+            switch (CurrentAttackTarget.Type)
+            {
+                case GameUnitType.Player:
+                    StartCoroutine(Attack(AttackDamage));
+                    break;
+                case GameUnitType.Minion:
+                    StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
+                    break;
+            }
+        }
+
         private bool HasCurrentTarget()
         {
             //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
@@ -988,11 +1007,6 @@ namespace NetworkedPlayer
 
         private IEnumerator Attack(float damage)
         {
-            if (isChannelingObjective || !isAutoattackOn)
-            {
-                yield break;
-            }
-
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);

@@ -15,7 +15,7 @@ namespace Lobby
         public static MenuUIController Instance;
         
         [SerializeField] private HoverMenuButton findLobby;
-        [SerializeField] private HoverMenuButton showCredits;
+        [SerializeField] private HoverMenuButton showTutorial;
         [SerializeField] private HoverMenuButton exitGame;
         [SerializeField] private HoverMenuButton serverStatus;
 
@@ -36,7 +36,7 @@ namespace Lobby
 
             Instance = this;
 
-            menuButtons = new List<HoverMenuButton> { findLobby, showCredits, exitGame, serverStatus, menuNameInput};
+            menuButtons = new List<HoverMenuButton> { findLobby, showTutorial, exitGame, serverStatus, menuNameInput};
 
             ShowUI(0.5f);
         }
@@ -85,10 +85,10 @@ namespace Lobby
             LauncherController.Instance.Connect();
         }
 
-        public void ShowCredits()
+        public void ShowTutorial()
         {
-            OnButtonClicked(showCredits);
-            SceneManager.LoadScene(2);
+            OnButtonClicked(showTutorial);
+            StartCoroutine(ActionAfterDelay(0.5f, () => SceneManager.LoadScene(2)));
         }
 
         public void Exit()

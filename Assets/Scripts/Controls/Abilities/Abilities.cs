@@ -205,6 +205,7 @@ namespace Controls.Abilities
 
                 ellenPlayerInput.DoAttack();
                 collisionSphereForStaff.activateDamage();
+                PlayerController.LocalPlayerController.AttackCurrentTarget();
 
                 /* End of Ellen's Attack Animation stuff */
                 break;
