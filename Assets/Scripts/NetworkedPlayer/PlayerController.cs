@@ -829,8 +829,6 @@ namespace NetworkedPlayer
         [PunRPC]
         public void playSpawnAudio(int networkID)
         {
-            Debug.Log("Here"+networkID+"|"+this.NetworkID);
-            Debug.Log("Here"+this.Team);
             if (this.NetworkID != networkID)
             {
                 return;

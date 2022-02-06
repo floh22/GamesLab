@@ -16,6 +16,7 @@ namespace Controls.Abilities
         public float ABILITY_DAMAGE = 20;
         public AudioSource AudioSource;
 
+
         private bool damageIsActivated = false;
 
         /* Start of Debug stuff
@@ -44,6 +45,8 @@ namespace Controls.Abilities
                 // Ignore units without GameUnit component
                 if (targetIGameUnit != null && !(targetIGameUnit is BaseBehavior))
                 {
+                    AudioSource.Play();
+
                     float damageMultiplier =
                         PlayerController.LocalPlayerController.DamageMultiplierAbility2 * (targetIGameUnit.Type.Equals(GameUnitType.Minion)
                             ? PlayerController.LocalPlayerController.DamageMultiplierMinion
@@ -52,7 +55,6 @@ namespace Controls.Abilities
                     float totalAbilityDamage = ABILITY_DAMAGE * damageMultiplier;
                 
                     IGameUnit.SendDealDamageEvent(PlayerController.LocalPlayerController, targetIGameUnit, totalAbilityDamage);
-                    this.playImpactAudio();
 
                     Debug.Log($"Player {PlayerController.LocalPlayerController.gameObject.name} of team {PlayerController.LocalPlayerController.Team} threw {this.gameObject.name} on {gameObj.name} of team {targetIGameUnit.Team} and did {totalAbilityDamage} damage.");
                 }
@@ -95,12 +97,6 @@ namespace Controls.Abilities
         public void activateDamage()
         {
             damageIsActivated = true;
-        }
-        
-        private void playImpactAudio()
-        {
-            AudioSource.enabled = true;
-            AudioSource.Play();
         }
 
         /* Start of Debug stuff
