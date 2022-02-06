@@ -18,7 +18,21 @@ namespace GameUnit
     public class BaseBehavior : MonoBehaviourPunCallbacks, IGameUnit
     {
         public int NetworkID { get; set; }
-        public int OwnerID => GameStateController.Instance.Players[Team].OwnerID;
+
+        public int OwnerID
+        {
+            get
+            {
+                try
+                {
+                    return GameStateController.Instance.Players[Team].OwnerID;
+                }
+                catch
+                {
+                    return -1;
+                }
+            }
+        }
         public GameData.Team Team { get; set; }
 
         public GameObject AttachtedObjectInstance { get; set; }

@@ -12,11 +12,7 @@ namespace GameManagement
         private int minutes;
         private int seconds;
         private string niceTime;
-
-        void Start()
-        {
-            timeRemainingComponent = GameObject.Find("Timer").GetComponent<TextMeshProUGUI>();
-        }
+        
         void Update()
         {
             if (timeRemainingInSeconds <= 0) return;

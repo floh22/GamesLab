@@ -439,24 +439,18 @@ namespace Network
                     return;
                 }
 
-                if(target.ToString().StartsWith("Minion"))
-                {                 
-                    //I am the owner. Deal the damage. This will get synced by photon
-                    if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
-                    {
-                        target.Health = Mathf.Max(0, target.Health - damage);   
-                        target.DoDamageVisual(source, damage);                            
-                    }    
-                }      
+                //Why only for minions??? this is why we have IGameUnit Aymane....
+                //I am the owner. Deal the damage. This will get synced by photon
+                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    target.Health = Mathf.Max(0, target.Health - damage);   
+                    target.DoDamageVisual(source, damage);                            
+                }        
 
                 /* Start of Ellen's Attack and Damaged Animations stuff */      
 
                 if(target.ToString().StartsWith("Ellen"))
-                {          
-                    target.Health = Mathf.Max(0, target.Health - damage);   
-                    target.DoDamageVisual(source, damage);                      
-
-                    String targetTeam = target.Team.ToString();
+                {
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     // Debug.Log($"Ellen of team {targetTeam} is taking dmg."); 
@@ -486,16 +480,7 @@ namespace Network
                             // Gamekit3D.PlayerController ellenGamekit3DPlayerController = ellenPlayerController.gameObject.GetComponent<Gamekit3D.PlayerController>();
                             // ellenGamekit3DPlayerController.DoTakeDamageVisual();
 
-                            MonoBehaviour damager = null;
-
-                            if(source.ToString().StartsWith("Minion"))
-                            {
-                                damager = ((Minion) source);
-                            }
-                            else if(source.ToString().StartsWith("Ellen"))
-                            {
-                                damager = ((PlayerController) source);
-                            }  
+                            MonoBehaviour damager = (MonoBehaviour) source;
 
                             Vector3 direction = (target.Position - source.Position).normalized;
 

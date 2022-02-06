@@ -64,8 +64,8 @@ namespace Network
         private Coroutine playerNameDisplayRoutine;
         private float displayRoutineVelocity;
         
-        private static readonly int Offset = Animator.StringToHash("Offset");
-        private static readonly int Speed = Animator.StringToHash("Speed");
+        private static readonly int Offset = Animator.StringToHash("VerticalSpeed");
+        private static readonly int Speed = Animator.StringToHash("AirborneVerticalSpeed");
 
         #endregion
         
@@ -215,6 +215,10 @@ namespace Network
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+            
+            ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = PersistentData.Team};
+            PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
+            
             InLobby = true;
             CheckGameStart();
         }

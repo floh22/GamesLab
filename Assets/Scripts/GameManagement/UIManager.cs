@@ -27,42 +27,51 @@ namespace GameManagement
 
         #region BasicUI
 
+        [Header("UI Components")]
         public GameObject PauseMenuUI;
         public GameObject IngameUI;
         public GameObject GameOverUI;
         public Image MinionSwitchButtonImage;
         public GameObject ActionButtonsGroup;
 
+        
         private GameObject PagesContainer;
         private Image[] PagesImages;
+        [Header("Base Stats")]
+        [SerializeField] private RectTransform baseHealthTransform;
+        private float baseHealthDisplayWidth;
 
+        [Header("Auto Attack Swap")]
         [SerializeField] private GameObject AutoAttackOnImage;
         [SerializeField] private GameObject AutoAttackOffImage;
 
+        [Header("Slenderman Indicator")]
         [SerializeField] private Image SlenderImage;
         private bool IsSlenderCooldown;
         private float SlenderCooldownDuration;
 
+        [Header("Death Indicator")]
         [SerializeField] private Image DeathIndicatorImage; 
         private bool IsDeathCooldown;
         private float DeathCooldownDuration;
-
-        private Image HealthbarImage;
-        [SerializeField] private Image OwnPlayerLevelBackgroundImage; 
-
         
+        [Header("Game Over")]
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_1; 
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_2; 
-        [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_3; 
+        [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_3;
 
 
         #endregion
 
         #region Level
+        
+        [Header("Level Up")]
 
         [SerializeField] private TextMeshProUGUI LevelLabel;
         [SerializeField] private TextMeshProUGUI LevelUpLabel;
         private GameObject[] levelUpButtons;
+        
+        [Header("Abilities")]
         public Image Circular_Meter_RANGE;
         public Image Circular_Meter_LINE;
         public Image Circular_Meter_MINION;
@@ -76,6 +85,7 @@ namespace GameManagement
         #region Scoreboard
 
         public HashSet<GameData.Team> ScoreboardEntries { get; set; }
+        [Header("Scoreboard")]
         [SerializeField] private TextMeshProUGUI[] Player_Pages_Labels;
         [SerializeField] private TextMeshProUGUI[] Player_Level_Labels;
         [SerializeField] private Image[] Player_Sprite_Images;
@@ -116,13 +126,14 @@ namespace GameManagement
 
             _playerController = PlayerController.LocalPlayerController;
 
-            PagesContainer = IngameUI.transform.Find("Pages Container").gameObject;
+            baseHealthDisplayWidth = baseHealthTransform.rect.width;
+
+            PagesContainer = IngameUI.transform.Find("TopRightUI").Find("Pages Container").gameObject;
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
 
             SetAutoAttack(GameData.Instance.AutoAttack);
 
-            SlenderImage = IngameUI.transform.Find("SlenderImage").gameObject.GetComponent<Image>();
-            HealthbarImage = IngameUI.transform.Find("Healthbar").gameObject.transform.Find("Healthbar_InnerBar").gameObject.GetComponent<Image>();
+            SlenderImage = IngameUI.transform.Find("SlenderIndicator").gameObject.GetComponent<Image>();
 
             GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
         }
@@ -138,7 +149,13 @@ namespace GameManagement
             if (_playerController != null)
             {
                 LevelLabel.text = _playerController.Level.ToString();
-                HealthbarImage.fillAmount = _playerController.Health / 100;
+                //HealthbarImage.fillAmount = _playerController.Health / 100;
+            }
+            
+            if (GameStateController.Instance != null && GameStateController.Instance.Bases != null && GameStateController.Instance.Bases.TryGetValue(PersistentData.Team ?? throw new NullReferenceException(), out BaseBehavior ownBase))
+            {
+                baseHealthTransform.sizeDelta =
+                    new Vector2((ownBase.Health / ownBase.MaxHealth) * baseHealthDisplayWidth, baseHealthTransform.rect.height);
             }
 
             if (IsSlenderCooldown)
@@ -173,7 +190,7 @@ namespace GameManagement
             SetPages(PlayerValues.PagesAmount);
             SetVisibilityOfLevelUpButtons(false);
             UpdateCircularMeters();
-            OwnPlayerLevelBackgroundImage.color = GetColor(_playerController.Team);
+            //OwnPlayerLevelBackgroundImage.color = GetColor(_playerController.Team);
             SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
 
         }
