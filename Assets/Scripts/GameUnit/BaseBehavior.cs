@@ -1,17 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Character;
-using Controls.Channeling;
-using ExitGames.Client.Photon;
 using GameManagement;
 using Network;
 using NetworkedPlayer;
 using Photon.Pun;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 namespace GameUnit
 {
@@ -68,6 +63,11 @@ namespace GameUnit
         public IGameUnit CurrentAttackTarget { get; set; } = null;
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
         public GameObject innerChannelingParticleSystem;
+
+        public IEnumerator IsAttackedCoroutine;
+        public int TimeUntilIsAttackedSoundIsPlayedAgainst = 8;
+
+        public AudioSource AudioSource;
 
         private int pages;
         
@@ -178,7 +178,8 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
-            
+            this.IsAttackedCoroutine = this.IsAttackedTimer();
+            Debug.Log("Base getting attacked");
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -346,6 +347,19 @@ namespace GameUnit
             {
                 baseBehavior.hasBeenChanneledOnce = true;
             }
+        }
+
+        private IEnumerator IsAttackedTimer()
+        {
+            if (this.IsAttackedCoroutine == null && this.IsAttackedCoroutine.Equals(null))
+            {
+                AudioSource.enabled = true;
+                AudioSource.Play();
+            }
+            
+            yield return new WaitForSeconds(this.TimeUntilIsAttackedSoundIsPlayedAgainst);
+
+            this.IsAttackedCoroutine = null;
         }
 
         private Color Copy(Color color)
