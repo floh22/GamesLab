@@ -1758,7 +1758,7 @@ GameObject:
   - component: {fileID: 8798221313809706362}
   m_Layer: 12
   m_Name: REDK
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3276,7 +3276,7 @@ GameObject:
   - component: {fileID: 6076744330566589632}
   m_Layer: 15
   m_Name: YELLOWK
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4175,7 +4175,7 @@ GameObject:
   - component: {fileID: 1919439788457766393}
   m_Layer: 13
   m_Name: BLUEK
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4641,7 +4641,7 @@ GameObject:
   - component: {fileID: 5911255106125019543}
   m_Layer: 11
   m_Name: YELLOW OLD
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
@@ -18017,7 +18017,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5797
+  m_VersionIndex: 5800
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -18140,7 +18140,7 @@ GameObject:
   - component: {fileID: 5911255106632706221}
   m_Layer: 11
   m_Name: BLUE OLD
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
@@ -31516,7 +31516,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5803
+  m_VersionIndex: 5806
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -31717,7 +31717,7 @@ GameObject:
   - component: {fileID: 5911255107177192922}
   m_Layer: 11
   m_Name: GREEN OLD
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
@@ -45093,7 +45093,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5791
+  m_VersionIndex: 5794
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -45216,7 +45216,7 @@ GameObject:
   - component: {fileID: 5911255107395939131}
   m_Layer: 11
   m_Name: RED OLD
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
@@ -58592,7 +58592,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5803
+  m_VersionIndex: 5806
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -59766,7 +59766,7 @@ GameObject:
   - component: {fileID: 2232540982278483746}
   m_Layer: 14
   m_Name: GREENK
-  m_TagString: Untagged
+  m_TagString: Base
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -60966,6 +60966,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 15
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 85ad39652a734d04b95c30a83b29068c,
+        type: 3}
+      propertyPath: m_TagString
+      value: Base
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85ad39652a734d04b95c30a83b29068c, type: 3}
 --- !u!1 &1325879203610415481 stripped
@@ -60987,38 +60992,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.2713118, y: 8.896651, z: 5.0351768}
   m_Center: {x: 0, y: -0.26253462, z: 2.517588}
---- !u!208 &4511047018178253978
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325879203610415481}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 2.6360002, y: 4.4480004, z: 2.5180001}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: -0.263, z: 2.5180001}
-  m_TimeToStationary: 0.5
---- !u!114 &8529192917374056340
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325879203610415481}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _health: 0
-  innerChannelingParticleSystem: {fileID: 6482828219871058949}
-  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 4128045787060888652}
 --- !u!82 &4128045787060888652
 AudioSource:
   m_ObjectHideFlags: 0
@@ -61116,6 +61089,38 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!208 &4511047018178253978
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1325879203610415481}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 2.6360002, y: 4.4480004, z: 2.5180001}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: -0.263, z: 2.5180001}
+  m_TimeToStationary: 0.5
+--- !u!114 &8529192917374056340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1325879203610415481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _health: 0
+  innerChannelingParticleSystem: {fileID: 6482828219871058949}
+  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
+  AudioSource: {fileID: 4128045787060888652}
 --- !u!4 &1814291702944795587 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85ad39652a734d04b95c30a83b29068c,
@@ -61680,6 +61685,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 13
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 85ad39652a734d04b95c30a83b29068c,
+        type: 3}
+      propertyPath: m_TagString
+      value: Base
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85ad39652a734d04b95c30a83b29068c, type: 3}
 --- !u!1 &2605002613411743773 stripped
@@ -61701,38 +61711,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.2713118, y: 8.896651, z: 5.0351768}
   m_Center: {x: 0, y: -0.26253462, z: 2.517588}
---- !u!208 &7293872207850336089
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2605002613411743773}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 2.6360002, y: 4.4480004, z: 2.5180001}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: -0.263, z: 2.5180001}
-  m_TimeToStationary: 0.5
---- !u!114 &2221498463410244953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2605002613411743773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _health: 0
-  innerChannelingParticleSystem: {fileID: 6482828219871058949}
-  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
 --- !u!82 &2093398085986393837
 AudioSource:
   m_ObjectHideFlags: 0
@@ -61830,6 +61808,38 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!208 &7293872207850336089
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605002613411743773}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 2.6360002, y: 4.4480004, z: 2.5180001}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: -0.263, z: 2.5180001}
+  m_TimeToStationary: 0.5
+--- !u!114 &2221498463410244953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605002613411743773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _health: 0
+  innerChannelingParticleSystem: {fileID: 6482828219871058949}
+  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
+  AudioSource: {fileID: 0}
 --- !u!4 &3417392913480372903 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85ad39652a734d04b95c30a83b29068c,
@@ -63801,6 +63811,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 85ad39652a734d04b95c30a83b29068c,
+        type: 3}
+      propertyPath: m_TagString
+      value: Base
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85ad39652a734d04b95c30a83b29068c, type: 3}
 --- !u!4 &6087457808515496875 stripped
@@ -63844,22 +63859,6 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: -0.263, z: 2.5180001}
   m_TimeToStationary: 0.5
---- !u!114 &8883508675479832221
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6859314505634947345}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _health: 0
-  innerChannelingParticleSystem: {fileID: 6482828219871058949}
-  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
 --- !u!82 &5225637385616526148
 AudioSource:
   m_ObjectHideFlags: 0
@@ -63957,6 +63956,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8883508675479832221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6859314505634947345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _health: 0
+  innerChannelingParticleSystem: {fileID: 6482828219871058949}
+  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
+  AudioSource: {fileID: 0}
 --- !u!1001 &6072555458644701202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64098,6 +64113,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 14
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 85ad39652a734d04b95c30a83b29068c,
+        type: 3}
+      propertyPath: m_TagString
+      value: Base
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85ad39652a734d04b95c30a83b29068c, type: 3}
 --- !u!4 &5973428761765290981 stripped
@@ -64141,22 +64161,6 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: -0.263, z: 2.5180001}
   m_TimeToStationary: 0.5
---- !u!114 &6498521742965689679
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6462156820733458783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _health: 0
-  innerChannelingParticleSystem: {fileID: 6482828219871058949}
-  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
 --- !u!82 &1677484704629062306
 AudioSource:
   m_ObjectHideFlags: 0
@@ -64254,6 +64258,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6498521742965689679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462156820733458783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d0c21db6b95ba42a862544ab9028f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _health: 0
+  innerChannelingParticleSystem: {fileID: 6482828219871058949}
+  TimeUntilIsAttackedSoundIsPlayedAgainst: 8
+  AudioSource: {fileID: 0}
 --- !u!1001 &6157600937875854602
 PrefabInstance:
   m_ObjectHideFlags: 0
