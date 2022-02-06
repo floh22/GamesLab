@@ -33,6 +33,7 @@ namespace GameManagement
         public GameObject GameOverUI;
         public Image MinionSwitchButtonImage;
         public GameObject ActionButtonsGroup;
+        public GameObject LevelUpButtonsGroup;
 
         
         private GameObject PagesContainer;
@@ -176,6 +177,7 @@ namespace GameManagement
                     IsDeathCooldown = false;
                     DeathIndicatorImage.enabled = false;
                     ActionButtonsGroup.SetActive(true);
+                    LevelUpButtonsGroup.SetActive(true);
                 }
             }
 
@@ -419,6 +421,7 @@ namespace GameManagement
             DeathCooldownDuration = duration + 0.5f;
             IsDeathCooldown = true;
             ActionButtonsGroup.SetActive(false);
+            LevelUpButtonsGroup.SetActive(false);
         }
 
         public void UIHELPERMETHODAddExperience(int experience)
