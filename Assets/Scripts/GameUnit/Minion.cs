@@ -166,6 +166,11 @@ namespace GameUnit
             // Add to local instance of GameStateController
             GameStateController.Instance.GameUnits.Add(this);
             GameStateController.Instance.Minions[Team].Add(this);
+
+            if (UIManager.Instance.isGameOver)
+            {
+                GetComponent<UnitVisibilityScript>().enabled = false;
+            }
         }
 
         // Start is called before the first frame update

@@ -395,6 +395,8 @@ namespace NetworkedPlayer
         {
             IsAlive = false;
 
+            GameStateController.Instance.Deaths++;
+
             if (HasPage)
             {
                 DropPageOnTheGround();
@@ -1012,6 +1014,20 @@ namespace NetworkedPlayer
             CurrentAttackTarget.AddAttacker(self);
             GameStateController.SendPlayerAutoAttackEvent(Team);
             ((IGameUnit) this).SendDealDamageEvent(CurrentAttackTarget, damage);
+
+            if (CurrentAttackTarget.Health - damage <= 0)
+            {
+                switch (CurrentAttackTarget.Type)
+                {
+                    case GameUnitType.Minion:
+                        GameStateController.Instance.MinionKills++;
+                        break;
+                    case GameUnitType.Player:
+                        GameStateController.Instance.Kills++;
+                        break;
+                }
+            }
+
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();

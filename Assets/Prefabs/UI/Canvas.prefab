@@ -634,6 +634,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAbility: 1
   deadZone: 0
+  markedForCooldownRelease: 0
   _cirularMeterImage: {fileID: 6458101070729833937}
 --- !u!1 &1357534351650273591
 GameObject:
@@ -2427,6 +2428,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAbility: 3
   deadZone: 0.2
+  markedForCooldownRelease: 0
   _cirularMeterImage: {fileID: 4098313194750547674}
 --- !u!1 &2000761999462499093
 GameObject:
@@ -3213,6 +3215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentAbility: 2
   deadZone: 0.2
+  markedForCooldownRelease: 0
   _cirularMeterImage: {fileID: 1162133339901176501}
 --- !u!1 &2000761999673860643
 GameObject:
@@ -8278,7 +8281,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5463959272999434508}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -9011,7 +9014,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6789642864487061321}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -9156,7 +9159,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2594086892446405485}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1232644694308852934}
+        m_TargetAssemblyTypeName: GameManagement.UIManager, Assembly-CSharp
+        m_MethodName: CloseLoseRecap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7025455183075189046
 GameObject:
   m_ObjectHideFlags: 0
@@ -9434,7 +9449,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Leave the game
+  m_text: Close Recap
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -10950,6 +10965,12 @@ PrefabInstance:
       propertyPath: Circular_Meter_3
       value: 
       objectReference: {fileID: 4230233078043501339}
+    - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: deadPlayerPrefab
+      value: 
+      objectReference: {fileID: 8908762660349973041, guid: c09fc22cef9a79d4281337f509b1528a,
+        type: 3}
     - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
         type: 3}
       propertyPath: AutoAttackOnImage

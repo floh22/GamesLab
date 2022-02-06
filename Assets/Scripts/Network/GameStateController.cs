@@ -34,9 +34,7 @@ namespace Network
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
         public const byte PlayerAutoAttackEventCode = 8;
-
         public const byte PlayerLoadedEventCode = 12;
-        // public const byte MinionSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -89,13 +87,6 @@ namespace Network
             PhotonNetwork.RaiseEvent(PlayerLoadedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
-        // public static void SendMinionSpawnedEvent(GameData.Team team, int networkID)
-        // {
-        //     object[] content = { team, networkID }; 
-        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
-        //     PhotonNetwork.RaiseEvent(MinionSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        // }        
-
 
         [Header("Player Data")]
         [SerializeField]
@@ -140,6 +131,11 @@ namespace Network
 
 
         private bool hasLeft = false;
+
+
+        public int Kills;
+        public int MinionKills;
+        public int Deaths;
 
         #region Photon Callbacks
 
@@ -638,20 +634,18 @@ namespace Network
         public void OnLose()
         {
             PlayerController.LocalPlayerController.OnLoseGame();
-
+            UIManager.Instance.SetGameOver(Kills, Deaths, Players.Count - 1, PlayerController.LocalPlayerInstance.transform.position);
 
             MasterController.Instance.StopMinionSpawning(PlayerController.LocalPlayerController.Team);
 
             SendLoseGameEvent(PlayerController.LocalPlayerController.Team);
             PhotonNetwork.Destroy(PlayerController.LocalPlayerInstance);
-
-            UIManager.Instance.SetGameOver(0, 0, 0);
+            
             Camera.main.AddComponent<AudioListener>();
         }
 
         public void OnLose(GameData.Team team)
         {
-            Debug.Log(team + " lost network message");
             if (PhotonNetwork.IsMasterClient)
             {
                 foreach (Minion minion in Minions[team])
@@ -665,6 +659,12 @@ namespace Network
             Bases.Remove(team);
             Targets.Remove(team);
             GameUnits.RemoveWhere(unit => unit.Team == team);
+
+            if (Players.Count == 0)
+            {
+                PhotonNetwork.LeaveRoom();
+                SceneManager.LoadScene(0);
+            }
         }
 
 
