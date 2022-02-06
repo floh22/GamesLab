@@ -25,7 +25,10 @@ public class LoadingScreenMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        float width = (Camera.main.scaledPixelWidth / 160) * 103;
+        RectTransform t = LeftMaskOne.transform.GetComponent<RectTransform>();
+        float width = (Camera.main.scaledPixelWidth / 2) + (t.sizeDelta.x * t.localScale.x) / 10.5f;
+
+        //width = 1920 / 2;
         
         leftPosStart = LeftMaskOne.transform.position;
         leftPosEnd = leftPosStart + new Vector3(width, 0, 0);
