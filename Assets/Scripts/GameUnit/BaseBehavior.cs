@@ -170,6 +170,12 @@ namespace GameUnit
             UIManager.Instance.SetPages(Pages);
         }
 
+
+        public void StopMinionSpawning()
+        {
+            
+        }
+
         public bool IsDestroyed()
         {
             return !gameObject;
@@ -208,7 +214,11 @@ namespace GameUnit
         private void CheckHealth()
         {
             if (_health == 0)
+            {
                 --Pages;
+                _health = MaxHealth;
+            }
+                
         }
 
         public void DisableChannelEffects()
@@ -238,8 +248,14 @@ namespace GameUnit
                     yield break;
                 }
 
+                if (channeler == null || channeler.Equals(null))
+                {
+                    DisableChannelEffects();
+                    yield break;
+                }
+
                 // Interrupt channeling effects if player is out of range with a base.
-                if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
+                if ( Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
                 {                    
                     DisableChannelEffects();
                     channeler.InterruptChanneling();

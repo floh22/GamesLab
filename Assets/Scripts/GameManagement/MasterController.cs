@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ExitGames.Client.Photon;
 using GameUnit;
@@ -18,6 +19,7 @@ namespace GameManagement
         public static MasterController Instance;
         
         private float updateTimer;
+        
 
         public MasterController()
         {
@@ -46,6 +48,11 @@ namespace GameManagement
             StartCoroutine(SpawnMinions(startDelayInMs));
         }
 
+        public void StopMinionSpawning(GameData.Team team)
+        {
+            
+        }
+
         private IEnumerator SpawnMinions(int startDelayInMs = 0)
         {
             yield return new WaitForSeconds(startDelayInMs / 1000);
@@ -53,7 +60,6 @@ namespace GameManagement
             while (!GameStateController.Instance.IsPaused)
             {
                 StartCoroutine(OnWaveSpawn());
-                
                 yield return new WaitForSeconds(Minion.Values.WaveDelayInMs / 1000);
             }
         }
@@ -108,19 +114,25 @@ namespace GameManagement
 
         void SpawnMinions(object o , EventArgs e)
         {
-            Minion minion = null;
 
             //Don't actually spawn the minions unless we are the master client
             if (PhotonNetwork.IsMasterClient)
-            {            
-                foreach (GameData.Team team in (GameData.Team[]) Enum.GetValues(typeof(GameData.Team)))
+            {
+                var teamsToSpawn = GameStateController.Instance.Players.Keys.Count == 1
+                    ? new List<GameData.Team>()
+                    {
+                        GameData.Team.RED,
+                        GameData.Team.GREEN
+                    } 
+                    : GameStateController.Instance.Players.Keys.ToList();
+                foreach (GameData.Team team in teamsToSpawn)
                 {
                     Vector3 spawnPoint = GameStateController.Instance.minionSpawnPointHolder.transform.Find(team.ToString()).transform.position;
 
                     GameObject go = PhotonNetwork.Instantiate(GameStateController.Instance.minionPrefab.name, spawnPoint,
                         Quaternion.LookRotation((Vector3.zero - transform.position).normalized));
 
-                    minion = go.GetComponent<Minion>();
+                    Minion minion = go.GetComponent<Minion>();
                     minion.Init(go.GetPhotonView().InstantiationId, team, GameStateController.Instance.Targets[team]);
                     // GameStateController.Instance.Minions[team].Add(minion); // Moved to Minion Awake()
 

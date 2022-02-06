@@ -859,6 +859,8 @@ namespace NetworkedPlayer
 
         public void OnLoseGame()
         {
+            // Stop following alive character
+            cameraController.OnStopFollowing();
         }
         
 

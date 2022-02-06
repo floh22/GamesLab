@@ -458,8 +458,11 @@ namespace GameManagement
                     return;
             }
 
-            _playerController.Health -= 200;
+            //_playerController.Health -= 200;
             // SetGameOver(66, 66, 66);
+            GameData.Team t = (GameData.Team)PersistentData.Team;
+            GameStateController.Instance.Bases[t].Pages--;
+
         }
 
         void UpdateScoreboard()
@@ -529,6 +532,7 @@ namespace GameManagement
         {
             isGameOver = true;
             PauseMenuUI.SetActive(false);
+            gameTimer.SetInactive();
             IngameUI.SetActive(false);
             GameOverUI.SetActive(true);
             GameOver_Stat_Text_1.text = kills.ToString();

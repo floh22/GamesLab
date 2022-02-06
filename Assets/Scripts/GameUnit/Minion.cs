@@ -341,8 +341,8 @@ namespace GameUnit
                             break;
                         }
 
-                        if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) >
-                            Values.MinionAttackRange)
+                        if ( GetDistanceToTarget(CurrentAttackTarget) >
+                             Values.MinionAttackRange)
                         {
                             CurrentAttackTarget.RemoveAttacker(this);
                             CurrentChaseTarget = CurrentAttackTarget;
@@ -462,47 +462,74 @@ namespace GameUnit
 
         Dictionary<IGameUnit, float> FindUnits()
         {
-            String[] layers = new String[5];
-
-            layers[0] = "REDUnits";
-            layers[1] = "BLUEUnits";
-            layers[2] = "GREENUnits";
-            layers[3] = "YELLOWUnits";
+            string[] layers = { "REDUnits", "BLUEUnits", "GREENUnits", "YELLOWUnits"};
+            //Only look for units of other teams
+            layers = layers.Where(layer => !layer.StartsWith(Team.ToString(), StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
             // Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
-            var results = new Collider[6];
+            var results = new Collider[20];
             var foundUnits = new Dictionary<IGameUnit, float>();
 
+            //Find viable targets. Just use all layers in the layer mask instead of doing the same work 4 times Aymane...
+            Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask(layers));
+
             //Find viable targets
-            foreach (String layerName in layers)
+            foreach (Collider res in results.NotNull())
             {
-                Physics.OverlapSphereNonAlloc(Position, Values.MinionAgroRadius, results, LayerMask.GetMask(layerName));
+                IGameUnit unit = res.GetComponent<IGameUnit>();
 
-                //Find viable targets
-                foreach (Collider res in results.NotNull())
+                //Ignore units without GameUnit component
+                if (unit == null || unit.Equals(null) || unit.IsAlive == false)
                 {
-                    IGameUnit unit = res.GetComponent<IGameUnit>();
-
-                    //Ignore units without GameUnit component
-                    if (unit == null || unit.Equals(null) || unit.IsAlive == false)
-                    {
-                        continue;
-                    }
-
-                    //Get distance between the units.
-                    //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
-                    float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
-
-                    foundUnits.TryAdd(unit, distance);
+                    continue;
                 }
 
-                // The static Array.Clear() method "sets a range of elements in the Array to zero, to false, or to Nothing, 
-                // depending on the element type". If you want to clear your entire array, you could use this method an 
-                // provide it 0 as start index and myArray.Length as length:
-                Array.Clear(results, 0, results.Length);
+                //Get distance between the units.
+                //TODO Maybe use the NavMesh to find the distance since now a unit over a wall could in theory be the closest
+                float distance = Vector3.Distance(Position, res.ClosestPoint(Position));
+
+                foundUnits.TryAdd(unit, distance);
             }
 
             return foundUnits;
+        }
+        
+        float GetDistanceToTarget(IGameUnit target)
+        {
+            if (target == null || target.Equals(null))
+                return Mathf.Infinity;
+            
+            if(target.Type != GameUnitType.Structure)
+                return Vector3.Distance(Position, target.Position.XZPlane());
+                
+            //Only get physical distance to edge when its a base since other game units are far smaller
+                
+            string[] layers = { "REDUnits", "BLUEUnits", "GREENUnits", "YELLOWUnits"};
+            //Only look for units of other teams
+            layers = layers.Where(layer => !layer.StartsWith(Team.ToString(), StringComparison.InvariantCultureIgnoreCase)).ToArray();
+
+            // Find potential targets only if currently none is set. Max of 20 targets atm... should be enough? Increase/Decrease as needed. This might cause an issue in the future... oh well
+            var results = new RaycastHit[5];
+
+            Physics.RaycastNonAlloc(new Ray(Position, target.Position.XZPlane()), results, Values.MinionLeashRadius,
+                LayerMask.GetMask(layers));
+            RaycastHit targetHit = default;
+            
+            foreach (RaycastHit hit in results)
+            {
+                try
+                {
+                    IGameUnit u = hit.collider.gameObject.GetComponent<IGameUnit>();
+                    if (u.NetworkID != target.NetworkID) continue;
+                    targetHit = hit;
+                }
+                catch
+                {
+                    //only get gameunits
+                }
+            }
+
+            return EqualityComparer<RaycastHit>.Default.Equals(targetHit, default) ? Mathf.Infinity : targetHit.distance;
         }
 
         void CheckReturnPath()
@@ -527,17 +554,13 @@ namespace GameUnit
 
             if (dist <= Values.MinionAttackRange)
             {
-                var results = new Collider[20];
-                Physics.OverlapSphereNonAlloc(Position, Values.MinionAttackRange, results,
-                    LayerMask.GetMask("GameObject"));
+                var results = FindUnits();
 
                 bool foundAlly = false;
                 bool foundEnemy = false;
 
-                foreach (Collider res in results.NotNull())
+                foreach (IGameUnit unit in results.Keys.NotNull())
                 {
-                    IGameUnit unit = res.GetComponent<IGameUnit>();
-
                     //Ignore units without GameUnit component
                     if (unit == null || unit.Equals(null) || unit.IsAlive == false)
                     {
@@ -588,7 +611,7 @@ namespace GameUnit
                 return;
             }
 
-            float distanceToTarget = Vector3.Distance(Position, CurrentChaseTarget.Position.XZPlane());
+            float distanceToTarget = GetDistanceToTarget(CurrentChaseTarget);
             float distanceToPath = Vector3.Distance(Position, nearestPointOnPath);
 
             //Check if target is outside of leash range
@@ -619,8 +642,7 @@ namespace GameUnit
             //If we are targeting a minion, see if there is a closer minion we can attack
             if (CurrentChaseTarget.Type == GameUnitType.Minion)
             {
-                (IGameUnit closest, float closestDistance) = (from unit in FindUnits() orderby unit.Value select unit)
-                    .Where(unit => unit.Key.Type == GameUnitType.Minion && unit.Key.Team != this.Team).FirstOrDefault();
+                (IGameUnit closest, float closestDistance) = (from unit in FindUnits() orderby unit.Value select unit).FirstOrDefault(unit => unit.Key.Type == GameUnitType.Minion && unit.Key.Team != this.Team);
 
                 //If there are not minions found nearby, we have no target. This will make minions de agro other minions as soon as they are out of agro range... might break stuff?
                 if (!(closest == null || closest.Equals(null) || closest.IsDestroyed()) &&
@@ -675,7 +697,7 @@ namespace GameUnit
                 yield break;
             }
 
-            if (Vector3.Distance(Position, CurrentAttackTarget.Position.XZPlane()) > Values.MinionAttackRange)
+            if (GetDistanceToTarget(CurrentAttackTarget) > Values.MinionAttackRange)
             {
                 CurrentAttackTarget.RemoveAttacker(this);
                 CurrentChaseTarget = CurrentAttackTarget;

@@ -50,7 +50,7 @@ namespace Network
         public static void SendLoseGameEvent(GameData.Team team)
         {
             object[] content = { team}; 
-            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
             PhotonNetwork.RaiseEvent(LoseGameEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
@@ -443,9 +443,10 @@ namespace Network
                 //I am the owner. Deal the damage. This will get synced by photon
                 if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    target.Health = Mathf.Max(0, target.Health - damage);   
-                    target.DoDamageVisual(source, damage);                            
-                }        
+                    target.Health = Mathf.Max(0, target.Health - damage);
+                } 
+                
+                target.DoDamageVisual(source, damage);
 
                 /* Start of Ellen's Attack and Damaged Animations stuff */      
 
@@ -637,14 +638,20 @@ namespace Network
         public void OnLose()
         {
             PlayerController.LocalPlayerController.OnLoseGame();
-            
+
+
+            MasterController.Instance.StopMinionSpawning(PlayerController.LocalPlayerController.Team);
+
             SendLoseGameEvent(PlayerController.LocalPlayerController.Team);
             PhotonNetwork.Destroy(PlayerController.LocalPlayerInstance);
-            
+
+            UIManager.Instance.SetGameOver(0, 0, 0);
+            Camera.main.AddComponent<AudioListener>();
         }
 
         public void OnLose(GameData.Team team)
         {
+            Debug.Log(team + " lost network message");
             if (PhotonNetwork.IsMasterClient)
             {
                 foreach (Minion minion in Minions[team])
