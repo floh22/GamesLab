@@ -54,11 +54,8 @@ namespace Network
 
         #region Private Fields
 
-        private List<RoomInfo> RoomList = new();
-
 
         private bool InLobby;
-        private bool IsReady;
         private bool JoinWhenReady;
 
         private Coroutine playerNameDisplayRoutine;
@@ -100,13 +97,13 @@ namespace Network
             // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
             if (PhotonNetwork.IsConnected && PhotonNetwork.NickName != "")
             {
-                if (!IsReady)
+                if (!PersistentData.ConnectedToServer)
                 {
                     JoinWhenReady = true;
                     return;
                 }
 
-                if (RoomList.Count == 0)
+                if (PersistentData.RoomList.Count == 0)
                 {
                     CreateRoom();
                     return;
@@ -116,7 +113,7 @@ namespace Network
                 {
                     Debug.Log("Attempting to join room");
                     PhotonNetwork.JoinRoom(
-                        (RoomList.FirstOrDefault(r => r.IsVisible && r.IsOpen )?? throw new NoAvailableRoomFoundException()).Name);
+                        (PersistentData.RoomList.FirstOrDefault(r => r.IsVisible && r.IsOpen )?? throw new NoAvailableRoomFoundException()).Name);
 
                 }
                 catch (NoAvailableRoomFoundException noRoomFound)
@@ -173,7 +170,7 @@ namespace Network
 
         public void OnConnectedToServer()
         {
-            IsReady = true;
+            PersistentData.ConnectedToServer = true;
         }
 
         public override void OnDisconnected(DisconnectCause cause)
@@ -253,7 +250,7 @@ namespace Network
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
                 return;
-            if (!IsReady)
+            if (!PersistentData.ConnectedToServer)
             {
                 JoinWhenReady = true;
             }
@@ -273,22 +270,10 @@ namespace Network
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
-            base.OnRoomListUpdate(roomList);
-            RoomList = roomList.Where(r => r.RemovedFromList == false && r.PlayerCount > 0).ToList();
-            IsReady = true;
-            Debug.Log($"{RoomList.Count} rooms available");
-            if (JoinWhenReady)
-            {
-                Connect();
-                JoinWhenReady = false;
-            }
+            if (!JoinWhenReady) return;
+            Connect();
+            JoinWhenReady = false;
         }
-
-        public override void OnCreatedRoom()
-        {
-            base.OnCreatedRoom();
-        }
-
         #endregion
 
 

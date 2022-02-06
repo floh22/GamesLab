@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Network;
 using Photon.Pun;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -24,6 +25,7 @@ namespace Lobby
         [SerializeField] private HoverMenuButton slendermanButton;
         [SerializeField] private HoverMenuButton basesButton;
         [SerializeField] private HoverMenuButton exitButton;
+        [SerializeField] private TMP_Text exitText;
 
 
         [SerializeField] private float buttonClickDelay = 0.2f;
@@ -47,6 +49,8 @@ namespace Lobby
         
         public void OnButtonClicked(HoverMenuButton button)
         {
+            exitText.text = "return";
+
             foreach (HoverMenuButton hoverMenuButton in (button == exitButton ? menuButtons.Except(new[] { button }).ToList() : menuButtons.Except(new[] { button, exitButton }).ToList()))
             {
                 hoverMenuButton.Click();
@@ -126,6 +130,7 @@ namespace Lobby
 
                 StartCoroutine(ActionAfterDelay(buttonClickDelay * 1.5f, () => SceneManager.LoadScene(0)));
             }
+            exitText.text = "exit to menu";
         }
 
     }
