@@ -120,8 +120,8 @@ namespace NetworkedPlayer
         [FormerlySerializedAs("PagePrefab")] [SerializeField] public GameObject pagePrefab;
         private Page currentPage;
 
-        private Queue<IGameUnit> PotentialTargets;
-        private HashSet<IGameUnit> PotentialTargetsSet;
+        private Queue<IGameUnit> potentialTargets;
+        private HashSet<IGameUnit> potentialTargetsSet;
 
         [SerializeField] public bool HasPage { get; set; }
 
@@ -190,8 +190,8 @@ namespace NetworkedPlayer
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
 
-            PotentialTargetsSet = new HashSet<IGameUnit>();
-            PotentialTargets = new Queue<IGameUnit>();
+            potentialTargetsSet = new HashSet<IGameUnit>();
+            potentialTargets = new Queue<IGameUnit>();
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             isAutoattackOn = true;
@@ -239,6 +239,21 @@ namespace NetworkedPlayer
                 GameObject uiGo = Instantiate(this.playerUiPrefab);
                 playerUI = uiGo.GetComponent<PlayerUI>();
                 playerUI.SetTarget(this);
+                switch (Team)
+                {
+                    case GameData.Team.RED: 
+                        playerUI.SetColor(Color.red);
+                        break;
+                    case GameData.Team.BLUE: 
+                        playerUI.SetColor(Color.blue);
+                        break;
+                    case GameData.Team.GREEN:
+                        playerUI.SetColor(Color.green);
+                        break;
+                    case GameData.Team.YELLOW: 
+                        playerUI.SetColor(Color.yellow);
+                        break;
+                }
             }
             else
             {
@@ -876,22 +891,22 @@ namespace NetworkedPlayer
         
         private bool HasPotentialTarget()
         {
-            if (PotentialTargets.Count == 0)
+            if (potentialTargets.Count == 0)
             {
                 return false;
             }
 
             IGameUnit potentialTarget = null;
-            while (PotentialTargetsSet.Count > 0 && !PotentialTargetsSet.Contains(potentialTarget))
+            while (potentialTargetsSet.Count > 0 && !potentialTargetsSet.Contains(potentialTarget))
             {
-                PotentialTargets.TryPeek(out potentialTarget);
-                if (!PotentialTargetsSet.Contains(potentialTarget))
+                potentialTargets.TryPeek(out potentialTarget);
+                if (!potentialTargetsSet.Contains(potentialTarget))
                 {
-                    PotentialTargets.Dequeue();
+                    potentialTargets.Dequeue();
                 }
             }
             
-            return PotentialTargetsSet.Count > 0;
+            return potentialTargetsSet.Count > 0;
         }
 
         private void SetPotentialTargetToCurrentTarget()
@@ -901,8 +916,8 @@ namespace NetworkedPlayer
                 return;
             }
 
-            CurrentAttackTarget = PotentialTargets.Dequeue();
-            PotentialTargetsSet.Remove(CurrentAttackTarget);
+            CurrentAttackTarget = potentialTargets.Dequeue();
+            potentialTargetsSet.Remove(CurrentAttackTarget);
         }
 
         private void AddTarget(IGameUnit target)
@@ -919,8 +934,8 @@ namespace NetworkedPlayer
 
             if (CurrentAttackTarget != null)
             {
-                PotentialTargetsSet.Add(target);
-                PotentialTargets.Enqueue(target);
+                potentialTargetsSet.Add(target);
+                potentialTargets.Enqueue(target);
                 return;
             }
 
@@ -944,9 +959,9 @@ namespace NetworkedPlayer
                 CurrentAttackTarget = null;
             }
 
-            if (PotentialTargetsSet.Contains(target))
+            if (potentialTargetsSet.Contains(target))
             {
-                PotentialTargetsSet.Remove(target);
+                potentialTargetsSet.Remove(target);
             }
         }
 
