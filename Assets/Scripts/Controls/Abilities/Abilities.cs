@@ -93,6 +93,8 @@ namespace Controls.Abilities
                 {
                     ability1Image.fillAmount = 1;
                     isCooldown1 = false;
+                    GameObject.FindWithTag("Ability1Handle").GetComponent<AbilityJoystick>().markedForCooldownRelease =
+                        true;
                 }
             }
 
@@ -103,6 +105,9 @@ namespace Controls.Abilities
                 {
                     ability2Image.fillAmount = 1;
                     isCooldown2 = false;
+                    GameObject.FindWithTag("Ability2Handle").GetComponent<AbilityJoystick>().markedForCooldownRelease =
+                        true;
+
                 }
             }
         }
@@ -226,7 +231,7 @@ namespace Controls.Abilities
                     energyExplosionAbilityScript.activateDamage(); // Activate damage for the caster (he main client).
 
                     /* End of the Energy Explosion stuff*/
-                    
+
                     isCooldown1 = true;
                     ability1Image.fillAmount = 0;
 

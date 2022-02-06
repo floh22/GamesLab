@@ -8,6 +8,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 {
     public Abilities.Ability currentAbility;
     public float deadZone = 0.2f;
+    public bool markedForCooldownRelease = false;
 
     [SerializeField] private Image _cirularMeterImage;
     private Abilities _abilities;
@@ -27,22 +28,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         _abilities = Abilities.Instance; 
         _abilityJoystick = parentGameObject.GetComponent<Joystick>();
         _abilityJoystickImage = parentGameObject.GetComponent<Image>();
-        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();  
-
-        // switch ((int) currentAbility)
-        // {
-        //     case ((int) Abilities.Ability.NORMAL):
-          
-        //     break;
-        //     case ((int) Abilities.Ability.LINE):
-
-        //     break;
-        //     case ((int) Abilities.Ability.RANGE):
-          
-        //     break;
-        //     default:
-        //     break;
-        // }        
+        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -78,6 +64,11 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         {
             RefreshReferences();
         }
+
+        if (this.markedForCooldownRelease)
+        {
+            this.markedForCooldownRelease = false;
+        }
         
         if (!_abilities.IsCooldown(currentAbility))
         {
@@ -92,7 +83,13 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        GetComponentInParent<FixedJoystick>().SendMessage("OnPointerUp", eventData);    
+        GetComponentInParent<FixedJoystick>().SendMessage("OnPointerUp", eventData);
+
+        if (this.markedForCooldownRelease)
+        {
+            this.markedForCooldownRelease = false;
+            return;
+        }
 
         if (InDeadZone())
         {
@@ -117,22 +114,7 @@ public class AbilityJoystick : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         _abilities = Abilities.Instance; 
         _abilityJoystick = parentGameObject.GetComponent<Joystick>();
         _abilityJoystickImage = parentGameObject.GetComponent<Image>();
-        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();  
-
-        // switch ((int) currentAbility)
-        // {
-        //     case ((int) Abilities.Ability.NORMAL):
-          
-        //     break;
-        //     case ((int) Abilities.Ability.LINE):
-
-        //     break;
-        //     case ((int) Abilities.Ability.RANGE):
-          
-        //     break;
-        //     default:
-        //     break;
-        // }        
+        _cirularMeterImage = parentGameObject.transform.Find("Circular_Meter").GetComponent<Image>();
     }
 
     private bool InDeadZone()
