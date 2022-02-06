@@ -137,6 +137,11 @@ MonoBehaviour:
   fogOfWarMesh: {fileID: 6541235781261919934}
   damageText: {fileID: 6558770237738666614, guid: 0420eb01f6b5adf47b307f9cca5d91f4,
     type: 3}
+  minion_materials:
+  - {fileID: 2100000, guid: 5e9135e27e909a042b2030159411a9ca, type: 2}
+  - {fileID: 2100000, guid: 1da146370cfd0a049bf09b4f2f09d463, type: 2}
+  - {fileID: 2100000, guid: 61ba23af9625cfe4c8e9e31fc69bdef3, type: 2}
+  - {fileID: 2100000, guid: 238d925fa510a994d82baabdeb9917d3, type: 2}
   ShowTarget: 0
 --- !u!195 &1269564560119471383
 NavMeshAgent:
