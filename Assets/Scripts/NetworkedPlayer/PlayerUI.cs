@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,14 @@ namespace NetworkedPlayer
 		[Tooltip("UI Slider to display Player's Health")]
 		[SerializeField]
 		private Slider playerHealthSlider;
+
+		[SerializeField]
+		private TMP_Text playerLevel;
+
+		[SerializeField] private Image playerLevelBackground;
+
+		[SerializeField] 
+		private Image playerExperience;
 		
 		[SerializeField]
 		private Image fill;
@@ -44,7 +53,6 @@ namespace NetworkedPlayer
 			canvasGroup = this.GetComponent<CanvasGroup>();
 			
 			this.transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
-			
 		}
 		
 		private void Update()
@@ -66,6 +74,9 @@ namespace NetworkedPlayer
 			{
 				Debug.LogError("playerHealthSlider is null in PlayerUI");
 			}
+
+			playerLevel.text = $"{target.Level}";
+			playerExperience.fillAmount = (float) target.Experience / target.ExperienceToReachNextLevel;
 		}
 
 		private void LateUpdate () {
@@ -97,6 +108,9 @@ namespace NetworkedPlayer
 		public void SetColor(Color color)
 		{
 			fill.color = color;
+
+			playerExperience.color = color;
+			playerLevel.color = color;
 		}
 
 		public void SetTarget(PlayerController toTarget){
