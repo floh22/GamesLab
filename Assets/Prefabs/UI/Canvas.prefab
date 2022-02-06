@@ -8260,7 +8260,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 805, y: -12.300016}
+  m_AnchoredPosition: {x: 805, y: -12.299988}
   m_SizeDelta: {x: 101.4068, y: 101.4068}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &1979652611986678965
@@ -10980,6 +10980,11 @@ PrefabInstance:
       propertyPath: DeathIndicatorImage
       value: 
       objectReference: {fileID: 7971209389335005422}
+    - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
+      propertyPath: LevelUpButtonsGroup
+      value: 
+      objectReference: {fileID: 2480761491889826826}
     - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
         type: 3}
       propertyPath: Circular_Meter_RANGE
