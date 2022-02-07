@@ -185,7 +185,7 @@ namespace GameUnit
         {
             this.CurrentlyAttackedBy.Add(unit);
             this.IsAttackedCoroutine = this.IsAttackedTimer();
-            Debug.Log("Base getting attacked");
+            // Debug.Log("Base getting attacked");
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

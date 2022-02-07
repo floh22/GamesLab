@@ -118,7 +118,7 @@ namespace NetworkedPlayer
 
         [FormerlySerializedAs("SlenderBuffPrefab")] [SerializeField] public GameObject slenderBuffPrefab;
         [FormerlySerializedAs("PagePrefab")] [SerializeField] public GameObject pagePrefab;
-        private Page currentPage;
+        public Page currentPage;
 
         private Queue<IGameUnit> potentialTargets;
         private HashSet<IGameUnit> potentialTargetsSet;
@@ -149,7 +149,7 @@ namespace NetworkedPlayer
         [FormerlySerializedAs("ChannelParticleSystem")] [SerializeField] public GameObject channelParticleSystem;
         [FormerlySerializedAs("RingsParticleSystem")] public GameObject ringsParticleSystem;
 
-        private bool isChannelingObjective;
+        public bool isChannelingObjective;
         private Vector3 channelingTo = Vector3.positiveInfinity;
 
         private IGameUnit self;
@@ -308,57 +308,6 @@ namespace NetworkedPlayer
                 }
                 */
             }
-        }
-
-        public void OnTriggerEnter(Collider other)
-        {
-            // we dont do anything if we are not the local player.
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-            
-            
-            //page code
-
-            if (!HasPage && other.CompareTag("Page"))
-            {
-                other.gameObject.GetPhotonView().TransferOwnership(PhotonNetwork.LocalPlayer);
-                Page page = other.GetComponent<Page>();
-
-                page.Follow(transform);
-                
-                
-                HasPage = true;
-                currentPage = page;
-                isChannelingObjective = false;
-                // Disable the channeling effect
-                channelParticleSystem.SetActive(false);
-                ringsParticleSystem.SetActive(false);
-                Debug.Log($"Page has been picked up by player of {Team} team");
-            }
-            
-            
-
-            if (other.gameObject == gameObject)
-                return;
-
-            var target = other.GetComponent<IGameUnit>();
-            
-            AddTarget(target);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            // we dont do anything if we are not the local player.
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-
-            var target = other.GetComponent<IGameUnit>();
-
-            DeleteTarget(target);
         }
 
         #endregion
@@ -941,7 +890,7 @@ namespace NetworkedPlayer
             potentialTargetsSet.Remove(CurrentAttackTarget);
         }
 
-        private void AddTarget(IGameUnit target)
+        public void AddTarget(IGameUnit target)
         {
             if (target == self)
             {
@@ -963,7 +912,7 @@ namespace NetworkedPlayer
             CurrentAttackTarget = target;
         }
 
-        private void DeleteTarget(IGameUnit target)
+        public void DeleteTarget(IGameUnit target)
         {
             if (target == null)
             {
