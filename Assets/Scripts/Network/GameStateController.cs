@@ -34,9 +34,7 @@ namespace Network
         public const byte LoseGameEventCode = 6;
         public const byte GameTimeEventCode = 7;
         public const byte PlayerAutoAttackEventCode = 8;
-
         public const byte PlayerLoadedEventCode = 12;
-        // public const byte MinionSpawnedEventCode = 12;
 
         public static UnityEvent LocalPlayerSpawnEvent = new();
 
@@ -50,7 +48,7 @@ namespace Network
         public static void SendLoseGameEvent(GameData.Team team)
         {
             object[] content = { team}; 
-            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
+            RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
             PhotonNetwork.RaiseEvent(LoseGameEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
@@ -88,13 +86,6 @@ namespace Network
             RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.All }; 
             PhotonNetwork.RaiseEvent(PlayerLoadedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
-
-        // public static void SendMinionSpawnedEvent(GameData.Team team, int networkID)
-        // {
-        //     object[] content = { team, networkID }; 
-        //     RaiseEventOptions raiseEventOptions = new() { Receivers = ReceiverGroup.Others }; 
-        //     PhotonNetwork.RaiseEvent(MinionSpawnedEventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        // }        
 
 
         [Header("Player Data")]
@@ -140,6 +131,11 @@ namespace Network
 
 
         private bool hasLeft = false;
+
+
+        public int Kills;
+        public int MinionKills;
+        public int Deaths;
 
         #region Photon Callbacks
 
@@ -439,18 +435,25 @@ namespace Network
                     return;
                 }
 
-                //Why only for minions??? this is why we have IGameUnit Aymane....
-                //I am the owner. Deal the damage. This will get synced by photon
-                if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                if(target is Minion || target is BaseBehavior)
                 {
-                    target.Health = Mathf.Max(0, target.Health - damage);   
-                    target.DoDamageVisual(source, damage);                            
-                }        
+                    //Why only for minions??? this is why we have IGameUnit Aymane....
+                    //I am the owner. Deal the damage. This will get synced by photon
+                    if (target.OwnerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                    {
+                        target.Health = Mathf.Max(0, target.Health - damage);
+                    } 
+                    
+                    target.DoDamageVisual(source, damage);
+                }
 
                 /* Start of Ellen's Attack and Damaged Animations stuff */      
 
-                if(target.ToString().StartsWith("Ellen"))
+                else if(target is PlayerController)
                 {
+                    target.Health = Mathf.Max(0, target.Health - damage);
+                    target.DoDamageVisual(source, damage);
+
                     PlayerController ellenPlayerController = (PlayerController) target;
 
                     // Debug.Log($"Ellen of team {targetTeam} is taking dmg."); 
@@ -637,10 +640,14 @@ namespace Network
         public void OnLose()
         {
             PlayerController.LocalPlayerController.OnLoseGame();
-            
+            UIManager.Instance.SetGameOver(Kills, Deaths, Players.Count - 1, PlayerController.LocalPlayerInstance.transform.position);
+
+            MasterController.Instance.StopMinionSpawning(PlayerController.LocalPlayerController.Team);
+
             SendLoseGameEvent(PlayerController.LocalPlayerController.Team);
             PhotonNetwork.Destroy(PlayerController.LocalPlayerInstance);
             
+            Camera.main.AddComponent<AudioListener>();
         }
 
         public void OnLose(GameData.Team team)
@@ -658,6 +665,12 @@ namespace Network
             Bases.Remove(team);
             Targets.Remove(team);
             GameUnits.RemoveWhere(unit => unit.Team == team);
+
+            if (Players.Count == 0)
+            {
+                PhotonNetwork.LeaveRoom();
+                SceneManager.LoadScene(0);
+            }
         }
 
 

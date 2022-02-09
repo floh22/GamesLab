@@ -21,11 +21,16 @@ public class LoadingScreenMovement : MonoBehaviour
     private Vector3 rightPosEnd;
 
     private Coroutine movementRoutine;
+
+    private Vector2 lastScreenSize = new Vector2(0,0);
     
     // Start is called before the first frame update
     void Start()
     {
-        float width = (Camera.main.scaledPixelWidth / 160) * 103;
+        RectTransform t = LeftMaskOne.transform.GetComponent<RectTransform>();
+        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 5f;
+
+        //width = 1920 / 2;
         
         leftPosStart = LeftMaskOne.transform.position;
         leftPosEnd = leftPosStart + new Vector3(width, 0, 0);
@@ -37,7 +42,19 @@ public class LoadingScreenMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (lastScreenSize == new Vector2(Screen.width, Screen.height)) return;
         
+        //Screen size changed
+        lastScreenSize = new Vector2(Screen.width, Screen.height);
+            
+        RectTransform t = LeftMaskOne.transform.GetComponent<RectTransform>();
+        float width = ((float)Screen.width / 2) + (t.sizeDelta.x * t.localScale.x) / 5f;
+            
+        leftPosStart = LeftMaskOne.transform.position;
+        leftPosEnd = leftPosStart + new Vector3(width, 0, 0);
+
+        rightPosStart = RightMaskOne.transform.position;
+        rightPosEnd = rightPosStart - new Vector3(width, 0, 0);
     }
 
 

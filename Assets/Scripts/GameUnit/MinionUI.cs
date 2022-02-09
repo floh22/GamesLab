@@ -24,6 +24,9 @@ namespace GameUnit
 		[SerializeField]
 		private Slider minionHealthSlider;
 
+		[SerializeField]
+		private Image fill;
+
 		private Minion target;
 
 		private Minion minion;
@@ -75,6 +78,11 @@ namespace GameUnit
 		#endregion
 
 		#region Public Methods
+
+		public void SetColor(Color color)
+		{
+			fill.color = color;
+		}
 		
 		public void SetTarget(Minion toTarget){
 

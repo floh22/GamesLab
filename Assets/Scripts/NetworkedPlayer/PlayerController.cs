@@ -120,6 +120,8 @@ namespace NetworkedPlayer
         [FormerlySerializedAs("PagePrefab")] [SerializeField] public GameObject pagePrefab;
         private Page currentPage;
 
+        private Queue<IGameUnit> potentialTargets;
+        private HashSet<IGameUnit> potentialTargetsSet;
 
         [SerializeField] public bool HasPage { get; set; }
 
@@ -188,6 +190,8 @@ namespace NetworkedPlayer
             AttachtedObjectInstance = gameObject;
             cameraController = gameObject.GetComponent<CameraController>();
 
+            potentialTargetsSet = new HashSet<IGameUnit>();
+            potentialTargets = new Queue<IGameUnit>();
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             isAutoattackOn = true;
@@ -235,6 +239,21 @@ namespace NetworkedPlayer
                 GameObject uiGo = Instantiate(this.playerUiPrefab);
                 playerUI = uiGo.GetComponent<PlayerUI>();
                 playerUI.SetTarget(this);
+                switch (Team)
+                {
+                    case GameData.Team.RED: 
+                        playerUI.SetColor(Color.red);
+                        break;
+                    case GameData.Team.BLUE: 
+                        playerUI.SetColor(Color.blue);
+                        break;
+                    case GameData.Team.GREEN:
+                        playerUI.SetColor(Color.green);
+                        break;
+                    case GameData.Team.YELLOW: 
+                        playerUI.SetColor(Color.yellow);
+                        break;
+                }
             }
             else
             {
@@ -270,24 +289,11 @@ namespace NetworkedPlayer
             // we only process Inputs and check health if we are the local player
             if (photonView.IsMine)
             {
-                //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
-                if (!(CurrentAttackTarget == null || CurrentAttackTarget.Equals(null) || isAttacking))
+                if (!isAutoattackOn)
                 {
-                    if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
-                    {
-                        return;
-                    }
-
-                    switch (CurrentAttackTarget.Type)
-                    {
-                        case GameUnitType.Player:
-                            StartCoroutine(Attack(AttackDamage));
-                            break;
-                        case GameUnitType.Minion:
-                            StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
-                            break;
-                    }
+                    return;
                 }
+                AttackTarget();
 
                 //This should in theory not be needed anymore since pages are now fully networked
                 /*
@@ -338,23 +344,8 @@ namespace NetworkedPlayer
                 return;
 
             var target = other.GetComponent<IGameUnit>();
-
-            if (target == self)
-            {
-                return;
-            }
-
-            if (target?.Team == self?.Team)
-            {
-                return;
-            }
-
-            if (CurrentAttackTarget != null)
-            {
-                return;
-            }
-
-            CurrentAttackTarget = target;
+            
+            AddTarget(target);
         }
 
         private void OnTriggerExit(Collider other)
@@ -366,25 +357,18 @@ namespace NetworkedPlayer
             }
 
             var target = other.GetComponent<IGameUnit>();
-            if (target == null)
-            {
-                return;
-            }
 
-            if (target == self)
-            {
-                return;
-            }
-
-            if (target == CurrentAttackTarget || CurrentAttackTarget == null)
-            {
-                CurrentAttackTarget = null;
-            }
+            DeleteTarget(target);
         }
 
         #endregion
 
         #region Public API
+
+        public void AttackCurrentTarget()
+        {
+            AttackTarget();
+        }
 
         public void AutoAttackOn()
         {
@@ -410,6 +394,8 @@ namespace NetworkedPlayer
         public void Die()
         {
             IsAlive = false;
+
+            GameStateController.Instance.Deaths++;
 
             if (HasPage)
             {
@@ -861,6 +847,8 @@ namespace NetworkedPlayer
 
         public void OnLoseGame()
         {
+            // Stop following alive character
+            cameraController.OnStopFollowing();
         }
         
 
@@ -885,6 +873,119 @@ namespace NetworkedPlayer
 
         #region Utils
 
+        private void AttackTarget()
+        {
+            if (isChannelingObjective)
+            {
+                return;
+            }
+
+            if (!HasCurrentTarget())
+            {
+                SetPotentialTargetToCurrentTarget();
+            }
+            if (!HasCurrentTarget() || isAttacking)
+            {
+                return;
+            }
+            if (Vector3.Distance(CurrentAttackTarget.Position, Position) > AttackRange)
+            {
+                return;
+            }
+
+            switch (CurrentAttackTarget.Type)
+            {
+                case GameUnitType.Player:
+                    StartCoroutine(Attack(AttackDamage));
+                    break;
+                case GameUnitType.Minion:
+                    StartCoroutine(Attack(AttackDamage * PlayerValues.AttackDamageMinionsMultiplier));
+                    break;
+            }
+        }
+
+        private bool HasCurrentTarget()
+        {
+            //Make sure to allways check == null and .Equals(null). This is because unity overwrites the Equals method for gameobjects, so we have to check both
+            return CurrentAttackTarget != null && !CurrentAttackTarget.Equals(null);
+        }
+        
+        private bool HasPotentialTarget()
+        {
+            if (potentialTargets.Count == 0)
+            {
+                return false;
+            }
+
+            IGameUnit potentialTarget = null;
+            while (potentialTargetsSet.Count > 0 && !potentialTargetsSet.Contains(potentialTarget))
+            {
+                potentialTargets.TryPeek(out potentialTarget);
+                if (!potentialTargetsSet.Contains(potentialTarget))
+                {
+                    potentialTargets.Dequeue();
+                }
+            }
+            
+            return potentialTargetsSet.Count > 0;
+        }
+
+        private void SetPotentialTargetToCurrentTarget()
+        {
+            if (!HasPotentialTarget())
+            {
+                return;
+            }
+
+            CurrentAttackTarget = potentialTargets.Dequeue();
+            potentialTargetsSet.Remove(CurrentAttackTarget);
+        }
+
+        private void AddTarget(IGameUnit target)
+        {
+            if (target == self)
+            {
+                return;
+            }
+
+            if (target?.Team == self?.Team)
+            {
+                return;
+            }
+
+            if (CurrentAttackTarget != null)
+            {
+                potentialTargetsSet.Add(target);
+                potentialTargets.Enqueue(target);
+                return;
+            }
+
+            CurrentAttackTarget = target;
+        }
+
+        private void DeleteTarget(IGameUnit target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            if (target == self)
+            {
+                return;
+            }
+            
+            if (target == CurrentAttackTarget || CurrentAttackTarget == null)
+            {
+                CurrentAttackTarget = null;
+            }
+
+            if (potentialTargetsSet.Contains(target))
+            {
+                potentialTargetsSet.Remove(target);
+            }
+        }
+
         private void SpawnPage()
         {
             Vector3 position = transform.position;
@@ -906,16 +1007,25 @@ namespace NetworkedPlayer
 
         private IEnumerator Attack(float damage)
         {
-            if (isChannelingObjective || !isAutoattackOn)
-            {
-                yield break;
-            }
-
             isAttacking = true;
             // OnAttacking();
             CurrentAttackTarget.AddAttacker(self);
             GameStateController.SendPlayerAutoAttackEvent(Team);
             ((IGameUnit) this).SendDealDamageEvent(CurrentAttackTarget, damage);
+
+            if (CurrentAttackTarget.Health - damage <= 0)
+            {
+                switch (CurrentAttackTarget.Type)
+                {
+                    case GameUnitType.Minion:
+                        GameStateController.Instance.MinionKills++;
+                        break;
+                    case GameUnitType.Player:
+                        GameStateController.Instance.Kills++;
+                        break;
+                }
+            }
+
             float pauseInSeconds = 1f * AttackSpeed;
             yield return new WaitForSeconds(pauseInSeconds / 2);
             // OnRest();

@@ -61,6 +61,12 @@ namespace GameManagement
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_2; 
         [SerializeField] private TextMeshProUGUI GameOver_Stat_Text_3;
 
+        [Header("Post Game")] 
+        [SerializeField] private GameObject fogOfWar;
+        [SerializeField] private GameObject deadPlayerPrefab;
+        private GameObject deadPlayer;
+        private Vector3 losePosition;
+
 
         #endregion
 
@@ -81,7 +87,7 @@ namespace GameManagement
 
 
         [FormerlySerializedAs("GameTimer")] public Timer gameTimer;
-        private bool isGameOver = false;
+        public bool isGameOver = false;
 
         #region Scoreboard
 
@@ -129,14 +135,22 @@ namespace GameManagement
 
             baseHealthDisplayWidth = baseHealthTransform.rect.width;
 
-            PagesContainer = IngameUI.transform.Find("TopRightUI").Find("Pages Container").gameObject;
+            PagesContainer = IngameUI.transform.Find("TopRightUI").transform.Find("Pages Container").gameObject;
             PagesImages = PagesContainer.GetComponentsInChildren<Image>();
+            
+            Debug.Log($"Found {PagesImages.Length} pages");
 
             SetAutoAttack(GameData.Instance.AutoAttack);
 
             SlenderImage = IngameUI.transform.Find("SlenderIndicator").gameObject.GetComponent<Image>();
 
-            GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
+            if (PlayerController.LocalPlayerController != null)
+            {
+                SetupUI();
+            }
+            else
+                GameStateController.LocalPlayerSpawnEvent.AddListener(SetupUI);
+            
         }
 
         // Update is called once per frame
@@ -150,7 +164,6 @@ namespace GameManagement
             if (_playerController != null)
             {
                 LevelLabel.text = _playerController.Level.ToString();
-                //HealthbarImage.fillAmount = _playerController.Health / 100;
             }
             
             if (GameStateController.Instance != null && GameStateController.Instance.Bases != null && GameStateController.Instance.Bases.TryGetValue(PersistentData.Team ?? throw new NullReferenceException(), out BaseBehavior ownBase))
@@ -185,14 +198,14 @@ namespace GameManagement
             CheckForUnspentLevelUps();
         }
 
-        void SetupUI()
+        public void SetupUI()
         {
+            Debug.Log("Local Player spawned");
             _playerController = PlayerController.LocalPlayerController;
 
             SetPages(PlayerValues.PagesAmount);
             SetVisibilityOfLevelUpButtons(false);
             UpdateCircularMeters();
-            //OwnPlayerLevelBackgroundImage.color = GetColor(_playerController.Team);
             SetMinionTarget(GetNextPlayerClockwise(PersistentData.Team ?? GameData.Team.RED, true));
 
         }
@@ -461,8 +474,11 @@ namespace GameManagement
                     return;
             }
 
-            _playerController.Health -= 200;
+            //_playerController.Health -= 200;
             // SetGameOver(66, 66, 66);
+            GameData.Team t = (GameData.Team)PersistentData.Team;
+            GameStateController.Instance.Bases[t].Pages--;
+
         }
 
         void UpdateScoreboard()
@@ -528,15 +544,53 @@ namespace GameManagement
             return currentBase.Pages;
         }
 
-        public void SetGameOver(int kills, int deaths, int playerRemaining)
+        public void SetGameOver(int kills, int deaths, int playerRemaining, Vector3 losePosition)
         {
+            fogOfWar.SetActive(false);
+            
+            foreach (IGameUnit gameUnit in GameStateController.Instance.GameUnits)
+            {
+                switch (gameUnit.Type)
+                {
+                    case GameUnitType.None:
+                        break;
+                    case GameUnitType.Structure:
+                        break;
+                    case GameUnitType.Player:
+                        PlayerController pc = (PlayerController)gameUnit;
+                        pc.gameObject.GetComponent<UnitVisibilityScript>().enabled = false;
+                        break;
+                    case GameUnitType.Minion:
+                        Minion minion = (Minion)gameUnit;
+                        minion.gameObject.GetComponent<UnitVisibilityScript>().enabled = false;
+                        break;
+                    case GameUnitType.Monster:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            
+            this.losePosition = losePosition;
             isGameOver = true;
             PauseMenuUI.SetActive(false);
+            //gameTimer.SetInactive();
             IngameUI.SetActive(false);
             GameOverUI.SetActive(true);
             GameOver_Stat_Text_1.text = kills.ToString();
             GameOver_Stat_Text_2.text = deaths.ToString();
             GameOver_Stat_Text_3.text = playerRemaining.ToString();
+        }
+        
+        public void CloseLoseRecap()
+        {
+            IngameUI.SetActive(true);
+            GameOverUI.SetActive(false);
+            
+            deadPlayer = Instantiate(deadPlayerPrefab, losePosition, Quaternion.identity);
+            CameraController deadCameraController = deadPlayer.GetComponent<CameraController>();
+            //follow dead character
+            deadCameraController.OnStartFollowing();
         }
     }
 }

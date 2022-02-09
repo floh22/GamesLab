@@ -15,7 +15,7 @@ namespace Controls.Channeling
 
         #region Private Fields
 
-        private const float RecoveryTime = 10f;
+        private const float RecoveryTime = 60f;
         
         private bool hasBeenAcquired;
 

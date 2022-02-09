@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace NetworkedPlayer
@@ -25,6 +26,11 @@ namespace NetworkedPlayer
             if (!isFollowing)
                 return;
 
+            if (toFollow.IsDestroyed())
+            {
+                isFollowing = false;
+                return;
+            }
             gameObject.transform.position = toFollow.position;
         }
     }

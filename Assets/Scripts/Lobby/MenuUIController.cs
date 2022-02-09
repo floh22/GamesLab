@@ -5,6 +5,7 @@ using System.Linq;
 using Network;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Lobby
@@ -14,7 +15,7 @@ namespace Lobby
         public static MenuUIController Instance;
         
         [SerializeField] private HoverMenuButton findLobby;
-        [SerializeField] private HoverMenuButton showCredits;
+        [SerializeField] private HoverMenuButton showTutorial;
         [SerializeField] private HoverMenuButton exitGame;
         [SerializeField] private HoverMenuButton serverStatus;
 
@@ -35,7 +36,7 @@ namespace Lobby
 
             Instance = this;
 
-            menuButtons = new List<HoverMenuButton> { findLobby, showCredits, exitGame, serverStatus, menuNameInput};
+            menuButtons = new List<HoverMenuButton> { findLobby, showTutorial, exitGame, serverStatus, menuNameInput};
 
             ShowUI(0.5f);
         }
@@ -84,9 +85,10 @@ namespace Lobby
             LauncherController.Instance.Connect();
         }
 
-        public void ShowCredits()
+        public void ShowTutorial()
         {
-            OnButtonClicked(showCredits);
+            OnButtonClicked(showTutorial);
+            StartCoroutine(ActionAfterDelay(0.5f, () => SceneManager.LoadScene(2)));
         }
 
         public void Exit()
