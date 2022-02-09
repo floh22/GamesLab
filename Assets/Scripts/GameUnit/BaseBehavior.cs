@@ -28,6 +28,7 @@ namespace GameUnit
                 }
             }
         }
+
         public GameData.Team Team { get; set; }
 
         public GameObject AttachtedObjectInstance { get; set; }
@@ -42,9 +43,9 @@ namespace GameUnit
         public float MaxHealth { get; set; } = 1000;
         public GameUnitType Type => GameUnitType.Structure;
         [SerializeField] private float _health;
+
         public float Health
         {
-
             get => _health;
             set
             {
@@ -52,6 +53,7 @@ namespace GameUnit
                 CheckHealth();
             }
         }
+
         public float MoveSpeed { get; set; } = 0;
         public float RotationSpeed { get; set; } = 0;
         public float AttackDamage { get; set; } = 0;
@@ -64,13 +66,13 @@ namespace GameUnit
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
         public GameObject innerChannelingParticleSystem;
 
-        public IEnumerator IsAttackedCoroutine;
+        public Coroutine IsAttackedCoroutine;
         public int TimeUntilIsAttackedSoundIsPlayedAgainst = 8;
 
         public AudioSource AudioSource;
 
         private int pages;
-        
+
         public int Pages
         {
             get => pages;
@@ -93,13 +95,13 @@ namespace GameUnit
             {
                 material.color = Color.white;
             }
-            
+
             CurrentlyAttackedBy = new HashSet<IGameUnit>();
             StartCoroutine(Glow());
 
             if (!photonView.IsMine)
                 return;
-            
+
             //Init these by owner only since these values get synced
             pages = PlayerValues.PagesAmount;
             GameObject o = gameObject;
@@ -115,9 +117,8 @@ namespace GameUnit
             }
 
             Health = MaxHealth;
-            
         }
-        
+
 
         public void OnMouseDown()
         {
@@ -154,7 +155,7 @@ namespace GameUnit
             channeler.OnStartBaseChannel();
             StartCoroutine(Channel(channeler));
         }
-        
+
         void OnPageUpdate()
         {
             if (Team != PersistentData.Team)
@@ -173,7 +174,6 @@ namespace GameUnit
 
         public void StopMinionSpawning()
         {
-            
         }
 
         public bool IsDestroyed()
@@ -184,8 +184,11 @@ namespace GameUnit
         public void DoDamageVisual(IGameUnit unit, float damage)
         {
             this.CurrentlyAttackedBy.Add(unit);
-            this.IsAttackedCoroutine = this.IsAttackedTimer();
-            Debug.Log("Base getting attacked");
+            if (this.Team == PersistentData.Team)
+            {
+                this.IsAttackedCoroutine = StartCoroutine(this.IsAttackedTimer());
+                Debug.Log("Your own base getting attacked");
+            }
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -203,12 +206,12 @@ namespace GameUnit
             else
             {
                 // Network player, receive data
-                this.NetworkID = (int)stream.ReceiveNext();
-                this.Team = (GameData.Team)stream.ReceiveNext();
-                this.Health = (float)stream.ReceiveNext();
-                this.MaxHealth = (float)stream.ReceiveNext();
-                this.Pages = (int)stream.ReceiveNext();
-                this.IsAlive = (bool)stream.ReceiveNext();
+                this.NetworkID = (int) stream.ReceiveNext();
+                this.Team = (GameData.Team) stream.ReceiveNext();
+                this.Health = (float) stream.ReceiveNext();
+                this.MaxHealth = (float) stream.ReceiveNext();
+                this.Pages = (int) stream.ReceiveNext();
+                this.IsAlive = (bool) stream.ReceiveNext();
             }
         }
 
@@ -219,7 +222,6 @@ namespace GameUnit
                 --Pages;
                 _health = MaxHealth;
             }
-                
         }
 
         public void DisableChannelEffects()
@@ -242,7 +244,7 @@ namespace GameUnit
                 // Could be due to external reasons like another player
                 // interrupting the the channeling player.
                 if (!channeler.IsChannelingObjective)
-                {                    
+                {
                     DisableChannelEffects();
                     channeler.DisableChannelEffects();
                     channeler.DisableChannelEffectsNetworked(NetworkID);
@@ -256,8 +258,8 @@ namespace GameUnit
                 }
 
                 // Interrupt channeling effects if player is out of range with a base.
-                if ( Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
-                {                    
+                if (Vector3.Distance(transform.position, channeler.Position) > PlayerValues.BaseChannelRange)
+                {
                     DisableChannelEffects();
                     channeler.InterruptChanneling();
                     channeler.DisableChannelEffectsNetworked(NetworkID);
@@ -267,7 +269,7 @@ namespace GameUnit
                 progress += MAX_CHANNELING_PROGRESS / secondsToChannel;
                 Debug.Log($"{Team} Base being channeled, {progress} / {MAX_CHANNELING_PROGRESS}");
 
-                if(progress >= MAX_CHANNELING_PROGRESS)
+                if (progress >= MAX_CHANNELING_PROGRESS)
                 {
                     // Stop channeling effects after successfuly channeling a base
                     // It's not an interruption but rather a stop to the channeling effects
@@ -307,12 +309,12 @@ namespace GameUnit
                     /* End of page stuff */
 
                     yield break;
-                }                
+                }
 
                 yield return new WaitForSeconds(1);
             }
         }
-        
+
         private IEnumerator Glow()
         {
             List<Material> materials = new List<Material>();
@@ -322,6 +324,7 @@ namespace GameUnit
             {
                 normalColors[material] = Copy(material.color);
             }
+
             Color glowColor = Color.green;
             float minutesToGlow = 1;
             float step = 0.1f;
@@ -359,6 +362,7 @@ namespace GameUnit
 
                 yield return new WaitForSeconds(pause);
             }
+
             foreach (var baseBehavior in FindObjectsOfType<BaseBehavior>())
             {
                 baseBehavior.hasBeenChanneledOnce = true;
@@ -367,14 +371,15 @@ namespace GameUnit
 
         private IEnumerator IsAttackedTimer()
         {
-            Debug.Log("here");
-            if (this.IsAttackedCoroutine == null && this.IsAttackedCoroutine.Equals(null))
+            if (this.IsAttackedCoroutine == null)
             {
-            Debug.Log("?????");
-                AudioSource.enabled = true;
                 AudioSource.Play();
             }
-            
+            else
+            {
+                StopCoroutine(this.IsAttackedCoroutine);
+            }
+
             yield return new WaitForSeconds(this.TimeUntilIsAttackedSoundIsPlayedAgainst);
 
             this.IsAttackedCoroutine = null;
