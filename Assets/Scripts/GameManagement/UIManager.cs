@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Network;
 using NetworkedPlayer;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -555,8 +556,10 @@ namespace GameManagement
         {
             fogOfWar.SetActive(false);
             
-            foreach (IGameUnit gameUnit in GameStateController.Instance.GameUnits)
+            foreach (IGameUnit gameUnit in GameStateController.Instance.GameUnits.NotNull())
             {
+                if(gameUnit.Equals(null) || gameUnit.IsDestroyed())
+                    continue;
                 switch (gameUnit.Type)
                 {
                     case GameUnitType.None:

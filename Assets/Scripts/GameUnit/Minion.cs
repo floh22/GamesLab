@@ -289,6 +289,12 @@ namespace GameUnit
             updateTimer = 0;
         }
 
+        private void OnDestroy()
+        {
+            GameStateController.Instance.Minions[Team].Remove(this);
+            GameStateController.Instance.GameUnits.Remove(this);
+        }
+
         public bool IsDestroyed()
         {
             return !gameObject;
