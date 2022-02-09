@@ -245,8 +245,14 @@ namespace Network
                 StartCoroutine(StartLobby());
             }
         }
-        
-        public IEnumerator StartLobby()
+
+
+        public void ForceStart()
+        {
+            StartCoroutine(StartLobby(false));
+        }
+
+        private IEnumerator StartLobby(bool waitToStart = true)
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
                 yield break;
@@ -259,7 +265,8 @@ namespace Network
 
 
             //Just wait a bit... a bit hacky but i really dont care
-            yield return new WaitForSeconds(8);
+            if(waitToStart)
+                yield return new WaitForSeconds(8);
             
             LoadingScreenController.SendGameLoadingEvent();
             StartCoroutine(LoadMainLevel());
