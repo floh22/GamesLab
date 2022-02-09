@@ -775,9 +775,9 @@ namespace GameUnit
                         continue;
                     }
 
+                    //Send out event to gain experience to the players in currentlyattackedby
                     object[] content = {true, controller.Team};
                     RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
-                    Debug.Log("Call event");
                     PhotonNetwork.RaiseEvent(PlayerController.AddExperienceEventCode, content, raiseEventOptions, SendOptions.SendReliable);
                 }
 
