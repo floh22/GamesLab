@@ -351,8 +351,10 @@ namespace GameUnit
 
         private IEnumerator IsAttackedTimer()
         {
+            Debug.Log("here");
             if (this.IsAttackedCoroutine == null && this.IsAttackedCoroutine.Equals(null))
             {
+            Debug.Log("?????");
                 AudioSource.enabled = true;
                 AudioSource.Play();
             }
