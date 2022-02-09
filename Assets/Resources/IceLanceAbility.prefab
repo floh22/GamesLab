@@ -9848,10 +9848,10 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 5.5
+  MaxDistance: 17
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
