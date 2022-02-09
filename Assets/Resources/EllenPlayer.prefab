@@ -5440,7 +5440,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 12
-  MaxDistance: 50
+  MaxDistance: 12.12
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -5832,7 +5832,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 5.5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -6378,7 +6378,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 5.5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -6914,7 +6914,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 5.5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -13871,7 +13871,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faa8b67e83b73fb4ba6b6a9b2482a664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxForwardSpeed: 8
+  maxForwardSpeed: 6
   gravity: 20
   jumpSpeed: 10
   minTurnSpeed: 400
@@ -16039,7 +16039,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 5.5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -16776,7 +16776,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 5.5
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -17363,7 +17363,7 @@ AudioSource:
   Priority: 1
   DopplerLevel: 1
   MinDistance: 6
-  MaxDistance: 50
+  MaxDistance: 6.06
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0

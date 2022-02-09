@@ -396,7 +396,7 @@ namespace Controls.Abilities
                 Vector3 target = (Vector3)data[3];
                 Vector3 direction = (Vector3)data[4];
 
-                Debug.Log("eventCode == CastAbilityEventCode");
+                // Debug.Log("eventCode == CastAbilityEventCode");
                 
                 CastAbility(GameStateController.Instance.Players.Values.SingleOrDefault(p => p.NetworkID == casterID), start, target, ability, direction);
             }
