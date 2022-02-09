@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4980774645668031393
 RectTransform:
   m_ObjectHideFlags: 0
@@ -198,6 +198,8 @@ MonoBehaviour:
   minionText: {fileID: 4980774645657012845}
   minionHealthSlider: {fileID: 4980774645657072377}
   fill: {fileID: 4980774645657072357}
+  fillArea: {fileID: 4980774645646290503}
+  background: {fileID: 4980774645646290497}
 --- !u!1 &4980774645646290501
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,7 +291,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4980774645668031399
 RectTransform:
   m_ObjectHideFlags: 0
