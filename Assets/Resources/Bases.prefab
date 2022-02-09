@@ -61839,7 +61839,7 @@ MonoBehaviour:
   _health: 0
   innerChannelingParticleSystem: {fileID: 6482828219871058949}
   TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
+  AudioSource: {fileID: 2093398085986393837}
 --- !u!4 &3417392913480372903 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85ad39652a734d04b95c30a83b29068c,
@@ -63971,7 +63971,7 @@ MonoBehaviour:
   _health: 0
   innerChannelingParticleSystem: {fileID: 6482828219871058949}
   TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
+  AudioSource: {fileID: 5225637385616526148}
 --- !u!1001 &6072555458644701202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64273,7 +64273,7 @@ MonoBehaviour:
   _health: 0
   innerChannelingParticleSystem: {fileID: 6482828219871058949}
   TimeUntilIsAttackedSoundIsPlayedAgainst: 8
-  AudioSource: {fileID: 0}
+  AudioSource: {fileID: 1677484704629062306}
 --- !u!1001 &6157600937875854602
 PrefabInstance:
   m_ObjectHideFlags: 0
