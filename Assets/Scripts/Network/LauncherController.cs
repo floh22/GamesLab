@@ -240,23 +240,26 @@ namespace Network
 
         private void CheckGameStart()
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom)
+            if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom && PhotonNetwork.IsMasterClient && InLobby)
             {
-                StartLobby();
+                StartCoroutine(StartLobby());
             }
         }
         
-        public void StartLobby()
+        public IEnumerator StartLobby()
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
-                return;
+                yield break;
             if (!PersistentData.ConnectedToServer)
             {
                 JoinWhenReady = true;
             }
             PhotonNetwork.CurrentRoom.IsVisible = false;
             PhotonNetwork.CurrentRoom.IsOpen = false;
-            
+
+
+            //Just wait a bit... a bit hacky but i really dont care
+            yield return new WaitForSeconds(8);
             
             LoadingScreenController.SendGameLoadingEvent();
             StartCoroutine(LoadMainLevel());

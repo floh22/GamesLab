@@ -120,7 +120,7 @@ namespace GameUnit
 
         [field: Header("Attack Logic")] public IGameUnit CurrentAttackTarget { get; set; }
         public IGameUnit CurrentChaseTarget { get; set; }
-        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
+        public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; } = new HashSet<IGameUnit>();
 
         public int attackingID;
         public IEnumerator attackCycle;
@@ -262,9 +262,6 @@ namespace GameUnit
             agent.stoppingDistance = Values.MinionAttackRange - 1f;
 
             nextWayPoint = Position;
-
-            //Attacking
-            CurrentlyAttackedBy = new HashSet<IGameUnit>();
 
             currentMinionState = MinionState.LookingForPath;
 
