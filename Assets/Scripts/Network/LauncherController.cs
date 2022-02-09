@@ -212,6 +212,7 @@ namespace Network
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
 
+            /*
             List<GameData.Team> freeTeams = new() {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
             foreach (Player p in PhotonNetwork.PlayerListOthers)
             {
@@ -225,11 +226,13 @@ namespace Network
                     //oops? this might cause issues
                 }
             }
+            
 
             PersistentData.Team = freeTeams[(PhotonNetwork.PlayerList.Length - 1) % 4];
+            */
             
-            //PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
-            
+            PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+
             ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = PersistentData.Team};
             PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
             
