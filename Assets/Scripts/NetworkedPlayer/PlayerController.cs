@@ -342,6 +342,7 @@ namespace NetworkedPlayer
 
         public void Die()
         {
+            InterruptChanneling();
             IsAlive = false;
 
             GameStateController.Instance.Deaths++;
