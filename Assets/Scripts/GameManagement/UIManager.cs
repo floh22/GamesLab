@@ -35,6 +35,7 @@ namespace GameManagement
         public Image MinionSwitchButtonImage;
         public GameObject ActionButtonsGroup;
         public GameObject LevelUpButtonsGroup;
+        public GameObject TopRightUI;
 
         
         private GameObject PagesContainer;
@@ -595,6 +596,9 @@ namespace GameManagement
         public void CloseLoseRecap()
         {
             IngameUI.SetActive(true);
+            ActionButtonsGroup.SetActive(false);
+            LevelUpButtonsGroup.SetActive(false);
+            TopRightUI.SetActive(false);
             GameOverUI.SetActive(false);
             
             deadPlayer = Instantiate(deadPlayerPrefab, losePosition, Quaternion.identity);

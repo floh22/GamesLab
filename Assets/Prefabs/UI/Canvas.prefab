@@ -10937,6 +10937,11 @@ PrefabInstance:
       objectReference: {fileID: 762861143138791311}
     - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
         type: 3}
+      propertyPath: TopRightUI
+      value: 
+      objectReference: {fileID: 1490235401588462503}
+    - target: {fileID: 3250662854955819254, guid: 3e5e84d16225f0c488ea7e2dab0444a3,
+        type: 3}
       propertyPath: PauseMenuUI
       value: 
       objectReference: {fileID: 2000761999516742405}
