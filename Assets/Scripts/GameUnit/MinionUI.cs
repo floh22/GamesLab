@@ -27,6 +27,13 @@ namespace GameUnit
 		[SerializeField]
 		private Image fill;
 
+		[SerializeField]
+		private GameObject fillArea;
+		[SerializeField]
+		private GameObject background;
+
+		private bool hasMinion = false;
+
 		private Minion target;
 
 		private Minion minion;
@@ -41,7 +48,9 @@ namespace GameUnit
 		{
 
 			this.transform.SetParent(GameObject.Find("Canvas").GetComponent<Transform>(), false);
-			
+			fillArea.SetActive(false);
+			background.SetActive(false);
+
 		}
 		
 		private void Update()
@@ -69,7 +78,10 @@ namespace GameUnit
 		{
 			// #Critical
 			// Follow the Target GameObject on screen.
-			if (minion == null) return;
+			if (minion == null)
+			{
+				return;
+			}
 
 			this.transform.position = Camera.main!.WorldToScreenPoint(minion.transform.position) + screenOffset;
 
@@ -99,6 +111,14 @@ namespace GameUnit
 			if (minionText != null)
 			{
 				minionText.text = minion.Team.ToString();
+			}
+
+			if (minion != null)
+			{
+				this.transform.position = Camera.main!.WorldToScreenPoint(minion.transform.position) + screenOffset;
+				hasMinion = true;
+				fillArea.SetActive(true);
+				background.SetActive(true);
 			}
 		}
 
