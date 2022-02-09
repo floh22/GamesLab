@@ -94,7 +94,7 @@ namespace GameManagement
             {
                 return;
             }
-            if (UIManager.Instance.gameTimer.timeRemainingInSeconds == 0)
+            if (UIManager.Instance.gameTimer.timeRemainingInSeconds <= 0)
             {
                 foreach (var kvp in GameStateController.Instance.Bases)
                 {
