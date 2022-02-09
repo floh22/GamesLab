@@ -211,7 +211,24 @@ namespace Network
             });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
-            PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
+
+            List<GameData.Team> freeTeams = new() {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
+            foreach (Player p in PhotonNetwork.PlayerListOthers)
+            {
+                try
+                {
+                    GameData.Team t = (GameData.Team)p.CustomProperties["Team"];
+                    freeTeams.Remove(t);
+                }
+                catch
+                {
+                    //oops? this might cause issues
+                }
+            }
+
+            PersistentData.Team = freeTeams[(PhotonNetwork.PlayerList.Length - 1) % 4];
+            
+            //PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
             
             ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = PersistentData.Team};
             PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
@@ -245,8 +262,13 @@ namespace Network
                 StartCoroutine(StartLobby());
             }
         }
+
+        public void ForceStart()
+        {
+            StartCoroutine(StartLobby(false));
+        }
         
-        public IEnumerator StartLobby()
+        public IEnumerator StartLobby(bool waitToStart = true)
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
                 yield break;
@@ -259,7 +281,8 @@ namespace Network
 
 
             //Just wait a bit... a bit hacky but i really dont care
-            yield return new WaitForSeconds(8);
+            if(waitToStart)
+                yield return new WaitForSeconds(8);
             
             LoadingScreenController.SendGameLoadingEvent();
             StartCoroutine(LoadMainLevel());
