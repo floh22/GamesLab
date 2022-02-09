@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Network;
 using NetworkedPlayer;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -474,10 +475,17 @@ namespace GameManagement
                     return;
             }
 
-            //_playerController.Health -= 200;
-            // SetGameOver(66, 66, 66);
-            GameData.Team t = (GameData.Team)PersistentData.Team;
-            GameStateController.Instance.Bases[t].Pages--;
+            var closest = PersistentData.Team?? throw  new NullReferenceException();
+            var closestDist = Mathf.Infinity;
+            
+            foreach (var (key, value) in GameStateController.Instance.Bases)
+            {
+                var dist = Vector3.Distance(PlayerController.LocalPlayerController.Position, value.Position);
+                if (!(dist < closestDist)) continue;
+                closest = key;
+                closestDist = dist;
+            }
+            GameStateController.Instance.Bases[closest].Pages--;
 
         }
 
@@ -548,8 +556,10 @@ namespace GameManagement
         {
             fogOfWar.SetActive(false);
             
-            foreach (IGameUnit gameUnit in GameStateController.Instance.GameUnits)
+            foreach (IGameUnit gameUnit in GameStateController.Instance.GameUnits.NotNull())
             {
+                if(gameUnit.Equals(null) || gameUnit.IsDestroyed())
+                    continue;
                 switch (gameUnit.Type)
                 {
                     case GameUnitType.None:

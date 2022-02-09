@@ -15,6 +15,7 @@ using UnityEngine.Events;
 using Utils;
 using Network;
 using NetworkedPlayer;
+using Photon.Realtime;
 
 namespace GameUnit
 {
@@ -287,6 +288,12 @@ namespace GameUnit
             if (!(updateTimer >= Values.UpdateRateInS)) return;
             AILogic();
             updateTimer = 0;
+        }
+
+        private void OnDestroy()
+        {
+            GameStateController.Instance.Minions[Team].Remove(this);
+            GameStateController.Instance.GameUnits.Remove(this);
         }
 
         public bool IsDestroyed()
@@ -774,7 +781,10 @@ namespace GameUnit
                         continue;
                     }
 
-                    controller.AddExperienceBySource(true);
+                    //Send out event to gain experience to the players in currentlyattackedby
+                    object[] content = {true, controller.Team};
+                    RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
+                    PhotonNetwork.RaiseEvent(PlayerController.AddExperienceEventCode, content, raiseEventOptions, SendOptions.SendReliable);
                 }
 
                 gameUnit.TargetDied(this);

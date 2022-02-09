@@ -2,20 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Character;
-using Controls.Channeling;
 using ExitGames.Client.Photon;
-using ExitGames.Client.Photon.StructWrapping;
 using GameManagement;
 using Network;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using Utils;
 
 namespace NetworkedPlayer
 {
-    public class PlayerController : MonoBehaviourPunCallbacks, IGameUnit
+    public class PlayerController : MonoBehaviourPunCallbacks, IGameUnit, IOnEventCallback
     {
         #region StaticFields
 
@@ -51,6 +48,9 @@ namespace NetworkedPlayer
 
 
         public IGameUnit CurrentAttackTarget { get; set; }
+        
+        public const byte AddExperienceEventCode = 13;
+
         public HashSet<IGameUnit> CurrentlyAttackedBy { get; set; }
 
         #endregion
@@ -687,6 +687,7 @@ namespace NetworkedPlayer
                 stream.SendNext(this.isChannelingObjective);
                 stream.SendNext(this.channelingTo);
                 stream.SendNext(this.HasPage);
+                stream.SendNext(this.Experience);
             }
             else
             {
@@ -698,6 +699,7 @@ namespace NetworkedPlayer
                 this.isChannelingObjective = (bool) stream.ReceiveNext();
                 this.channelingTo = (Vector3) stream.ReceiveNext();
                 this.HasPage = (bool) stream.ReceiveNext();
+                this.Experience = (int) stream.ReceiveNext();
             }
         }
 
@@ -816,6 +818,35 @@ namespace NetworkedPlayer
             
             currentPage.Drop();
             Debug.Log($"Page has been dropped on the ground by player of {Team} team");
+        }
+        
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            PhotonNetwork.AddCallbackTarget(this);
+        }
+
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            PhotonNetwork.RemoveCallbackTarget(this);
+        }
+        
+        public void OnEvent(EventData photonEvent)
+        {
+            byte eventCode = photonEvent.Code;
+            if (eventCode == AddExperienceEventCode)
+            {
+                object[] data = (object[]) photonEvent.CustomData;
+                
+                bool byMinion = (bool) data[0];
+                GameData.Team team = (GameData.Team) data[1];
+                //Only gain the experience if it is meant for you
+                if (team == this.Team && photonView.IsMine)
+                {
+                    this.AddExperienceBySource(byMinion);
+                }
+            }
         }
 
         #endregion

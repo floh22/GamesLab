@@ -19,14 +19,19 @@ namespace GameManagement
         public static MasterController Instance;
         
         private float updateTimer;
+
+        private bool isSinglePlayerGame = false;
         
 
         public MasterController()
         {
             if (Instance == null)
                 Instance = this;
-            
-            
+
+            if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            {
+                isSinglePlayerGame = true;
+            }
         }
 
         public void SpawnSlenderman()
@@ -89,7 +94,7 @@ namespace GameManagement
             {
                 return;
             }
-            if (UIManager.Instance.gameTimer.timeRemainingInSeconds == 0)
+            if (UIManager.Instance.gameTimer.timeRemainingInSeconds <= 0)
             {
                 foreach (var kvp in GameStateController.Instance.Bases)
                 {
@@ -118,7 +123,7 @@ namespace GameManagement
             //Don't actually spawn the minions unless we are the master client
             if (PhotonNetwork.IsMasterClient)
             {
-                var teamsToSpawn = GameStateController.Instance.Players.Keys.Count == 1
+                var teamsToSpawn = isSinglePlayerGame
                     ? new List<GameData.Team>()
                     {
                         GameData.Team.RED,

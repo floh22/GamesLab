@@ -158,15 +158,19 @@ namespace GameUnit
 
         void OnPageUpdate()
         {
-            if (Team != PersistentData.Team)
-                return;
-
-            if (Pages <= 0)
+            if (Pages <= 0 && IsAlive)
             {
                 IsAlive = false;
-                if (PlayerController.LocalPlayerInstance != null && !PlayerController.LocalPlayerInstance.Equals(null))
+
+                if (Team == PersistentData.Team)
+                {
                     GameStateController.Instance.OnLose();
+                }
             }
+            
+            
+            if (Team != PersistentData.Team)
+                return;
 
             UIManager.Instance.SetPages(Pages);
         }
