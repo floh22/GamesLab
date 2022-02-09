@@ -15,6 +15,7 @@ using UnityEngine.Events;
 using Utils;
 using Network;
 using NetworkedPlayer;
+using Photon.Realtime;
 
 namespace GameUnit
 {
@@ -780,7 +781,10 @@ namespace GameUnit
                         continue;
                     }
 
-                    controller.AddExperienceBySource(true);
+                    //Send out event to gain experience to the players in currentlyattackedby
+                    object[] content = {true, controller.Team};
+                    RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
+                    PhotonNetwork.RaiseEvent(PlayerController.AddExperienceEventCode, content, raiseEventOptions, SendOptions.SendReliable);
                 }
 
                 gameUnit.TargetDied(this);
