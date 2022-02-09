@@ -474,10 +474,17 @@ namespace GameManagement
                     return;
             }
 
-            //_playerController.Health -= 200;
-            // SetGameOver(66, 66, 66);
-            GameData.Team t = (GameData.Team)PersistentData.Team;
-            GameStateController.Instance.Bases[t].Pages--;
+            var closest = PersistentData.Team?? throw  new NullReferenceException();
+            var closestDist = Mathf.Infinity;
+            
+            foreach (var (key, value) in GameStateController.Instance.Bases)
+            {
+                var dist = Vector3.Distance(PlayerController.LocalPlayerController.Position, value.Position);
+                if (!(dist < closestDist)) continue;
+                closest = key;
+                closestDist = dist;
+            }
+            GameStateController.Instance.Bases[closest].Pages--;
 
         }
 

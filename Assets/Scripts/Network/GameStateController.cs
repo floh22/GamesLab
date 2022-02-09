@@ -642,8 +642,6 @@ namespace Network
             PlayerController.LocalPlayerController.OnLoseGame();
             UIManager.Instance.SetGameOver(Kills, Deaths, Players.Count - 1, PlayerController.LocalPlayerInstance.transform.position);
 
-            MasterController.Instance.StopMinionSpawning(PlayerController.LocalPlayerController.Team);
-
             SendLoseGameEvent(PlayerController.LocalPlayerController.Team);
             PhotonNetwork.Destroy(PlayerController.LocalPlayerInstance);
             
@@ -654,6 +652,8 @@ namespace Network
         {
             if (PhotonNetwork.IsMasterClient)
             {
+                MasterController.Instance.StopMinionSpawning(PlayerController.LocalPlayerController.Team);
+                
                 foreach (Minion minion in Minions[team])
                 {
                     PhotonNetwork.Destroy(minion.gameObject);
