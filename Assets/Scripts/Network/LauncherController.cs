@@ -17,10 +17,19 @@ using Random = System.Random;
 
 namespace Network
 {
-    public class LauncherController : MonoBehaviourPunCallbacks
+    public class LauncherController : MonoBehaviourPunCallbacks, IOnEventCallback
     {
 
         public static LauncherController Instance;
+        
+        public const byte PlayerTeamAssignmentEventCode = 14;
+        
+        public static void SendPlayerTeamAssignmentEvent(int playerID, GameData.Team assignedTeam)
+        {
+            object[] content = {playerID, assignedTeam};
+            RaiseEventOptions raiseEventOptions = new() {Receivers = ReceiverGroup.All};
+            PhotonNetwork.RaiseEvent(PlayerTeamAssignmentEventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
         
         #region Private Serializable Fields
 
@@ -57,6 +66,8 @@ namespace Network
 
         private bool InLobby;
         private bool JoinWhenReady;
+        
+        private HashSet<GameData.Team> freeTeams = new() {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
 
         private Coroutine playerNameDisplayRoutine;
         private float displayRoutineVelocity;
@@ -86,6 +97,20 @@ namespace Network
                 playerObject.GetComponent<Animator>().SetFloat(Speed, UnityEngine.Random.Range(0.85f, 1.15f));
             }
         }
+        
+        
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            PhotonNetwork.AddCallbackTarget(this);
+        }
+
+        public override void OnDisable()
+        {
+            base.OnDisable();
+            PhotonNetwork.RemoveCallbackTarget(this);
+        }
+        
 
         /// <summary>
         /// Start the connection process.
@@ -188,6 +213,17 @@ namespace Network
 
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
+            GameData.Team leftTeam = (GameData.Team)otherPlayer.CustomProperties["Team"];
+
+            try
+            {
+                freeTeams.Add(leftTeam);
+            }
+            catch
+            {
+                Debug.Log("Attempted freeing already free team");
+            }
+
             UpdatePlayerLights();
             LobbyUIController.Instance.UpdatePlayerNames();
 
@@ -211,30 +247,21 @@ namespace Network
             });
             Debug.Log($"Joined room {PhotonNetwork.CurrentRoom.Name}");
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
-
-            /*
-            List<GameData.Team> freeTeams = new() {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
-            foreach (Player p in PhotonNetwork.PlayerListOthers)
+            
+            
+            freeTeams = new HashSet<GameData.Team> {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
+            if(PhotonNetwork.IsMasterClient)
+                AssignPlayerTeam(PhotonNetwork.LocalPlayer);
+            
+            //Remove already assigned teams from free teams
+            foreach (GameData.Team t in PhotonNetwork.CurrentRoom.Players.Values.Where(player => player.CustomProperties.ContainsKey("Team")).Select(player => (GameData.Team)player.CustomProperties["Team"]))
             {
-                try
-                {
-                    GameData.Team t = (GameData.Team)p.CustomProperties["Team"];
-                    freeTeams.Remove(t);
-                }
-                catch
-                {
-                    //oops? this might cause issues
-                }
+                freeTeams.Remove(t);
             }
             
-
-            PersistentData.Team = freeTeams[(PhotonNetwork.PlayerList.Length - 1) % 4];
-            */
+            //Now set by master client
+            //PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
             
-            PersistentData.Team = (GameData.Team)PhotonNetwork.PlayerList.Length - 1;
-
-            ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = PersistentData.Team};
-            PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
             
             InLobby = true;
             CheckGameStart();
@@ -242,12 +269,30 @@ namespace Network
 
         public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
         {
+            if(PhotonNetwork.IsMasterClient)
+                AssignPlayerTeam(newPlayer);
+
             if (Equals(newPlayer, PhotonNetwork.LocalPlayer))
                 return;
             UpdatePlayerLights();
             LobbyUIController.Instance.UpdatePlayerNames();
             ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
             CheckGameStart();
+        }
+
+        private void AssignPlayerTeam(Player player)
+        {
+            //All teams assigned
+            if (freeTeams.Count == 0)
+                return;
+            
+            GameData.Team t = freeTeams.First();
+            freeTeams.Remove(t);
+            
+            ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = t};
+            player.SetCustomProperties(teamProperties);
+            
+            SendPlayerTeamAssignmentEvent(player.ActorNumber, t);
         }
 
         private void UpdatePlayerLights()
@@ -303,6 +348,31 @@ namespace Network
             Connect();
             JoinWhenReady = false;
         }
+
+        public void OnEvent(EventData photonEvent)
+        {
+            byte eventCode = photonEvent.Code;
+
+            if (eventCode == PlayerTeamAssignmentEventCode)
+            {
+                object[] data = (object[]) photonEvent.CustomData;
+
+                int playerID = (int) data[0];
+                GameData.Team team = (GameData.Team) data[1];
+                
+                Debug.Log($"Player assigned Team {team}");
+
+                //Remove team from being available
+                freeTeams.Remove(team);
+
+                //If this is me, set my team
+                if (playerID == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    PersistentData.Team = team;
+                }
+            }
+        }
+
         #endregion
 
 
