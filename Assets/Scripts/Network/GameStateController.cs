@@ -668,8 +668,7 @@ namespace Network
 
             if (Players.Count == 0)
             {
-                PhotonNetwork.LeaveRoom();
-                SceneManager.LoadScene(0);
+                StartCoroutine(LoadingScreenController.Instance.ReturnToMenu());
             }
         }
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ExitGames.Client.Photon;
 using GameManagement;
 using Lobby;
+using NetworkedPlayer;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
@@ -53,7 +54,9 @@ namespace Network
 
         [Header("Scene Data")] 
         [SerializeField] private List<GameObject> playerLights;
-        [SerializeField] private List<GameObject> playerObjects;
+        [SerializeField] public List<GameObject> playerObjects;
+        [SerializeField] public Dictionary<GameData.Team, Vector3> playerPositions = new Dictionary<GameData.Team, Vector3>();
+        [SerializeField] public Dictionary<GameData.Team, GameObject> playerObjectsByTeam = new Dictionary<GameData.Team, GameObject>();
         [SerializeField] private GameObject slenderman;
 
         [SerializeField] private LobbyCameraController cameraController;
@@ -70,6 +73,7 @@ namespace Network
         private HashSet<GameData.Team> freeTeams = new() {GameData.Team.RED, GameData.Team.BLUE, GameData.Team.GREEN, GameData.Team.YELLOW};
 
         private Coroutine playerNameDisplayRoutine;
+        private Coroutine gameStartingDelayRoutine;
         private float displayRoutineVelocity;
         
         private static readonly int Offset = Animator.StringToHash("VerticalSpeed");
@@ -88,13 +92,20 @@ namespace Network
             if(Instance != null)
                 Destroy(this);
             Instance = this;
+            
             PhotonNetwork.ConnectUsingSettings();
             PhotonNetwork.GameVersion = GameVersion.ToString();
-            
+
+            int teamCounter = 0;
             foreach (GameObject playerObject in playerObjects)
             {
                 playerObject.GetComponent<Animator>().SetFloat(Offset, UnityEngine.Random.Range(0, 2f));
                 playerObject.GetComponent<Animator>().SetFloat(Speed, UnityEngine.Random.Range(0.85f, 1.15f));
+                
+                playerPositions.Add((GameData.Team)teamCounter, playerObject.transform.position);
+                playerObjectsByTeam.Add((GameData.Team)teamCounter, playerObject);
+
+                teamCounter++;
             }
         }
         
@@ -163,10 +174,19 @@ namespace Network
         {
             if (!PhotonNetwork.InRoom)
                 return;
+            
+            if (gameStartingDelayRoutine != null)
+            {
+                StopCoroutine(gameStartingDelayRoutine);
+                PhotonNetwork.CurrentRoom.IsVisible = true;
+                PhotonNetwork.CurrentRoom.IsOpen = true;
+                return;
+            }
+            
+            
             PhotonNetwork.LeaveRoom(false);
             PhotonNetwork.JoinLobby();
-            
-            
+
             slenderman?.SetActive(true);
             LobbyUIController.Instance.IsActive = false;
 
@@ -191,6 +211,25 @@ namespace Network
         {
             Debug.Log("Connected to Server");
             PhotonNetwork.JoinLobby();
+            
+            if (LoadingScreenController.Instance.IsClosed)
+            {
+                Debug.Log("Opening Loading screen");
+                LoadingScreenController.Instance.OpenLoadingScreen();
+            }
+            
+            //Reset singletons
+            CameraController.ActiveInstance = null;
+            GameStateController.Instance = null;
+            GameData.Instance = null;
+            MasterController.Instance = null;
+            UIManager.Instance = null;
+            
+            //Reset data
+            PersistentData.Team = null;
+            ExitGames.Client.Photon.Hashtable teamProperties = new() {["Team"] = null};
+            PhotonNetwork.LocalPlayer.SetCustomProperties(teamProperties);
+            
         }
 
         public void OnConnectedToServer()
@@ -224,6 +263,23 @@ namespace Network
                 Debug.Log("Attempted freeing already free team");
             }
 
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (!PhotonNetwork.CurrentRoom.IsOpen || !PhotonNetwork.CurrentRoom.IsVisible)
+                {
+                    PhotonNetwork.CurrentRoom.IsVisible = true;
+                    PhotonNetwork.CurrentRoom.IsOpen = true;
+                }
+            }
+
+            if (gameStartingDelayRoutine != null)
+            {
+                PhotonNetwork.CurrentRoom.IsVisible = true;
+                PhotonNetwork.CurrentRoom.IsOpen = true;
+                StopCoroutine(gameStartingDelayRoutine);
+            }
+            
+            
             UpdatePlayerLights();
             LobbyUIController.Instance.UpdatePlayerNames();
 
@@ -274,9 +330,7 @@ namespace Network
 
             if (Equals(newPlayer, PhotonNetwork.LocalPlayer))
                 return;
-            UpdatePlayerLights();
-            LobbyUIController.Instance.UpdatePlayerNames();
-            ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
+            
             CheckGameStart();
         }
 
@@ -307,7 +361,7 @@ namespace Network
         {
             if (PhotonNetwork.CurrentRoom.PlayerCount == maxPlayersPerRoom && PhotonNetwork.IsMasterClient && InLobby)
             {
-                StartCoroutine(StartLobby());
+                gameStartingDelayRoutine = StartCoroutine(StartLobby());
             }
         }
 
@@ -320,6 +374,7 @@ namespace Network
         {
             if (!PhotonNetwork.IsMasterClient || !InLobby)
                 yield break;
+            
             if (!PersistentData.ConnectedToServer)
             {
                 JoinWhenReady = true;
@@ -331,7 +386,14 @@ namespace Network
             //Just wait a bit... a bit hacky but i really dont care
             if(waitToStart)
                 yield return new WaitForSeconds(8);
-            
+
+            if (waitToStart && PhotonNetwork.CurrentRoom.PlayerCount != 4)
+            {
+                PhotonNetwork.CurrentRoom.IsVisible = true;
+                PhotonNetwork.CurrentRoom.IsOpen = true;
+                yield break;
+            }
+
             LoadingScreenController.SendGameLoadingEvent();
             StartCoroutine(LoadMainLevel());
         }
@@ -369,6 +431,18 @@ namespace Network
                 if (playerID == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
                     PersistentData.Team = team;
+                }
+                
+                UpdatePlayerLights();
+                ShowConnectionInfo($"Waiting for Players\n{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
+                
+                if (!LobbyUIController.Instance.cameraMoveFinished)
+                {
+                    LobbyUIController.Instance.updatePlayerNamesOnMoveFinish = true;
+                }
+                else
+                {
+                    LobbyUIController.Instance.UpdatePlayerNames();
                 }
             }
         }

@@ -6,7 +6,7 @@ namespace GameManagement
     [Serializable]
     public class GameData : MonoBehaviour
     {
-        public static GameData Instance {get; private set;}
+        public static GameData Instance;
 
         public const float SecondsPerRound = 300;
 

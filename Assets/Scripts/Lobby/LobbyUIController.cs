@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using GameManagement;
+using Network;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -42,6 +44,10 @@ public class LobbyUIController : MonoBehaviour
     private Coroutine changeStateRoutine;
 
 
+    public bool cameraMoveFinished = false;
+    public bool updatePlayerNamesOnMoveFinish = false;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,9 +62,28 @@ public class LobbyUIController : MonoBehaviour
 
     public void UpdatePlayerNames()
     {
-        for (int playerPos = 0; playerPos < PhotonNetwork.CurrentRoom.PlayerCount; playerPos++)
+        int counter = 0;
+        foreach(var player in  PhotonNetwork.CurrentRoom.Players)
         {
-            playerNameDisplays[playerPos].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[playerPos].NickName;
+            GameData.Team t = (GameData.Team)player.Value.CustomProperties["Team"];
+            GameObject playerObject = LauncherController.Instance.playerObjectsByTeam[t];
+
+
+            Vector3 pastPos = playerObject.transform.position;
+            playerObject.transform.position =
+                LauncherController.Instance.playerPositions.Values.ToList()[counter];
+            playerNameDisplays[counter].text = PhotonNetwork.CurrentRoom.Players.Values.ToList()[counter].NickName;
+
+
+            GameObject o = LauncherController.Instance.playerObjects.FirstOrDefault(p => p != playerObject &&
+                Vector3.Distance(p.transform.position, playerObject.transform.position) < 0.1f);
+
+            if (o != null && !o.Equals(null))
+            {
+                o.transform.position = pastPos;
+            }
+
+            counter++;
         }
         
         if(playerNameDisplayRoutine != null)
@@ -116,9 +141,13 @@ public class LobbyUIController : MonoBehaviour
 
             yield return null;
         }
+
+        cameraMoveFinished = true;
+        
         yield return new WaitForSeconds(0.1f);
         
-        UpdatePlayerNames();
+        if(updatePlayerNamesOnMoveFinish)
+            UpdatePlayerNames();
     }
 
 
@@ -126,6 +155,8 @@ public class LobbyUIController : MonoBehaviour
     {
         playerNameMask.padding = new Vector4(0, 0, 1920, 0);
         dividerTransform.localScale = new Vector3(1.12f, 1, 1);
+        cameraMoveFinished = false;
+        updatePlayerNamesOnMoveFinish = false;
         yield return null; 
         
     }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Lobby;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -98,6 +99,8 @@ public class LoadingScreenMovement : MonoBehaviour
             
                 yield return null;
             }
+
+            LoadingScreenController.Instance.IsClosed = true;
         }
         else
         {
@@ -117,6 +120,8 @@ public class LoadingScreenMovement : MonoBehaviour
             
                 yield return null;
             }
+            
+            LoadingScreenController.Instance.IsClosed = false;
         }
         
     }
