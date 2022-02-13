@@ -8,7 +8,7 @@ namespace GameManagement
     {
         public static GameData Instance;
 
-        public const float SecondsPerRound = 300;
+        public const float SecondsPerRound = 120;
 
         public enum Levels {
             START = 0,
